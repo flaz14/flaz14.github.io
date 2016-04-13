@@ -1,0 +1,931 @@
+<meta charset="utf-8">
+<html>
+<head>
+	<style>	
+		/* Keymap tables styles */
+		.table-outer {
+			width: 100%;
+		}
+
+		.table-outer td {
+			padding: 0.05em;
+			vertical-align: top;
+		}
+
+		.table-inner {
+			width: 100%;
+			border: 0.05em solid DimGray;
+			border-radius: 0.5em;
+			border-color: LightGreen;
+			margin-bottom: 0.5em;
+			font-size: 15pt;
+		}
+
+		.table-inner caption {
+			font-size: 130%;
+			font-style: italic;
+			font-weight: bold;
+			font-family: Courier;
+	  		padding: 0.05em;
+			color: #F28A20;
+		}	
+
+		.table-inner tr, .table-inner td {
+			border: 0em;
+			padding: 0.2em;
+		}
+
+		.table-inner td {
+			vertical-align: middle;
+		}
+
+		.table-inner tr:nth-child(even) {
+			background-color: #EFFFEF;
+		}
+	
+		.table-inner td:nth-child(1) { 
+			width: 45%;
+			font-size: 70%;
+			font-family: "Monospace";
+		}
+	
+		.table-inner td:nth-child(2) { 
+			font-size: 100%;
+		}
+
+		.table-inner kbd {
+			margin: 0em 0.1em;
+			padding: 0.1em 0.6em;
+			border-radius: 0.2em;
+			border: 0.03em solid rgb(204, 204, 204);
+			color: rgb(51, 51, 51);
+			line-height: 1.4;
+			display: inline-block;
+			box-shadow: 0em 0.03em 0em rgba(0,0,0,0.2), inset 0em 0em 0em 0.05em #FFFFFF;
+			background-color: rgb(247, 247, 247);
+			text-shadow: 0 0.02em 0 #FFF;
+			font-size: 150%;
+		}
+
+		/* Styles specifically for drawing logos */
+		.logos {
+			position: absolute;
+			left: -2.5em;
+			top: 0.2em;
+			transform:scale(0.7);
+		}
+	
+		/* IntelliJ IDEA logo */
+		.idea {
+			position: absolute;
+			left: 5em;
+			top: 2em;
+			transform:scale(0.03);
+		}
+
+		.idea-circle {
+			position: absolute;
+			top: 25em;
+			left: 12em;
+			height: 30em;
+			width: 30em;
+			border-radius: 50%;
+			background-color: #F28A20;
+		}
+
+		.idea-j {
+			position: absolute;
+			top: -15em;
+			left: 12em;
+			height: 30em;
+			width: 30em;
+			border-radius: 50%;
+			background-color: #195BA8;			
+		}
+
+		.idea-j:before {
+			position: absolute;
+			content: '';
+			left: 15em;
+			width: 55em;
+			height: 30em;
+			background-color: #195BA8;			
+		}
+
+		.idea-j:after {
+			position: absolute;
+			content: '';
+			left: 40em;
+			top: 30em;
+  			width: 30em;
+			height: 30em;
+			border-radius: 0em 0em 20em 0em;
+			background-color: #195BA8;
+		}
+
+		.idea-j-curve {
+			position: absolute;
+			left: 28em;
+			top: 20em;
+			width: 54em;
+			height: 73em;
+			border-radius: 0em 0em 50em 0em;
+			background-color: #195BA8;	
+		}
+
+		.idea-j-curve:before {
+			position: absolute;
+			content: '';
+			left: 0em;
+			top: 0em;
+			width: 24em;
+			height: 43em;
+			border-radius: 0em 0em 50em 0em;
+			background-color: White;	
+		}
+
+		.idea-j-curve-ending {
+			position: absolute;
+			top: 63em;
+			left: 12em;
+			width: 30em;
+			height: 30em;
+			border-radius: 50% 0% 50% 50%;
+			background-color: #195BA8;
+		}
+
+		.idea-i {
+			position: absolute;
+			top: -15em;
+			left: 95em;
+			width: 30em;
+			height: 108em;
+			border-radius: 50em;
+			background-color: #195BA8;		
+		}
+
+		/* Tux */
+		.tux {
+			position: absolute;
+			top: 3em;
+			left: 10em;
+			transform:scale(0.017);
+		}
+		
+		.tux-body{
+			position: absolute;
+			width: 230em;
+			height: 35em;
+			background-color: Black;
+		}
+
+		.tux-body:before{
+			position: absolute;
+			content: '';
+			top: -70em;
+			left: 0em;
+			width: 230em;
+			height: 200em;
+			border-radius: 50%;
+			background-color: Black;
+		}
+
+		.tux-body:after{
+			position: absolute;
+			content: '';
+			bottom: -70em;
+			left: 0em;
+			width: 230em;
+			height: 200em;
+			border-radius: 50%;
+			background-color: Black;
+		}
+
+		.tux-left-eye {
+			position: absolute;
+			z-index: 99;
+			top: -65em;
+			left: 50em;
+			width: 70em;
+			height: 70em;
+			border-radius: 50%;
+			background-color: White;
+		}
+
+		.tux-left-eyeball {
+			position: absolute;
+			z-index: 100;
+			top: 20em;
+			left: 35em;
+			height: 35em;
+			width: 22em;
+			border-radius: 50%;
+			background-color: Black;
+		}
+
+		.tux-left-eyeball-inner {
+			position: absolute;
+			z-index: 101;
+			top: 12em;
+			left: 6em;
+			height: 10em;
+			width: 10em;
+			border-radius: 50%;
+			background-color: White;
+		}
+
+		.tux-right-eye {
+			position: absolute;
+			z-index: 99;
+			top: -65em;
+			left: 110em;
+			width: 70em;
+			height: 70em;
+			border-radius: 50%;
+			background-color: White;
+		}
+
+		.tux-right-eyeball {
+			position: absolute;
+			z-index: 100;
+			top: 20em;
+			left: 12em;
+			height: 35em;
+			width: 22em;
+			border-radius: 50%;
+			background-color: Black;
+		}
+
+		.tux-right-eyeball-inner {
+			position: absolute;
+			z-index: 101;
+			top: 12em;
+			left: 5em;
+			height: 10em;
+			width: 10em;
+			border-radius: 50%;
+			background-color: White;
+		}
+
+		.tux-beak {
+			position: absolute;
+			z-index: 100;
+			top: -11em;
+			left: 100em;
+			width: 30em;
+			height: 30em;
+			border-radius: 12em 0em 0em 0em;
+			transform: rotate(45deg);
+			background-color: Orange;
+		}
+
+		.tux-left-wing {
+			position:absolute;
+			z-index: 100;
+			left: 10em;
+			top: 30em;
+			width:80em;
+			height:40em;
+			border-radius: 0em 0em 100% 0em;
+			transform:rotate(40deg);
+			background-color: Black;
+		}
+
+
+		.tux-right-wing {
+			position: absolute;
+			z-index: 100;
+			left:140em;
+			top: 30em;
+			width:80em;
+			height:40em;
+			border-radius: 0em 0em 0em 100%;
+			transform:rotate(-40deg);
+			background-color: Black;
+		}
+
+		.tux-paunch {
+			position: absolute;
+			z-index: 99;
+			bottom: -92em;
+			left: 48em;
+			width: 132em;
+		    	height: 115em;
+			border-radius: 90% 90% 80% 80%;
+			background: radial-gradient(#CCF5FF, #FFFFFF);
+		}
+
+		.tux-left-foot {
+			position: absolute;
+			z-index: 100;
+			left:45em;
+			top: 100em;
+			width: 70em;
+			height: 35em;
+			border-radius: 90em 90em 15em 15em;
+			background-color: Orange;
+		}
+
+		.tux-right-foot {
+			position: absolute;
+			z-index: 100;
+			left: 115em;
+			top: 100em;
+			width: 70em;
+			height: 35em;
+			border-radius: 90em 90em 15em 15em;
+			background-color: Orange;
+		}
+
+		/* Linux Mint logo */
+		.mint {
+			position: absolute;
+			left: 15em;
+			top: 1.5em;
+			transform:scale(0.02);
+		}
+
+
+		.mint-square {
+			position: absolute;
+			width: 189em;
+			height: 174em;
+			border-radius: 0% 40% 0% 40%;
+			border: solid 4em LightGray;
+			background-color: White;
+		}
+
+		.mint-chars-1 {
+			position: absolute;
+			left: 18em;
+			top: 18em;
+			width: 158em;
+			height: 144em;
+			border-radius: 0% 40% 10% 40%;
+			background-color: #92CC59;
+		}
+
+		.mint-chars-2 {
+			position: absolute;
+			left: 36em;
+			top: 36em;
+			width: 127em;
+			height: 108em;
+			border-radius: 0% 40% 40% 40%;
+			background-color: White;
+		}
+
+		.mint-chars-3 {
+			position: absolute;
+			left: 54em;
+			top: 36em;
+			width: 92em;
+			height: 89em;
+			border-radius: 0% 0% 26% 30%;
+			background-color: #92CC59;
+		}
+
+		.mint-chars-4 {
+			position: absolute;
+			left: 54em;
+			top: 36em;
+			width: 112em;
+			height: 50em;
+			border-radius: 0% 30% 0% 0%;
+			background-color: #92CC59;
+		}
+		
+		.mint-m-1 {
+			position: absolute;
+			left: 74em;
+			top: 50em;
+			width: 54em;
+			height: 54em;
+			border-radius: 30em 30em 0em 0em;
+			background-color: #FFFFFF;
+		}
+
+		.mint-m-2 {
+			position: absolute;
+			left: 109em;
+			top: 50em;
+			width: 54em;
+			height: 54em;
+			border-radius: 30em 30em 5em 0em;
+			background-color: White;
+		}
+
+		.mint-m-3 {
+			position: absolute;
+			left: 128em;
+			top: 68em;
+			width: 18em;
+			height: 36em;
+			border-radius: 30em 30em 0em 0em;
+			background-color: #92CC59;
+		}
+		
+		.mint-m-4 {
+			position: absolute;
+			left: 91em;
+			top: 68em;
+			width: 18em;
+			height: 36em;
+			border-radius: 30em 30em 0em 0em;
+			background-color: #92CC59;
+		}
+
+		.mint-corner {
+			position: absolute;
+			left: -30em;
+			width: 30em;
+			height: 63em;
+			border-top: solid 4em LightGray;
+			border-left: solid 4em LightGray;
+			border-bottom: solid 4em LightGray;
+			background-color: White;
+		}
+
+		.mint-corner-1 {
+			position: absolute;
+			left: -12em;
+			top: 18em;
+			width: 36em;
+			height: 45em;
+			background-color: #92CC59;
+		}
+
+		.mint-corner-2 {
+			position: absolute;
+			left: 0em;
+			top: 45em;
+			width: 18em;
+			height: 19em;
+			border-radius: 0% 50em 0% 0%;
+			background-color: White;
+		}
+
+		.mint-corner-3 {
+			position: absolute;
+			left: -12em;
+			top: 45em;
+			width: 12em;
+			height: 19em;
+			background-color: White;
+		}
+
+		/* Other styles */
+		.title {
+			position: absolute;
+			left: 12em;
+			top: -1em;
+			font-weight: bold;
+			color: #195BAB;
+		}
+
+		.comment {
+			font-size: 50%;
+			font-family: Arial;
+			color: #92CC59;
+		}
+
+</style>
+</head>
+<body>
+	<!-- Logos -->
+	<div class="logos">
+		<div class="idea">
+			<div class="idea-j-curve"></div>
+			<div class="idea-circle"></div>
+			<div class="idea-j"></div>
+			<div class="idea-j-curve-ending"></div>
+			<div class="idea-i"></div>
+		</div>
+		<div class="tux">
+			<div class="tux-body">
+				<div class="tux-left-eye">
+					<div class="tux-left-eyeball">
+						<div class="tux-left-eyeball-inner"></div>
+					</div>
+				</div>
+				<div class="tux-right-eye">
+					<div class="tux-right-eyeball">
+						<div class="tux-right-eyeball-inner"></div>
+					</div>
+				</div>
+				<div class="tux-beak"></div>
+				<div class="tux-left-wing"></div>
+				<div class="tux-right-wing"></div>
+				<div class="tux-paunch"></div>
+				<div class="tux-left-foot"></div>
+				<div class="tux-right-foot"></div>
+			</div>
+		</div>
+		<div class="mint">
+			<div class="mint-square"></div>
+			<div class="mint-chars-1"></div>
+			<div class="mint-chars-2"></div>
+			<div class="mint-chars-3"></div>
+			<div class="mint-chars-4"></div>
+			<div class="mint-m-1"></div>
+			<div class="mint-m-2"></div>
+			<div class="mint-m-3"></div>
+			<div class="mint-m-4"></div>
+			<div class="mint-corner"></div>
+			<div class="mint-corner-1"></div>
+			<div class="mint-corner-2"></div>
+			<div class="mint-corner-3"></div>
+		</div>
+	</div>
+
+	<div class="title">
+		<pre>
+ ___       _       _ _ _     _   ___ ____  _____    _      _                                    
+|_ _|_ __ | |_ ___| | (_)   | | |_ _|  _ \| ____|  / \    | | _____ _   _ _ __ ___   __ _ _ __  
+ | || '_ \| __/ _ \ | | |_  | |  | || | | |  _|   / _ \   | |/ / _ \ | | | '_ ` _ \ / _` | '_ \ 
+ | || | | | ||  __/ | | | |_| |  | || |_| | |___ / ___ \  |   <  __/ |_| | | | | | | (_| | |_) |
+|___|_| |_|\__\___|_|_|_|\___/  |___|____/|_____/_/   \_\ |_|\_\___|\__, |_| |_| |_|\__,_| .__/ 
+                                                                    |___/                |_|    
+
+		</pre>
+	</div>
+	
+	<br><br><br><br>
+	<span class="comment">IntelliJIDEA Ultimate 13.1.2 &nbsp;&nbsp;&nbsp;&nbsp; LinuxMint 17.1 64bit &nbsp;&nbsp;&nbsp;&nbsp;<br>
+				some keys are changed or disabled due to conflicts with desktop environment, other are disabled because they are not used for a long time
+	</span>
+	
+	<!-- Keymap tables -->
+	<table class="table-outer">
+		<tr>
+			<td>
+				<table class="table-inner">
+					<caption>Editing</caption>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>&nbsp;&nbsp;&nbsp;Space&nbsp;&nbsp;&nbsp;</kbd></td>
+						<td>Basic code completion</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>&nbsp;&nbsp;&nbsp;Space&nbsp;&nbsp;&nbsp;</kbd></td>
+						<td>Name of class completion</td>
+					</tr>
+					<tr>
+						<td><kbd>Alt</kbd> + <kbd/>&nbsp;&nbsp;&nbsp;Enter&nbsp;&nbsp;&nbsp;</kbd></td>
+						<td>Show intention actions and quick-fixes</td>
+					</tr>
+					<tr>
+						<td><kbd>Alt</kbd> + <kbd>Insert</kbd></td>
+						<td>Add new file, test method, Maven depencency, ...</td>					
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>/</kbd></td>
+						<td>Comment / uncomment with line comment</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>/</kbd></td>
+						<td>Comment / uncomment with block comment</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>L</kbd></td>
+						<td>Reformat code</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>O</kbd></td>
+						<td>Optimize imports</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>&#8595;</kbd> / <kbd>&#8593;</kbd></td>
+						<td>Move line under caret or selected text one block / method / class down or up</td>					
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>W</kbd></td>
+						<td>Select word, line, block, ...</td>
+					</tr>
+					<tr>
+						<td>&nbsp;midddle button + mouse move</td>
+						<td>Select rectangle area of text</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Y</kbd></td>
+						<td>Delete line at caret</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd></td>
+						<td>Paste from history</td>
+					</tr>
+
+				</table>	
+				<table class="table-inner">
+					<caption>Search / Replace</caption>
+					<tr>
+						<td>&nbsp;2 &#215; <kbd>Shift</kbd></td>
+						<td>Find everywhere</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd></td>
+						<td>Find in path</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>F</kbd></td>
+						<td>Find in file</td>
+					</tr>
+					<tr>
+						<td><kbd>F3</kbd></td>
+						<td>Find next occurrence</td>
+					</tr>
+					<tr>
+						<td><kbd>Shift</kbd> + <kbd>F3</kbd></td>
+						<td>Find previous occurrence</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>R</kbd></td>
+						<td>Replace</td>
+					</tr>
+					<tr>
+						<td><kbd>Alt</kbd> + <kbd>F7</kbd></td>
+						<td>Find usages in module</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>F7</kbd></td>
+						<td>Find usages in file</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F7</kbd></td>
+						<td>Highlight usages in file</td>
+					</tr>
+				</table>
+				<table class="table-inner">
+					<caption>Refactoring</caption>
+					<tr>
+						<td><kbd>Shift</kbd> + <kbd>F6</kbd></td>
+						<td>Rename</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>F6</kbd></td>
+						<td>Change signature</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>M</kbd></td>
+						<td>Extract method</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>V</kbd></td>
+						<td>Extract variable</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>F</kbd></td>
+						<td>Extract field</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>C</kbd></td>
+						<td>Extract constant</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>P</kbd></td>
+						<td>Extract parameter</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd></td>
+						<td>Surround with try-catch-finally, Runnable, ...</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>N</kbd></td>
+						<td>Inline</td>
+					</tr>
+					<tr>
+						<td><kbd>Alt</kbd> + <kbd>Delete</kbd></td>
+						<td>Safe delete</td>
+					</tr>
+				</table>
+			</td>
+			<td>	
+				<table class="table-inner">
+					<caption>Navigation between tabs / tool windows</caption>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>N</kbd></td>
+						<td>Go to class</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>N</kbd></td>
+						<td>Go to file</td>
+					</tr>
+					<tr>
+						<td><kbd>Alt</kbd> + <kbd>Home</kbd></td>
+						<td>Show navigation bar</td>
+					</tr>
+					<tr>
+						<td><kbd>Ecs</kbd></td>
+						<td>Go to editor from tool window (but don't hide tool window)</td>
+					</tr>
+					<tr>
+						<td><kbd>Shift</kbd> + <kbd>Ecs</kbd></td>
+						<td>Go to editor from tool window (and hide active or last tool window)</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F12</kbd></td>
+						<td>Maximize / minimize editor</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>PageDown</kbd> / <kbd>PageUp</kbd></td>
+						<td>Go to next / previous editor tab</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>F4</kbd></td>
+						<td>Close active editor tab</td>
+					</tr>
+					<tr>
+						<td><kbd>Scroll Lock</kbd></td>
+						<td>Close all non-active tabs</td>
+					</tr>				
+					<tr>
+						<td><kbd>Pause (Break)</kbd></td>
+						<td>Close all tabs</td>
+					</tr>
+					<tr>
+						<td><kbd>Alt</kbd> + one of 0..9</td>
+						<td>Open corresponding tool window</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Tab</kbd></td>
+						<td>Switch between tabs and tool windows</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>E</kbd></td>
+						<td>Switch between recent files</td>
+					</tr>
+					<tr>
+						<td><kbd>F12</kbd></td>
+						<td>Jump to last used tool window</td>
+					</tr>
+					<tr>
+						<td><kbd>Shift</kbd> + <kbd>F4</kbd></td>
+						<td>Open source in new editor window</td>
+					</tr>
+					<tr>
+						<td>&nbsp;midddle button click</td>
+						<td>Close tab or tool window under mouse pointer</td>
+					</tr>
+				</table>
+				<table class="table-inner">
+					<caption>Navigation inside editor / tool window</caption>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>G</kbd></td>
+						<td>Go to line</td>
+					</tr>
+					<tr>
+						<td><kbd>Alt</kbd> + <kbd>&#8595;</kbd> / <kbd>&#8593;</kbd></td>
+						<td>Go to next / previous method</td>
+					</tr>
+					<tr>
+						<td><kbd>Alt</kbd> +  <kbd>&#8592;</kbd> / <kbd>&#8594;</kbd></td>
+						<td>Navigate back / forward across code</td>
+					</tr>
+					<tr>
+						<td><kbd>F2</kbd>&nbsp; or &nbsp;<kbd>Shift</kbd> + <kbd>F2</kbd></td>
+						<td>Next / previous highlighted error</td>
+					</tr>
+					<tr>
+						<td><kbd>F6</kbd>&nbsp; or &nbsp;<kbd>Ctrl</kbd> + click</td>
+						<td>Go to declaration</td>
+					</tr>
+					<tr>
+						<td><kbd>F5</kbd>&nbsp; or &nbsp;<kbd>Ctrl</kbd> + <kbd>Alt</kbd> + click</td>
+						<td>Go to implementation(s)</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>S</kbd></td>
+						<td>Equivalent to "Scroll From Source" button in <i>Project</i> tool window (additional plugin is involved)</td>
+					</tr>
+				</table>
+				<table class="table-inner">
+					<caption>Quick info</caption>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>P</kbd></td>
+						<td>Parameter info (within method call arguments)</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd></td>
+						<td>Quick definition lookup</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Q</kbd></td>
+						<td>Quick documentation lookup</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + mouse over code</td>
+						<td>Brief info about code</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>F12</kbd></td>
+						<td>File structure popup</td>
+					</tr>
+				</table>
+				<table class="table-inner">
+					<caption>Miscellaneous</caption>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd></td>
+						<td>Find any action</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>D</kbd></td>
+						<td>Compare two files (when files are selected in tool window, for example, <i>Project</i>)</td>
+					</tr>
+					<tr>
+						<td><kbd>F1</kbd></td>
+						<td>IntelliJ's documentation about item under cursor</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>&#8592;</kbd> / <kbd>&#8594;</kbd></td>
+						<td>Drag border (change width) of active tool window</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>&#8593;</kbd> / <kbd>&#8595;</kbd></td>
+						<td>Drag border (change height) of active tool window</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>B</kbd></td>
+						<td>Toggle bookmark</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr><td>&nbsp;</td></tr>
+		<tr>
+			<td>
+				<table class="table-inner">
+					<caption>Debugging</caption>
+					<tr>
+						<td><kbd>F8</kbd></td>
+						<td>Step over</td>
+					</tr>
+					<tr>
+						<td><kbd>F7</kbd></td>
+						<td>Step into</td>
+					</tr>
+					<tr>
+						<td><kbd>Shift</kbd> + <kbd>F7</kbd></td>
+						<td>Smart step into</td>
+					</tr>
+					<tr>
+						<td><kbd>Shift</kbd> + <kbd>F8</kbd></td>
+						<td>Step out</td>
+					</tr>
+					<tr>
+						<td><kbd>Alt</kbd> + <kbd>F9</kbd></td>
+						<td>Run to cursor</td>
+					</tr>
+					<tr>
+						<td><kbd>Alt</kbd> + <kbd>F8</kbd></td>
+						<td>Evaluate expression</td>
+					</tr>
+					<tr>
+						<td><kbd>F9</kbd></td>
+						<td>Resume program</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>F8</kbd></td>
+						<td>Toggle breakpoint</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F8</kbd></td>
+						<td>View breakpoints</td>
+					</tr>
+				</table>
+			</td>
+			<td>
+				<table class="table-inner">
+					<caption>Compile and Run</caption>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>F9</kbd></td>
+						<td>Make project (compile modified and dependent)</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F9</kbd></td>
+						<td>Comile selected file, package or module</td>
+					</tr>
+					<tr>
+						<td><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>F10</kbd></td>
+						<td>Select configuration and run</td>
+					</tr>
+					<tr>
+						<td><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>F9</kbd></td>
+						<td>Select configuration and debug</td>
+					</tr>
+					<tr>
+						<td><kbd>Shift</kbd> + <kbd>F10</kbd></td>
+						<td>Run</td>
+					</tr>
+					<tr>
+						<td><kbd>Shift</kbd> + <kbd>F9</kbd></td>
+						<td>Debug</td>
+					</tr>
+					<tr>
+						<td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F10</kbd></td>
+						<td>Run context configuration from editor</td>
+					</tr>
+				</table>	
+			</td>
+		</tr>
+	</table>
+</body>
+</htm>
