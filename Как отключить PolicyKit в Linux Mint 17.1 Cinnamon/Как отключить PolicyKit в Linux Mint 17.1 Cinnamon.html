@@ -1,10 +1,10 @@
 <html>
 	<head>
-		<title>Как отключить PolicyKit в Linux Mint 17.1 Cinnamon</title>
+		<title>Как "отключить" PolicyKit в Linux Mint 17.1 Cinnamon</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<head>
 	<body>
-		<h1>Как отключить PolicyKit в Linux Mint 17.1 Cinnamon</h1>
+		<h1>Как "отключить" PolicyKit в Linux Mint 17.1 Cinnamon</h1>
 		<p>
 		Здесь "отключить" означает настроить PolicyKit таким образом, чтобы с его помощью нельзя было выполнять административные задачи. Например, удалять пакеты посредством Synaptic (команда <code>synaptic-pkexec</code>) или форматировать диски с помощью GParted (команда <code>gparted-pkexec</code>). Но при этом должна остаться возможность выключать компьютер, менять настройки сетевых подключений и выполнять другие действия, для которых по умолчанию никакие пароли не требуются.
 		</p>
@@ -34,7 +34,7 @@
 		</p>
 		<p>
 		В итоге, PolicyKit будет запрашивать пароль не вызвавшего его пользователя, а пароль root. Но, поскольку пользователя root в Ubuntu (а следовательно, и в Linux Mint) нет, то, какой пароль ни вводи, он не подойдет.<br>
-		<img src="PolicyKit.png"/>
+		<img src="окно ввода пароля.png"/>
 		</p>
 		<hr/>
 		<p>
