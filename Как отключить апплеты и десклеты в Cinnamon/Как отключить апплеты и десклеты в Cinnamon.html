@@ -1,0 +1,54 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Как отключить апплеты и десклеты в Cinnamon</title>
+	</head>
+	<body>	
+		<p>
+			Полностю отключить апплеты, десклеты и расширения в Cinammon нельзя - это часть рабочего стола. Например, часы на панели задач и индикатор раскладки клавиатуры - это апплеты. В принципе, отключить их можно: "неудаляемые" апплеты и десклеты находятся в каталогах <code>/usr/share/cinnamon/applets</code> и <code>/usr/share/cinnamon/desklets</code> соответственно. Даже если после этого Cinnamon заработает без сбоев, придется искать им замену (вряд ли сторонние программы подойдут, большинство из них рассчитаны на рабочую среду Gnome, а Cinnamon, хоть и наследник Gnome, но все же немного отличается от своего предшественника). Кроме того, они вернуться после обновления системы.
+		</p>
+		<p>
+			А вот избавить отдельно взятого пользователя от новых апплетов, десклетов и расширений можно. 
+		</p>
+		<p>
+			<ol>
+				<li>
+					Добавляем нового пользователя, под которым нельзя будет залогиниться. Например, создадим пользователя mycinnamon (вместе с пользователем будет создана одноименная группа):
+					<br/>
+					<code>
+						sudo adduser&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
+						<br/>
+						&nbsp;&nbsp;--disabled-login&nbsp;\
+						<br/>
+						&nbsp;&nbsp;--no-create-home&nbsp;\
+						<br/>
+						&nbsp;&nbsp;--debug&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
+						<br/>
+						&nbsp;&nbsp;mycinnamon
+						<br/>
+					</code>
+				</li>
+				<li>
+					Удаляем все апплеты и десклеты с помощью GUI. Затем, для большей уверенности, удаляем содержимое каталогов <code>~/.local/share/cinnamon/applets</code>, <code>~/.local/share/cinnamon/desklets</code> и <code>~/.local/share/cinnamon/extensions</code> (сами каталоги не трогаем).
+				</li>
+				<li>
+					Назначаем нового владельца для каталога <code>~/.local/share/cinnamon</code>:
+					<br/>
+					<code>
+						chown -R mycinnamon:mycinnamon&nbsp;~/.local/share/cinnamon && \
+						<br/>
+						chmod -R 555&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~/.local/share/cinnamon
+						<br/>
+					</code>
+				</li>
+			</ol>
+		</p>
+		<p>
+			Все, теперь только пользователь <i>mycinnamon</i> может манипулировать апплетами, десклетами и расширениями рабочего стола Сinnamon. 
+		</p>
+		<hr/>
+		<p>
+			<strong>PS</strong> Можно было просто назначить <i>root</i> в качестве владельца для <code>~/.local/share/cinnamon</code>. Но, по-моему, лучше назначить нового пользователя. Так будет понятно, что настройки касаются отдельно взятого пользователя, и <i>root</i> здесь ни при чем (оставим ему системные настройки).
+		</p>
+	</body>
+</html>
