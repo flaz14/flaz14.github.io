@@ -17,14 +17,10 @@
 					Добавляем в систему нового пользователя, под которым нельзя будет залогиниться. Например, создадим пользователя <i>mycinnamon</i> (вместе с пользователем будет создана одноименная группа):
 					<p>
 						<code>
-							sudo adduser&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
-							<br/>
-							&nbsp;&nbsp;--disabled-login&nbsp;\
-							<br/>
-							&nbsp;&nbsp;--no-create-home&nbsp;\
-							<br/>
-							&nbsp;&nbsp;--debug&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
-							<br/>
+							sudo adduser&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br/>
+							&nbsp;&nbsp;--disabled-login&nbsp;\<br/>
+							&nbsp;&nbsp;--no-create-home&nbsp;\<br/>
+							&nbsp;&nbsp;--debug&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br/>
 							&nbsp;&nbsp;mycinnamon
 						</code>
 					</p>
@@ -36,8 +32,7 @@
 					Назначаем нового владельца для каталога <code>~/.local/share/cinnamon</code>:
 					<p>
 						<code>
-							sudo chown --recursive mycinnamon:mycinnamon&nbsp;~/.local/share/cinnamon && \
-							<br/>
+							sudo chown --recursive mycinnamon:mycinnamon&nbsp;~/.local/share/cinnamon && \<br/>
 							sudo chmod --recursive 555&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~/.local/share/cinnamon
 						</code>
 					</p>
