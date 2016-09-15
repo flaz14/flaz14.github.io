@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Гибернация и Dropbox в Linux Mint 17.1 Cinnamon</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a href="здесь будет абсолютная ссылка на эту же страницу">
+				Гибернация и Dropbox в Linux Mint 17.1 Cinnamon
+			</a>
+		</h1>
+
+		<h2>Intro</h2>
+
+		<p>
+			Гибернация - не самая сильная сторона Linux <sup id="footnote-1-top"><a 
+			href="#footnote-1-bottom">[1]</a></sup>. Так, в <a 
+			href="https://help.ubuntu.com/stable/ubuntu-help/power-hibernate.html">официальной 
+			документации по Ubuntu</a> сказано:
+			<blockquote>
+				Unfortunately, hibernate doesn't work in many cases, which can cause you to lose data if 
+				you expect your documents and applications to re-open when you switch your computer back 
+				on. Therefore, hibernate is disabled by default.
+			</blockquote>
+
+		<p>
+			Но на настольном компьютере без WiFi и т.п. есть смысл задействовать гибернацию (и на ноутбуке 
+			тоже есть смысл, например, на <i>HP ProBook 4515s</i> гибернация в <i>Linux Mint 17.1</i> 
+			работает хорошо: нет глюков ни с WiFi, ни c тачпадом, ни с яркостью экрана). Перед выключением 
+			питания содержимое оперативной памяти сохраняется на жесткий диск <sup id="footnote-2-top"><a 
+			href="#footnote-2-bottom">[2]</a></sup>. При включении питания все сохраненное 
+			восстанавливается. В большинстве случаев можно не опасаться за целостность файлов. Если же 
+			программа синхронизирует файлы, хранящиеся на нескольких компьютерах, через Интернет (что и 
+			делает Dropbox), то не все так просто. 
+
+		<h2>Возможные проблемы</h2>
+
+		<p>
+			Представим ситуацию, когда один Dropbox аккаунт используется на нескольких машинах. Пока 
+			<strong>компьютер 1</strong> 
+			выключен, файлы с <strong>компьютера 2</strong> закачиваются в облако. Вдруг во время 
+			закачивания очередного файла (пусть файл решили не скопировать, а именно переместить, например, 
+			выполнили команду <code>mv /tmp/some_file ~/Dropbox</code>) пользователь отправляет ОС в 
+			гибернацию. При переходе в гибернацию ОС не оповещает работающие программы о своих намерениях (в 
+			отличие от обычного выключения питания: в этом случае ОС отправляет всем процессам сигнал 
+			<b>SIGTERM</b>). Теперь, пока <strong>компьютер 2</strong> находиться в глубокой спячке, 
+			пользователь включает <strong>компьютер 1</strong>. Что будет с файлом в этом случае? Не 
+			потеряется ли он (ведь файл не докачался, на <strong>компьютере 1</strong> этого файла нет 
+			вообще, а в облаке присутствует всего лишь его часть) - сложно сказать. Конечно, программисты 
+			Dropbox делают свою работу хорошо, но вряд ли даже им под силу сделать так, чтобы гибернация 
+			работала без глюков на всех ОС (из числа Linux-систем на <a 
+			href="https://www.dropbox.com/ru/install?os=lnx">странице загрузки</a> перечислены только 
+			Ubuntu, Debian и Fedora, но на самом деле Linux'ов больше, включая дистрибутивы на не очень 
+			новых ядрах и дистрибутивы на патченных ядрах). В общем, для надежности будет лучше сделать так, 
+			чтобы перед гибернацией Dropbox корректно закачивал файлы (Dropbox так и сделает, если команда 
+			на завершение работы отдана вежливо), а после пробуждения снова запускался.
+
+		<h2>Изобретаем велосипед</h2>
+
+		<p>
+			Создаем в <code>/etc/pm/sleep.d</code> скрипт с командами для вежливого завершения работы 
+			Dropbox перед гибернацией и запуска Dropbox после пробуждения. Эта процедура детально описана в 
+			ответе 
+			<a href="http://askubuntu.com/questions/308067/how-to-run-a-script-after-or-before-hibernate">
+			How to run a script after or before hibernate</a>. Стоит только добавить, что команды, 
+			помещенные в скрипт, будут выполняться с правами <i>root</i> (что в случае с Dropbox 
+			нежелательно). Поэтому будем запускать их с правами обычного пользователя с помощью 
+			<code>su</code>. В общем, у меня получился скрипт с именем <code>99_dropbox</code>:
+			<h4>
+				<a href="#listing-1">Листинг 1</a>
+			</h4>
+			<code>
+				#!/bin/bash<br>
+				<br>
+				# I would like to be sure that Dropbox syncronizes all files<br>
+				# before computer is running to hibernation (so the same Dropbox<br>
+				# account can be used from another PC while this one is<br>
+				# hibernated). And obviously I would like to start Dropbox<br>
+				# client when computer wakes up.<br>
+				#<br>
+				# This snippet is copied and pasted from<br>
+				# 'How to run a script after or before hibernate' answer<br>
+				# (http://askubuntu.com/questions/308067/
+					how-to-run-a-script-after-or-before-hibernate)<br>
+				<br>
+				case "$1" in<br>
+				&nbsp;&nbsp;hibernate)<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;# put commands to run on hibernation here<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;su --command '/home/david/bin/dropbox-wrapper.sh stop' 
+					--shell /bin/sh 
+					--preserve-environment --login david<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;su --command 'sync' david<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;;;<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;thaw)<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;# put commands to run when returning from hibernation here<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;su --command '/home/david/bin/dropbox-wrapper.sh start' 
+					--shell /bin/sh 
+					--preserve-environment --login david &<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;;;<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;suspend)<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;# put commands to run on suspend here<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;;;<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;resume)<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;# put commands to run when returning from suspension<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;;;<br>
+				esac
+			</code>
+
+		<p>
+			Для остановки/запуска Dropbox достаточно использовать команду <code>dropbox stop</code> 
+			и <code>dropbox start</code> 
+			соответственно. Но, как видно из листинга 1, вызывается не "родная" команда 
+			<code>dropbox</code>, а некий <code>dropbox-wrapper.sh</code>. Зачем же он нужен? Дело в 
+			том, что если всего лишь выполнить <code>dropbox start</code>, то Dropbox запуститься, 
+			но значок в трее не появиться (конечно, на сервере это погоды не сделает, но на 
+			настольном компьютере без значка - не жизнь). Для отображения значка в трее Dropbox 
+			должен знать переменную окружения <b>DISPLAY</b>. Эта переменная, так же как и 
+			некоторые другие, "обнуляется" командой <code>su</code> (даже если бы переменные не 
+			обнулялись, то откуда им взяться в скрипте, запущенном с правами <i>root</i>, который 
+			вообще ничего не знает о графической оболочке). В нашем скрипте-обертке мы 
+			восстанавливаем "потерянные" переменные окружения.
+			<h4>
+				<a href="#listing-2">Листинг 2</a>
+			</h4>
+			<code>
+				#!/bin/sh<br>
+				<br>
+				# Dropbox needs some environment variables in order to be ran correctly<br>
+				# (it recognizes target user by these variables). But when Dropbox is ran<br>
+				# from command line via 'su' most of the environment variables are reset.<br>
+				# This is why we restore them directly in this script.<br>
+				export USER='david'<br>
+				export LOGNAME="$USER"<br>
+				export HOME="/home/$USER"<br>
+				export SHELL='/bin/bash'<br>
+				<br>
+				# PATH is a little bit reduced because only few items are really required.<br>
+				export PATH='/home/david/bin:/usr/local/sbin:
+					/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'<br>
+				<br>
+				# DISPLAY variable is required not only by Dropbox, but by 'notify-send'<br>
+				# as well (we involve 'notify-send' when something goes wrong with<br>
+				# Dropbox). It should not be hardcoded. But for now it works pretty well<br>
+				# (because there is only one user on this PC with one monitor).<br>
+				export DISPLAY=:0<br>
+				<br>
+				# Possible actions are 'start' and 'stop', just for convinience.<br>
+				action="$1"<br>
+				case "$action" in<br>
+				&nbsp;&nbsp;'start' | 'stop' )<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;output="$(dropbox "$action" 2>&1)"<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;if [ $? -ne 0 ]; then<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;notify-send "Cannot $action Dropbox: $output"<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;fi<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;;;<br>
+				&nbsp;&nbsp;* )<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;notify-send "Cannot affect Dropbox: invalid action [$action] is 
+				specified."<br>
+				esac
+			</code>
+
+		<h2>Outro</h2>
+
+		<p>
+			Здесь, конечно, можно было бы задействовать какие-нибудь фичи Cinnamon, или команды вроде 
+			<code>who</code> в паре с <code>grep</code> (см. ответ <a 
+			href="http://askubuntu.com/a/348388/480298">Problem with `notify-send`</a>), чтобы 
+			определить, какой же все-таки дисплей принадлежит пользователю <i>david</i>, но и так сойдет 
+			(потому что обычных пользователей, т.е. пользователей, от имени которых можно войти в 
+			графическую оболочку, у меня всего один, и монитор у меня один). В общем, даже в таком черновом 
+			виде все работает. Да, приходиться немного подождать, пока Dropbox сделает все свои дела. Но 
+			лучше подождать несколько десятков секунд, чем безвозвратно потерять (или испортить) свои файлы.
+
+		<p>
+			&#9135;&#9135;&#9135;&#9135;&#9135;
+			<ol>
+				<li id="footnote-1-bottom">
+					<p>
+						<a href="#footnote-1-top">&uarr;</a> 
+						В Windows XP (а в те времена драйверы поставлялись на дисках буквально 
+						для каждой железки) гибернация не всегда работала безупречно. Так, на 
+						старом компьютере (AMD Sempron 2200+) после пробуждения появлялись 
+						артефакты и прочие глюки изображения.
+				
+				<li id="footnote-2-bottom">
+					<p>
+						<a href="#footnote-2-top">&uarr;</a>
+						Вопрос: что происходит с содержимым памяти видеоадаптера (дискретная 
+						видеокарта) когда компьютер переходит в гибернацию?
+			</ol>
+
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+	</body>
+</html>
