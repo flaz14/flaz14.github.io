@@ -32,10 +32,8 @@
 			документации по Ubuntu</a> сказано:
 			<blockquote>
 				Unfortunately, hibernate doesn't work in many cases, which can cause you to lose data 
-if 
-				you expect your documents and applications to re-open when you switch your computer 
-back 
-				on. Therefore, hibernate is disabled by default.
+				if you expect your documents and applications to re-open when you switch your computer 
+				back on. Therefore, hibernate is disabled by default.
 			</blockquote>
 
 		<p>
@@ -82,45 +80,39 @@ back
 			нежелательно). Поэтому будем запускать их с правами обычного пользователя с помощью 
 			<code>su</code>. Получившийся у меня скрипт <code>99_dropbox</code> приведен 
 			<a href="#listing-1">листинге 1</a>:
-			<h4>
-				<a id="listing-1">Листинг 1</a>
-			</h4>
-			<code>
-				#!/bin/bash<br>
-				<br>
-				# I would like to be sure that Dropbox syncronizes all files<br>
-				# before computer is running to hibernation (so the same Dropbox<br>
-				# account can be used from another PC while this one is<br>
-				# hibernated). And obviously I would like to start Dropbox<br>
-				# client when computer wakes up.<br>
-				#<br>
-				# This snippet is copied and pasted from<br>
-				# 'How to run a script after or before hibernate' answer<br>
-				# (http://askubuntu.com/questions/308067/
-					how-to-run-a-script-after-or-before-hibernate)<br>
-				<br>
-				case "$1" in<br>
-				&nbsp;&nbsp;hibernate)<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;# put commands to run on hibernation here<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;su --command '/home/david/bin/dropbox-wrapper.sh stop' 
-					--shell /bin/sh 
-					--preserve-environment --login david<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;su --command 'sync' david<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;;;<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;thaw)<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;# put commands to run when returning from hibernation here<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;su --command '/home/david/bin/dropbox-wrapper.sh start' 
-					--shell /bin/sh 
-					--preserve-environment --login david &<br>
-					&nbsp;&nbsp;&nbsp;&nbsp;;;<br>
-					&nbsp;&nbsp;&nbsp;&nbsp;suspend)<br>
-					&nbsp;&nbsp;&nbsp;&nbsp;# put commands to run on suspend here<br>
-					&nbsp;&nbsp;&nbsp;&nbsp;;;<br>
-					&nbsp;&nbsp;&nbsp;&nbsp;resume)<br>
-					&nbsp;&nbsp;&nbsp;&nbsp;# put commands to run when returning from suspension<br>
-					&nbsp;&nbsp;&nbsp;&nbsp;;;<br>
-				esac
-			</code>
+
+<h4><a id="listing-1">Листинг 1</a></h4>
+<pre>
+#!/bin/bash
+
+# I would like to be sure that Dropbox syncronizes all files 
+# before computer is running to hibernation (so the same Dropbox
+# account can be used from another PC while this one is 
+# hibernated). And obviously I would like to start Dropbox 
+# client when computer wakes up. 
+# 
+# This snippet is copied and pasted from 
+# 'How to run a script after or before hibernate' answer
+# (http://askubuntu.com/questions/308067/how-to-run-a-script-after-or-before-hibernate)
+
+case "$1" in
+  hibernate)
+    # put commands to run on hibernation here
+    su --command '/home/david/bin/dropbox-wrapper.sh stop' --shell /bin/sh --preserve-environment --login david
+    su --command 'sync' david
+    ;;
+  thaw)
+    # put commands to run when returning from hibernation here
+    su --command '/home/david/bin/dropbox-wrapper.sh start' --shell /bin/sh --preserve-environment --login david &
+    ;;
+  suspend)
+    # put commands to run on suspend here
+    ;;
+  resume) 
+    # put commands to run when returning from suspension
+    ;;
+esac
+</pre>
 
 		<p>
 			Для остановки/запуска Dropbox достаточно использовать команду <code>dropbox stop</code> 
@@ -134,45 +126,42 @@ back
 			переменные не обнулялись, то откуда им взяться в скрипте, запущенном с правами <i>root</i>, 
 			который вообще ничего не знает о графической оболочке?). В нашем скрипте-обертке, приведенном в
 			<a href="#listing-2">листинге 2</a>, мы восстанавливаем "потерянные" переменные окружения.
-			<h4>
-				<a id="listing-2">Листинг 2</a>
-			</h4>
-			<code>
-				#!/bin/sh<br>
-				<br>
-				# Dropbox needs some environment variables in order to be ran correctly<br>
-				# (it recognizes target user by these variables). But when Dropbox is ran<br>
-				# from command line via 'su' most of the environment variables are reset.<br>
-				# This is why we restore them directly in this script.<br>
-				export USER='david'<br>
-				export LOGNAME="$USER"<br>
-				export HOME="/home/$USER"<br>
-				export SHELL='/bin/bash'<br>
-				<br>
-				# PATH is a little bit reduced because only few items are really required.<br>
-				export PATH='/home/david/bin:/usr/local/sbin:
-					/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'<br>
-				<br>
-				# DISPLAY variable is required not only by Dropbox, but by 'notify-send'<br>
-				# as well (we involve 'notify-send' when something goes wrong with<br>
-				# Dropbox). It should not be hardcoded. But for now it works pretty well<br>
-				# (because there is only one user on this PC with one monitor).<br>
-				export DISPLAY=:0<br>
-				<br>
-				# Possible actions are 'start' and 'stop', just for convinience.<br>
-				action="$1"<br>
-				case "$action" in<br>
-				&nbsp;&nbsp;'start' | 'stop' )<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;output="$(dropbox "$action" 2>&1)"<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;if [ $? -ne 0 ]; then<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;notify-send "Cannot $action Dropbox: $output"<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;fi<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;;;<br>
-				&nbsp;&nbsp;* )<br>
-				&nbsp;&nbsp;&nbsp;&nbsp;notify-send "Cannot affect Dropbox: invalid action [$action] is 
-				specified."<br>
-				esac
-			</code>
+
+<h4><a id="listing-2">Листинг 2</a></h4>
+<pre>
+#!/bin/sh
+
+# Dropbox needs some environment variables in order to be ran correctly
+# (it recognizes target user by these variables). But when Dropbox is ran
+# from command line via 'su' most of the environment variables are reset. 
+# This is why we restore them directly in this script.
+export USER='david'
+export LOGNAME="$USER"
+export HOME="/home/$USER"
+export SHELL='/bin/bash'
+
+# PATH is a little bit reduced because only few items are really required.
+export PATH='/home/david/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+# DISPLAY variable is required not only by Dropbox, but by 'notify-send'
+# as well (we involve 'notify-send' when something goes wrong with 
+# Dropbox). It should not be hardcoded. But for now it works pretty well
+# (because there is only one user on this PC with one monitor).
+export DISPLAY=:0
+
+# Possible actions are 'start' and 'stop', just for convinience.
+action="$1"
+case "$action" in 
+	'start' | 'stop' ) 
+		output="$(dropbox "$action" 2>&1)"
+		if [ $? -ne 0 ]; then
+			notify-send "Cannot $action Dropbox: $output"
+		fi
+		;;
+	* ) 
+		notify-send "Cannot affect Dropbox: invalid action [$action] is specified."
+esac
+</pre>
 
 		<h2>Outro</h2>
 
