@@ -16,11 +16,22 @@
 		<hr>
 		
 		<h1>
-			<a href="?">Как "отключить" апплеты, десклеты и расширения в Cinnamon</a>
+			<a href=
+		"http://flaz14.github.io/how-to-disable-applets-in-cinnamon/how-to-disable-applets-in-cinnamon.html">
+				Как "отключить" апплеты, десклеты и расширения в Cinnamon
+			</a>
 		</h1>
 		
 		<p>
-			Апплеты, десклеты и расширения - это часть рабочего стола Cinnamon. Например, часы на панели задач и индикатор раскладки клавиатуры - это апплеты. В принципе, отключить их можно. Например, "неудаляемые" апплеты и десклеты находятся в каталогах <code>/usr/share/cinnamon/applets</code> и <code>/usr/share/cinnamon/desklets</code> соответственно. Даже если после удаления содержимого этих каталогов Cinnamon заработает без сбоев, придется искать замену апплетам (вряд ли сторонние программы подойдут, большинство из них рассчитаны на рабочую среду Gnome, а Cinnamon, хоть и наследник Gnome, все же немного отличается от своего предшественника)... Кроме того, они могут вернуться после обновления системы (потому что при обновлении файлы обычно перезаписываются).
+			Апплеты, десклеты и расширения - это часть рабочего стола Cinnamon. Например, часы на панели 
+			задач и индикатор раскладки клавиатуры - это апплеты. В принципе, отключить их можно. Например, 
+			"неудаляемые" апплеты и десклеты находятся в каталогах <code>/usr/share/cinnamon/applets</code> 
+			и <code>/usr/share/cinnamon/desklets</code> соответственно. Даже если после удаления содержимого 
+			этих каталогов Cinnamon заработает без сбоев, придется искать замену апплетам (вряд ли 
+			сторонние программы подойдут, большинство из них рассчитаны на рабочую среду Gnome, а Cinnamon, 
+			хоть и наследник Gnome, все же немного отличается от своего предшественника)... Кроме того, они 
+			могут вернуться после обновления системы (потому что при обновлении файлы обычно 
+			перезаписываются).
 
 		<p>
 			А вот избавить отдельно взятого пользователя от новых апплетов, десклетов и расширений можно. 
@@ -28,42 +39,49 @@
 		<p>
 			<ol>
 				<li>
-					Добавляем в систему нового пользователя, под которым нельзя будет залогиниться <sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>. Например, создадим пользователя <i>mycinnamon</i> (вместе с пользователем будет создана одноименная группа):
-					<p>
-						<code>
-							sudo adduser&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
-							<br>
-							&nbsp;&nbsp;--disabled-login&nbsp;\
-							<br>
-							&nbsp;&nbsp;--no-create-home&nbsp;\
-							<br>
-							&nbsp;&nbsp;--debug&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
-							<br>
-							&nbsp;&nbsp;mycinnamon
-						</code>
+					Добавляем в систему нового пользователя, под которым нельзя будет залогиниться 
+					<sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>. Например, 
+					создадим пользователя <i>mycinnamon</i> (вместе с пользователем будет создана 
+					одноименная группа):
+
+<p>
+<pre>
+sudo adduser       \
+  --disabled-login \
+  --no-create-home \
+  --debug          \
+  mycinnamon
+</pre>
 
 				<li>
-					Удаляем все апплеты, десклеты и расширения с помощью GUI. Затем, для большей уверенности, очищаем каталоги  <code>~/.local/share/cinnamon/applets</code>, <code>~/.local/share/cinnamon/desklets</code> и <code>~/.local/share/cinnamon/extensions</code> (сами каталоги не трогаем).
+					Удаляем все апплеты, десклеты и расширения с помощью GUI. Затем, для большей 
+					уверенности, очищаем каталоги  <code>~/.local/share/cinnamon/applets</code>, 
+					<code>~/.local/share/cinnamon/desklets</code> и 
+					<code>~/.local/share/cinnamon/extensions</code> (сами каталоги не трогаем).
 
 				<li>
 					Назначаем нового владельца для каталога <code>~/.local/share/cinnamon</code>:
-					<p>
-						<code>
-							sudo chown --recursive mycinnamon:mycinnamon&nbsp;~/.local/share/cinnamon && \
-							<br>
-							sudo chmod --recursive 555&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~/.local/share/cinnamon
-						</code>
+<p>
+<pre>
+sudo chown --recursive mycinnamon:mycinnamon ~/.local/share/cinnamon && \
+sudo chmod --recursive 555                   ~/.local/share/cinnamon
+</pre>
 			</ol>
 
 		<p>
-			Все, теперь только пользователь <i>mycinnamon</i> может манипулировать апплетами, десклетами и расширениями рабочего стола Сinnamon. 
+			Все, теперь только пользователь <i>mycinnamon</i> может манипулировать апплетами, десклетами и 
+			расширениями рабочего стола Сinnamon. 
 
 		<p>
 			&#9135;&#9135;&#9135;&#9135;&#9135;
 			<ol>
 				<li id="footnote-1-bottom">
 					<p>
-						<a href="#footnote-1-top">&uarr;</a> Можно было просто назначить <i>root</i> в качестве владельца для <code>~/.local/share/cinnamon</code>. Но, по-моему, лучше назначить нового пользователя. Так будет понятно, что <i>root</i> здесь ни при чем (оставим ему системные настройки).
+						<a href="#footnote-1-top">&uarr;</a> Можно было просто назначить 
+						<i>root</i> в качестве владельца для 
+						<code>~/.local/share/cinnamon</code>. Но, по-моему, лучше назначить 
+						нового пользователя. Так будет понятно, что <i>root</i> здесь ни при чем 
+						(оставим ему системные настройки).
 			</ol>
 			
 		<hr>
