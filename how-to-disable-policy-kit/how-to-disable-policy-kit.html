@@ -48,7 +48,8 @@
 			<ol>
 				<li>
 					Создаем фиктивную группу <i>mypolkit</i>:
-					<p><code>sudo addgroup mypolkit</code>
+					<p>
+						<code>sudo addgroup mypolkit</code>
 
 				<li>
 					Правим файл 
@@ -58,7 +59,7 @@
 					этот же каталог, а в другой, например, <code>/backups</code>, иначе файл-бэкап 
 					может быть воспринят как еще один конфиг. Отредактированный конфиг должен 
 					выглядеть так:
-					<p>
+<p>
 <pre>
 [Configuration]
 AdminIdentities=unix-group:mypolkit
