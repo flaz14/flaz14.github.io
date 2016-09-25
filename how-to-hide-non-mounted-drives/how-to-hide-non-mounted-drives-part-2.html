@@ -1,0 +1,225 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Несмонтированные диски - с глаз долой. Часть 2 (черновик)</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a href=
+		"здесь будет полная (с именем сервера) ссылка на эту же страницу">
+				Несмонтированные диски - с глаз долой. Часть 2 (черновик)
+			</a>
+		</h1>
+
+		<h2>Proof of Concept</h2>
+
+		<p>
+			Нам поможет функция <code>dlsym()</code> (для развернутых сведений см. <code>man 3 
+			dlopen</code>). Есть очень классная статья на тему перехвата библиотечных функций (без нее бы я 
+			ничего не сделал): 
+			<a href="opensourceforu.efytimes.com/2011/08/lets-hook-a-library-function/">
+				Let’s Hook a Library Function
+			<a>. 
+			Но, как в ней сказано, есть некоторые ограничения. 
+
+		<ol>
+			<li>
+				<p>
+					<blockquote>
+						Do beware of functions that themselves call dlsym(), when you need to 
+						call __libc_dlsym (handle, symbol) in the hook.
+					</blockquote>
+					Т.е. нельзя перехватить функцию, внутри которой вызывается 
+					<code>dlsym()</code>. Вряд ли библиотеки Gnome используют 
+					<code>dlsym()</code> (в конце концов, Gnome, как большинство 
+					современных Open Source проектов, позиционируется как изящное и надежное 
+					решение, а не нагромождение костылей). Но все-таки это надо проверить 
+					(т.е. именно проверить в деле, а не делать выводы только глядя на 
+					исходный код).
+			
+			<li>
+				<p>
+					<blockquote>
+						Ensure that the SUID bit is not set, otherwise you can’t use LD_PRELOAD.
+					</blockquote>
+					Вряд ли у исполняемого файла Nemo установлен SUID бит (по-идее, для всех 
+					исполняемых файлов, поставляемых в составе дистрибутива, в качестве владельца 
+					установлен <i>root</i>). Но на врякий случай проверим это:
+<pre>
+david@athlonx2 / $ which nemo
+/usr/bin/nemo
+david@athlonx2 / $ ls -l --all --human-readable /usr/bin/nemo
+-rwxr-xr-x 1 root root 1,8M Jan 20  2015 /usr/bin/nemo
+</pre>
+					Как видим, SUID бит не установлен. Так что по этому поводу можно не 
+					беспокоиться (правда, придется повозиться со скриптами оболочки и переменной 
+					PATH, чтобы Nemo "подхватил" поддельную функцию).
+			
+			<li>
+				<p>
+					<blockquote>
+						Also, internal library function calls are resolved before runtime — say, 
+						if some function in libc calls getaddrinfo() or malloc(), it will never 
+						call the hook from a different library.
+					</blockquote>
+					Вроде бы Nemo полностью полагается на библиотеки Gnome. Но этот факт, 
+					опять-таки, нужно проверить (как минимум вглянуть на исходный код).
+		</ol>
+
+		Начнем с пункта 3 (иначе как мы выявим функцию, которую будем перехватывать?).
+	
+		<h2>Ищем функцию-жертву</h2>
+		
+		<p>
+			Начнем с файла <i>nemo-places-sidebar.c</i>, фрагмент которого уже приводился в части 1 !здесь 
+			будет ссылка на листинг 1 из части 1!. Судя по строкам 
+<a
+href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L946">
+№946 - №947
+</a>
+<pre>
+   946	    /* first go through all connected drives */
+   947	    drives = g_volume_monitor_get_connected_drives (volume_monitor);
+</pre>
+
+			, Nemo получает список дисков с помощью функции 
+			<code>g_volume_monitor_get_connected_drives()</code>. Найдем все вызовы этой функции в Nemo:
+			
+<pre>
+david@athlonx2 ~/Temp/nemo $ grep -R 'g_volume_monitor_get_connected_drives' .
+./src/nemo-places-sidebar.c:    drives = g_volume_monitor_get_connected_drives (volume_monitor);
+./src/nemo-view.c:        drives = g_volume_monitor_get_connected_drives (volume_monitor);
+</pre>
+			C <i>nemo-places-sidebar.c</i> мы уже разобрались. Взглянем на <i>nemo-view.c</i>:
+			
+<pre>
+david@athlonx2 ~/Temp/nemo $ grep -C 10 'g_volume_monitor_get_connected_drives' ./src/nemo-view.c
+            g_object_unref (mount);
+            g_object_unref (icon);
+            g_free (name);
+            g_free (mount_uri);
+
+            index++;
+        }
+        g_list_free (mounts);
+
+        /* first go through all connected drives */
+        drives = g_volume_monitor_get_connected_drives (volume_monitor);
+
+        for (l = drives; l != NULL; l = l->next) {
+            drive = l->data;
+
+            volumes = g_drive_get_volumes (drive);
+            if (volumes != NULL) {
+                for (ll = volumes; ll != NULL; ll = ll->next) {
+                    volume = ll->data;
+                    identifier = g_volume_get_identifier (volume, G_VOLUME_IDENTIFIER_KIND_CLASS);
+</pre>
+
+			Выглядит как копипаст из <i>nemo-places-sidebar.c</i> (или наоборот). Главное, 
+			что <code>g_volume_monitor_get_connected_drives()</code> используется по 
+			прямому назначению 
+			(об этом свидетельствуют комментарии в исходниках) и что эта функция находиться не в Nemo, а 
+			в библиотеках Gnome. 
+
+		<p>
+			Как говорит официальная 
+<a href="https://developer.gnome.org/gio/stable/GVolumeMonitor.html#g-volume-monitor-get-connected-drives">
+документация по Gnome
+</a>:
+			<blockquote>
+				Gets a list of drives connected to the system.
+				<br>
+				The returned list should be freed with g_list_free(), after its elements have been 
+				unreffed with g_object_unref().
+			</blockquote>
+			
+			Мы сделаем следующее: 
+			<ol>
+				<li>
+					Перехватим функцию
+			
+				<li>
+					Удалим из списка все элементы, которые относятся к несмонтированным дискам 
+					(не забывая очистить память с помощью <code>g_object_unref()</code>).
+				
+				<li>
+					Вернем Nemо "отфильтрованный" список.
+			</ol>
+			
+
+		<p>
+			В Nemo есть еще одно место
+			
+			
+
+		<p>
+			<ol>
+				<li>
+					Вот пример сноски:  
+					<sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>.
+
+<!-- Блок преформатированного текста размещается в новом абзаце.
+     Перед строкой преформатированного текста не должно быть никаких дополнительных пробелов если их не было 
+     в оригинальном исходном коде). -->
+<p>
+<pre>
+sudo adduser       \
+  --disabled-login \
+  --no-create-home \
+  --debug          \
+  mycinnamon
+</pre>
+
+<!-- Длинный листинг предваряется заголовком 4-го уровня, внутри залоговка - гиперссылка. 
+     В заголовке также указывается имя файла или ссылка на оригинал -->
+<h4><a id="listing-1">Листинг 1 - файл /etc/pm/sleep.d/99_dropbox</a></h4>
+<pre>
+#!/bin/bash
+
+# I would like to be sure that Dropbox syncronizes all files 
+# before computer is running to hibernation (so the same Dropbox
+...
+</pre>
+
+		<p>
+			Конец статьи
+
+		<!-- В этом обзаце находятся сноски. -->
+		<p>
+			<!-- Что-то вроде короткой горизонтальной линии (в strict HTML ee нет...) -->
+			&#9135;&#9135;&#9135;&#9135;&#9135;
+			<ol>
+				<!-- Пример текста сноски. 2-ая сноска будет состоять из таких же тегов, только везде
+				     в ссылках будет "2" -->
+				<li id="footnote-1-bottom">
+					<p>
+						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
+						Можно было просто ...
+			</ol>
+
+		<!-- Горизонтальная линия отделяет нижнюю панель навигации от содержимого статьи.
+		     Т.о. текст статьи (вместе с заголовком и сносками) размещется между двумя горизонтальными 
+		     линиями -->
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+	</body>
+</html>
