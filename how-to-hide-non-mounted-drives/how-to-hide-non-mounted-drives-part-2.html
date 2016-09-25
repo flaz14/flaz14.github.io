@@ -133,10 +133,12 @@ david@athlonx2 ~/Temp/nemo $ grep -C 10 'g_volume_monitor_get_connected_drives' 
 			(об этом свидетельствуют комментарии в исходниках) и что эта функция находиться не в Nemo, а 
 			в библиотеках Gnome. 
 
+		<h2>Составляем план перехвата</h2>
+			
 		<p>
 			Как говорит официальная 
 <a href="https://developer.gnome.org/gio/stable/GVolumeMonitor.html#g-volume-monitor-get-connected-drives">
-документация по Gnome
+документация по Gnome o g_volume_monitor_get_connected_drives()
 </a>:
 			<blockquote>
 				Gets a list of drives connected to the system.
@@ -160,58 +162,30 @@ david@athlonx2 ~/Temp/nemo $ grep -C 10 'g_volume_monitor_get_connected_drives' 
 			
 
 		<p>
-			В Nemo есть еще одно место
+			В Nemo есть еще одно подозрительное место в строках 
+<a 
+href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L1046">
+№1046 - №1047:
+</a>
 			
+<pre>
+  1046	    /* add all volumes that is not associated with a drive */
+  1047	    volumes = g_volume_monitor_get_volumes (volume_monitor);
+</pre>
+	
+			Что же оно значит? В Linux том (слово "том", он же "volume" более общее, 
+			чем "диск" или "раздел") может представлять как раздел диска, так и диск целиком.
+			Например, если на флешке создать два раздела, один ext2, другой ntfs, то система при подключении 
+			такой флешки "увидит" два тома, скажем, /dev/sdb1 и /dev/sdb2). Саму же 
+			флешку (/dev/sdb) нельзя будет смонтировать. Но если на флешке целиком 
+			отформатирована, например, в файловую систему UDF, то она будет определяться только лишь как 
+			диск (/dev/sdb), и этот диск можно будет смонтировать. В Nemo это предусмотрено. 
+			Так что придется еще и перехватывать функцию <code>g_volume_monitor_get_volumes()</code>. Она 
+			аналогична аналогична рассмотренной ранее <code>g_volume_monitor_get_connected_drives()</code>.
+			Так что проблем возникнуть не должно.
 			
-
 		<p>
-			<ol>
-				<li>
-					Вот пример сноски:  
-					<sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>.
-
-<!-- Блок преформатированного текста размещается в новом абзаце.
-     Перед строкой преформатированного текста не должно быть никаких дополнительных пробелов если их не было 
-     в оригинальном исходном коде). -->
-<p>
-<pre>
-sudo adduser       \
-  --disabled-login \
-  --no-create-home \
-  --debug          \
-  mycinnamon
-</pre>
-
-<!-- Длинный листинг предваряется заголовком 4-го уровня, внутри залоговка - гиперссылка. 
-     В заголовке также указывается имя файла или ссылка на оригинал -->
-<h4><a id="listing-1">Листинг 1 - файл /etc/pm/sleep.d/99_dropbox</a></h4>
-<pre>
-#!/bin/bash
-
-# I would like to be sure that Dropbox syncronizes all files 
-# before computer is running to hibernation (so the same Dropbox
-...
-</pre>
-
-		<p>
-			Конец статьи
-
-		<!-- В этом обзаце находятся сноски. -->
-		<p>
-			<!-- Что-то вроде короткой горизонтальной линии (в strict HTML ee нет...) -->
-			&#9135;&#9135;&#9135;&#9135;&#9135;
-			<ol>
-				<!-- Пример текста сноски. 2-ая сноска будет состоять из таких же тегов, только везде
-				     в ссылках будет "2" -->
-				<li id="footnote-1-bottom">
-					<p>
-						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
-						Можно было просто ...
-			</ol>
-
-		<!-- Горизонтальная линия отделяет нижнюю панель навигации от содержимого статьи.
-		     Т.о. текст статьи (вместе с заголовком и сносками) размещется между двумя горизонтальными 
-		     линиями -->
+			В части 3 !здесь будет ссылка на часть 3! мы приступим к программированию.
 		<hr>
 
 		<h1>
