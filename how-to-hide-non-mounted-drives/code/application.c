@@ -2,73 +2,115 @@
 #include <glib-object.h>
 #include <gio/gio.h>
 
-
-void
-print_connected_drives (GList * connected_drives)
+int is_network_volume(GVolume * volume)
 {
-  GList *l, *ll;
-
-  
-
-  for (l = connected_drives; l != NULL; l = l->next)
-    {
-      GDrive *drive = l->data;
-      GList *volumes = g_drive_get_volumes (drive);
-      if (volumes != NULL)
-	{
-	  for (ll = volumes; ll != NULL; ll = ll->next)
-	    {
-	      GVolume *volume = ll->data;
-	      char *identifier = g_volume_get_identifier (volume,
-							  G_VOLUME_IDENTIFIER_KIND_CLASS);
-
-	      // Skip network volumes
-	      if (g_strcmp0 (identifier, "network") == 0)
-		{
-		  g_free (identifier);
-		  continue;
-		}
-	      g_free (identifier);
-
-	      GMount *mount = g_volume_get_mount (volume);
-	      if (mount != NULL)
-		{
-		  GFile *root = g_mount_get_default_location (mount);
-		  // TODO print root
-		  g_object_unref (root);
-		  char *mount_uri = g_file_get_uri (root);
-		  // TODO print mount_uri
-		  g_free (mount_uri);
-		}
-
-	      g_object_unref (mount);
-	      g_object_unref (volume);
-	    }
-	  g_list_free (volumes);
-	}
-    }
-  return;
+	char *identifier = g_volume_get_identifier(volume,
+						   G_VOLUME_IDENTIFIER_KIND_CLASS);
+	int result = g_strcmp0(identifier, "network") == 0;
+	g_free(identifier);
+	return result;
 }
 
-int
-main ()
+void print_volume(GVolume * volume)
 {
-  printf ("Hi! I'm sample application!\n");
-  GVolumeMonitor *volume_monitor = g_volume_monitor_get ();
+	char *name = g_volume_get_name(volume);
+	char *identifier = g_volume_get_identifier(volume,
+						   G_VOLUME_IDENTIFIER_KIND_UNIX_DEVICE);
 
-/////////////////////////////////////////////////////////////////////
+	printf("       name: %s\n", name);
+	printf("       identifier: %s\n", identifier);
 
-  printf ("Call g_volume_monitor_get_connected_drives() ...\n");
-  GList *connected_drives =
-    g_volume_monitor_get_connected_drives (volume_monitor);
-  print_connected_drives (connected_drives);
+	g_free(identifier);
+	g_free(name);
+}
 
-/////////////////////////////////////////////////////////////////////
+void print_mounted_volume(GVolume * volume)
+{
+	printf("+ mounted volume\n");
+	print_volume(volume);
+}
 
-  printf ("Bye!\n");
-  g_list_free (connected_drives);
-  g_object_unref (volume_monitor);
+void print_non_mounted_volume(GVolume * volume)
+{
+	printf("- non-mounted volume\n");
+	print_volume(volume);
+}
 
+void print_connected_drives(GList * connected_drives)
+{
+	GList *l, *ll;
+	for (l = connected_drives; l != NULL; l = l->next) {
+		GDrive *drive = l->data;
+		GList *volumes = g_drive_get_volumes(drive);
+		if (volumes != NULL) {
+			for (ll = volumes; ll != NULL; ll = ll->next) {
+				GVolume *volume = ll->data;
 
-  return 0;
+				if (is_network_volume(volume))
+					continue;
+
+				GMount *mount = g_volume_get_mount(volume);
+
+				if (mount != NULL) {
+					print_mounted_volume(volume);
+					g_object_unref(mount);
+				} else {
+					print_non_mounted_volume(volume);
+				}
+				g_object_unref(volume);
+			}
+			g_list_free(volumes);
+		}
+	}
+	g_list_free(connected_drives);
+	return;
+
+}
+
+void print_connected_volumes(GList * connected_volumes)
+{
+	GList *l;
+	for (l = connected_volumes; l != NULL; l = l->next) {
+		GVolume *volume = l->data;
+		
+		// skip physical drives
+		GDrive *drive = g_volume_get_drive(volume);
+		if (drive != NULL) {
+			g_object_unref(volume);
+			g_object_unref(drive);
+			continue;
+		}
+
+		if (is_network_volume(volume))
+			continue;
+
+		GMount *mount = g_volume_get_mount(volume);
+		if (mount != NULL) {
+			print_mounted_volume(volume);
+			g_object_unref(mount);
+		} else {
+			print_non_mounted_volume(volume);
+		}
+		g_object_unref(volume);
+	}
+	g_list_free(connected_volumes);
+}
+
+int main()
+{
+	printf("Hi! I'm sample application!\n");
+	GVolumeMonitor *volume_monitor = g_volume_monitor_get();
+
+	printf("\nCall g_volume_monitor_get_connected_drives() ...\n");
+	GList *connected_drives =
+	    g_volume_monitor_get_connected_drives(volume_monitor);
+	print_connected_drives(connected_drives);
+
+	printf("\nCall g_volume_monitor_get_volumes() ...\n");
+	GList *connected_volumes = g_volume_monitor_get_volumes(volume_monitor);
+	print_connected_volumes(connected_volumes);
+
+	printf("\nBye!\n");
+	g_object_unref(volume_monitor);
+	return 0;
 }
