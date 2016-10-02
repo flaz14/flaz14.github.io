@@ -17,10 +17,10 @@ hook:
 	gcc -Wall -g `pkg-config --cflags gtk+-3.0` -shared -ldl -fPIC libhook.c -o libhook.so \
 `pkg-config --libs gtk+-3.0`
 
-run: application
+test: application
 	./application
 	
-capture: application hook
+test-hook: application hook
 	LD_PRELOAD=./libhook.so ./application
 
 clean:
