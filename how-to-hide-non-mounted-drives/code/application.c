@@ -17,22 +17,20 @@ void print_volume(GVolume * volume)
 	char *identifier = g_volume_get_identifier(volume,
 						   G_VOLUME_IDENTIFIER_KIND_UNIX_DEVICE);
 
-	printf("       name: %s\n", name);
-	printf("       identifier: %s\n", identifier);
-
+	printf("%s [%s]\n", identifier, name);
 	g_free(identifier);
 	g_free(name);
 }
 
 void print_mounted_volume(GVolume * volume)
 {
-	printf("+ mounted volume\n");
+	printf("+ ");
 	print_volume(volume);
 }
 
 void print_non_mounted_volume(GVolume * volume)
 {
-	printf("- non-mounted volume\n");
+	printf("- ");
 	print_volume(volume);
 }
 
