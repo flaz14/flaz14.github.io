@@ -1,4 +1,4 @@
-#define _GNU_SOURCE // TODO should I use _GNU_SOURCE macro everywhere in my code???
+#define _GNU_SOURCE		// TODO should I use _GNU_SOURCE macro everywhere in my code???
 #include <stdio.h>
 #include <stdint.h>
 #include <dlfcn.h>
@@ -19,7 +19,6 @@ GList *g_drive_get_volumes(GDrive * drive);
 void trace_in();
 void trace_out();
 void print_drive_identifier(GDrive * drive);
-
 
 GList *g_drive_get_volumes(GDrive * drive)
 {
@@ -47,16 +46,20 @@ GList *g_drive_get_volumes(GDrive * drive)
 	return only_mounted_volumes;
 }
 
-void trace_in() {
+void trace_in()
+{
 	printf(">\n");
 }
 
-void trace_out() {
+void trace_out()
+{
 	printf("<\n");
 }
 
-void print_drive_identifier(GDrive * drive) {
-	char *identifier = g_drive_get_identifier(drive, G_VOLUME_IDENTIFIER_KIND_UNIX_DEVICE);
+void print_drive_identifier(GDrive * drive)
+{
+	char *identifier =
+	    g_drive_get_identifier(drive, G_VOLUME_IDENTIFIER_KIND_UNIX_DEVICE);
 	printf("    %s\n", identifier);
 	g_free(identifier);
 }
