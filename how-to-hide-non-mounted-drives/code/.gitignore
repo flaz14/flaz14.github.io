@@ -1,2 +1,4 @@
 application
 application.c~
+libhook.c~
+libhook.so
