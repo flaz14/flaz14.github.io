@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>Несмонтированные диски - с глаз долой. Часть 1 (черновик)</title>
+		<title>Несмонтированные диски - с глаз долой. Часть 1</title>
 	</head>
 	
 	<body>
@@ -18,7 +18,7 @@
 		<h1>
 			<a href=
 		"здесь будет полная (с именем сервера) ссылка на эту же страницу">
-				Несмонтированные диски - с глаз долой. Часть 1 (черновик)
+				Несмонтированные диски - с глаз долой. Часть 1
 			</a>
 		</h1>
 		
@@ -27,35 +27,38 @@
 		<p>
 			В Linux Mint Cinnamon в качестве файлового менеджера по-умолчанию установлен 
 			<a href="https://github.com/linuxmint/nemo">Nemo</a>. По-моему, это очень хорошая программа: 
-			быстрая, функциальная и не перегруженная лишними возможностями. Но есть в Nemo один недостаток: 
-			он всегда отображает несмонтированные диски. Например, как видно из рисунка 1, 
-			к компьютеру подллючены 2 диска. Причем первый (с 
-			меткой <i>8_ext</i>) смонтирован (обратите внимание на значок извлечения диска напротив). 
-			А второй диск (с меткой <i>8_ntfs</i>) несмонтирован (значка извлечения нет). Но отображаются 
-			оба диска. И если случайно 
-			кликнуть на <i>8_ntfs</i> такой диск, то Nemo его cмонтирует. Такое поведение не всегда 
-			меня устраивает. Например, на компьютере с Dual Boot я не хочу видеть разделы Windows. Но, если 
-			вдруг понадобиться что-то скопировать с диска C:, или же произвести восстановительные работы на 
-			нем, я всегда смогу смонтировать диск вручную из командой строки с нужными мне опциями 
-			(например, Read Only).
+			быстрая и в меру функциальная. Но есть в ней один недостаток: Nemo всегда отображает 
+			несмонтированные диски. Например, когда к компьютеру подключена флешка, разбитая на два 
+			раздела, и первый раздел (с меткой <i>8_ext</i>) смонтирован (обратите 	внимание на значок 
+			извлечения диска напротив), а второй (с меткой <i>8_ntfs</i>) несмонтирован (значка извлечения 
+			нет), то все равно на боковой панели отображаются оба раздела, как на 
+			<a href="#illustration-1-1">рисунке 1.1</a>. 
+			Если случайно кликнуть на <i>8_ntfs</i>, то Nemo смонтирует этот раздел (даже если 
+			автоматическое 				монтирование отключено). Такое поведение не всегда меня 
+			устраивает. Например, на компьютере с 				Dual Boot я не хочу видеть 
+			разделы Windows. Если же мне вдруг понадобиться что-то скопировать с 			диска 
+			C:, или же произвести на нем восстановительные работы, я всегда смогу смонтировать 		
+			соответсвующий раздел вручную из командой строки с нужными мне опциями (например, 
+			Read Only).
 			
 		<h4>
-			<a id="illustration-1">
-				Рисунок 1 - пример отображения несмонтированного диска на боковой панели Nemo
+			<a id="illustration-1-1">
+				Рисунок 1.1 - пример отображения несмонтированного диска на боковой панели Nemo
 			</a>
 		</h4>
 		<img alt="Пример отображения несмонтированного диска на боковой панели Nemo" 
-		src="nemo-sidebar-with-unmounted-drive-visible.png" width="240px">
+		src="illustrations/nemo-sidebar-with-unmounted-drive-visible.png" width="240px">
 
 			
 		<p>
 			К сожалению, в Nemo нет возможности скрыть несмонтированные диски. Я 
 			облазил все настройки и ничего связанного с этим не нашел. Действительно, судя по исходному 
-			коду Nemo (здесь и далее рассматривается версия 2.4.5, но в последней версии 3.0.6 то же 
-			самое), отвечающему за отображение значков в боковой панели, фрагмент которого  
-			приведен в листинге 1, это поведение никак не 
-			настраивается и не отключается. Это подтверждается и комментариями в строках №992 - №999 и 
-			№1089.
+			коду Nemo (здесь и далее рассматривается версия <b>2.4.5</b>, но в последней версии 
+			<b>3.0.6</b> то же 
+			самое), отвечающему за отображение значков на боковой панели, фрагмент которого  
+			приведен в <a href="#listing-1">листинге 1</a> (многие строки опущены для краткости), это 
+			поведение никак не настраивается и не отключается. Это подтверждается и комментариями в строках 
+			№992 - №999 и №1089.
 			
 <h4><a id="listing-1">Листинг 1 - </a>
 <a 
@@ -64,6 +67,7 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
 </a>
 </h4>
 <pre>
+   ...
    946	    /* first go through all connected drives */
    947	    drives = g_volume_monitor_get_connected_drives (volume_monitor);
    948	
@@ -73,42 +77,11 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
    952	        volumes = g_drive_get_volumes (drive);
    953	        if (volumes != NULL) {
    954	            for (ll = volumes; ll != NULL; ll = ll->next) {
-   955	                volume = ll->data;
-   956	                identifier = g_volume_get_identifier (volume, G_VOLUME_IDENTIFIER_KIND_CLASS);
-   957	
-   958	                if (g_strcmp0 (identifier, "network") == 0) {
-   959	                    g_free (identifier);
-   960	                    network_volumes = g_list_prepend (network_volumes, volume);
-   961	                    continue;
-   962	                }
-   963	                g_free (identifier);
-   964	
+   ...                  ...
    965	                mount = g_volume_get_mount (volume);
    966	                if (mount != NULL) {
    967	                    /* Show mounted volume in the sidebar */
-   968	                    icon = g_mount_get_icon (mount);
-   969	                    root = g_mount_get_default_location (mount);
-   970	                    mount_uri = g_file_get_uri (root);
-   971	                    name = g_mount_get_name (mount);
-   972	                    full = get_disk_full (g_file_new_for_uri (mount_uri), &tooltip_info);
-   973	                    tooltip = g_strdup_printf (_("%s (%s)\n%s"),
-   974	                                               g_file_get_parse_name (root),
-   975	                                               g_volume_get_identifier (volume,
-   976	                                                                        G_VOLUME_IDENTIFIER_KIND_UNIX_DEVICE),
-   977	                                               tooltip_info);
-   978	                    g_free (tooltip_info);
-   979	                    cat_iter = add_place (sidebar, PLACES_MOUNTED_VOLUME,
-   980	                                           SECTION_DEVICES,
-   981	                                           name, icon, mount_uri,
-   982	                                           drive, volume, mount, 0, tooltip,
-   983	                                           full, TRUE,
-   984	                                           cat_iter);
-   985	                    g_object_unref (root);
-   986	                    g_object_unref (mount);
-   987	                    g_object_unref (icon);
-   988	                    g_free (tooltip);
-   989	                    g_free (name);
-   990	                    g_free (mount_uri);
+   ...                      ...
    991	                } else {
    992	                    /* Do show the unmounted volumes in the sidebar;
    993	                     * this is so the user can mount it (in case automounting
@@ -118,120 +91,40 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
    997	                     * cue that the user should remember to yank out the media if
    998	                     * he just unmounted it.
    999	                     */
-  1000	                    icon = g_volume_get_icon (volume);
-  1001	                    name = g_volume_get_name (volume);
-  1002	                    tooltip = g_strdup_printf (_("Mount and open %s (%s)"), name,
-  1003	                                               g_volume_get_identifier (volume,
-  1004	                                                                        G_VOLUME_IDENTIFIER_KIND_UNIX_DEVICE));
-  1005	
-  1006	                    cat_iter = add_place (sidebar, PLACES_MOUNTED_VOLUME,
-  1007	                                           SECTION_DEVICES,
-  1008	                                           name, icon, NULL,
-  1009	                                           drive, volume, NULL, 0, tooltip, 0, FALSE,
-  1010	                                           cat_iter);
-  1011	                    g_object_unref (icon);
-  1012	                    g_free (name);
-  1013	                    g_free (tooltip);
+   ...                      ...
   1014	                }
   1015	                g_object_unref (volume);
   1016	            }
   1017	            g_list_free (volumes);
-  1018	        } else {
-  1019	            if (g_drive_is_media_removable (drive) && !g_drive_is_media_check_automatic (drive)) {
-  1020	                /* If the drive has no mountable volumes and we cannot detect media change.. we
-  1021	                 * display the drive in the sidebar so the user can manually poll the drive by
-  1022	                 * right clicking and selecting "Rescan..."
-  1023	                 *
-  1024	                 * This is mainly for drives like floppies where media detection doesn't
-  1025	                 * work.. but it's also for human beings who like to turn off media detection
-  1026	                 * in the OS to save battery juice.
-  1027	                 */
-  1028	                icon = g_drive_get_icon (drive);
-  1029	                name = g_drive_get_name (drive);
-  1030	                tooltip = g_strdup_printf (_("Mount and open %s"), name);
-  1031	
-  1032	                cat_iter = add_place (sidebar, PLACES_BUILT_IN,
-  1033	                                       SECTION_DEVICES,
-  1034	                                       name, icon, NULL,
-  1035	                                       drive, NULL, NULL, 0, tooltip, 0, FALSE,
-  1036	                                       cat_iter);
-  1037	                g_object_unref (icon);
-  1038	                g_free (tooltip);
-  1039	                g_free (name);
-  1040	            }
-  1041	        }
-  1042	        g_object_unref (drive);
-  1043	    }
-  1044	    g_list_free (drives);
+   ...              ...
   1045	
   1046	    /* add all volumes that is not associated with a drive */
   1047	    volumes = g_volume_monitor_get_volumes (volume_monitor);
   1048	    for (l = volumes; l != NULL; l = l->next) {
-  1049	        volume = l->data;
-  1050	        drive = g_volume_get_drive (volume);
-  1051	        if (drive != NULL) {
-  1052	                g_object_unref (volume);
-  1053	            g_object_unref (drive);
-  1054	            continue;
-  1055	        }
-  1056	
-  1057	        identifier = g_volume_get_identifier (volume, G_VOLUME_IDENTIFIER_KIND_CLASS);
-  1058	
-  1059	        if (g_strcmp0 (identifier, "network") == 0) {
-  1060	            g_free (identifier);
-  1061	            network_volumes = g_list_prepend (network_volumes, volume);
-  1062	            continue;
-  1063	        }
-  1064	        g_free (identifier);
-  1065	
+   ...          ...
   1066	        mount = g_volume_get_mount (volume);
   1067	        if (mount != NULL) {
-  1068	            icon = g_mount_get_icon (mount);
-  1069	            root = g_mount_get_default_location (mount);
-  1070	            mount_uri = g_file_get_uri (root);
-  1071	            full = get_disk_full (g_file_new_for_uri (mount_uri), &tooltip_info);
-  1072	            tooltip = g_strdup_printf (_("%s\n%s"),
-  1073	                                       g_file_get_parse_name (root),
-  1074	                                       tooltip_info);
-  1075	            g_free (tooltip_info);
-  1076	            g_object_unref (root);
-  1077	            name = g_mount_get_name (mount);
-  1078	            cat_iter = add_place (sidebar, PLACES_MOUNTED_VOLUME,
-  1079	                                   SECTION_DEVICES,
-  1080	                                   name, icon, mount_uri,
-  1081	                                   NULL, volume, mount, 0, tooltip, full, TRUE,
-  1082	                                   cat_iter);
-  1083	            g_object_unref (mount);
-  1084	            g_object_unref (icon);
-  1085	            g_free (name);
-  1086	            g_free (tooltip);
-  1087	            g_free (mount_uri);
+   ...              ...
   1088	        } else {
   1089	            /* see comment above in why we add an icon for an unmounted mountable volume */
-  1090	            icon = g_volume_get_icon (volume);
-  1091	            name = g_volume_get_name (volume);
-  1092	            cat_iter = add_place (sidebar, PLACES_MOUNTED_VOLUME,
-  1093	                                   SECTION_DEVICES,
-  1094	                                   name, icon, NULL,
-  1095	                                   NULL, volume, NULL, 0, name, 0, FALSE,
-  1096	                                   cat_iter);
-  1097	            g_object_unref (icon);
-  1098	            g_free (name);
+   ...              ...
   1099	        }
   1100	        g_object_unref (volume);
   1101	    }
   1102	    g_list_free (volumes);
+   ...
 </pre>
 
 		<h2>Возможное решение 1</h2>
 
 		<p>
-			Убрать ненужные строки в исходнике, скомпилировать доработанную версию Nemo и 
-			установить его в систему.<br>
+			Убираем ненужные строки в исходнике, компилируем доработанную версию Nemo и установить его в 
+			систему.<br>
 			Достоинства:<br>
 			<ul>
 				<li>
-					элегантность решения
+					очень элегантное решение (объем кода, а следовательно, и размер программы 
+					уменьшается!)
 			
 				<li>
 					100% будет работать
@@ -240,20 +133,21 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
 			Недостатки:<br>
 			<ul>
 				<li>
-					для компиляции и сборки, кроме собственно компилятора, 
-					понадобятся дополнительные утилиты. Устанавливать их - 
-					это морока.
+					для компиляции и сборки, кроме собственно gcc, make и набора библиотек 
+					Gnome для разработчика, придется установить дополнительные утилиты: всякие 
+					autotools и т.п. А после того как все заработает, придется еще "очистить" 
+					систему от ненужных более пакетов
 						
 				<li>
-					придется всегда хранить на компьютере исходный текст 
-					Nemo, иначе не получиться удалить его. Можно собрать 
-					свой пакет, но это лишняя морока. 
+					придется всегда хранить на компьютере исходники Nemo, иначе не получиться 
+					удалить программу (справедливости ради стоит отметить, что можно создать свой 
+					пакет на основе исходных текстов, и затем обращаться с ним так же, как и с 
+					обычными пакетами).
 					
 				<li>
-					как только "самопальный" пакет установлен, его уже не 
-					получиться обновлять из официальных репозиториев как 
-					остальные пакеты (а даже если и можно было бы, 
-					официальная версия Nemo затерла бы нашу доработанную, и 
+					как только Nemo установлен (неважно, из исходных текстов или из самодельного 
+					пакета), его уже не получиться обновлять из официальных репозиториев (а даже 
+					если и можно было бы, официальная версия Nemo затерла бы нашу, доработанную, и 
 					мы пришли бы к тому, с чего начали)
 			</ul>
 					
