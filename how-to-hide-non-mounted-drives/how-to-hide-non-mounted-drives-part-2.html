@@ -29,9 +29,7 @@
 			сведениями обращайтесь к <code>man 3 dlopen</code>). Есть очень классная статья на тему 
 			перехвата библиотечных функций (без нее я бы ничего не сделал): 
 			<a href="http://opensourceforu.efytimes.com/2011/08/lets-hook-a-library-function/">
-				Let’s Hook a Library Function
-			<a>. 
-			Но, как сказано в статье, есть некоторые ограничения:
+				Let’s Hook a Library Function<a>. Но, как сказано в статье, есть некоторые ограничения:
 
 		<ol>
 			<li>
@@ -87,7 +85,7 @@ href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mou
 			части 1</a>. Судя по строкам 
 <a
 href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L946">
-№№ 946 - 947
+№№946-947
 </a>
 <pre>
    946	    /* first go through all connected drives */
@@ -158,12 +156,15 @@ david@athlonx2 ~/Temp/nemo $ grep -C 10 'g_volume_monitor_get_connected_drives' 
 				<li>
 					Удалим из возвращенного функцией списка все элементы, которые относятся к 
 					несмонтированным дискам. Нужно лишь воспользоваться 
-					<code>g_volume_get_mount()</code>, как это и делает Nemo (см. строку №965 в
-					в 
-<a href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#listing-1">
-					листинге 1)</a>. Не забывая при этом очистить элементы списка, которые 
-					соответствуют несмонтированным разделам, с помощью 
-					<code>g_object_unref()</code>).
+					<code>g_volume_get_mount()</code> как это и делает Nemo в строке 
+					<a href="">№965</a>:
+<pre>
+   965                  mount = g_volume_get_mount (volume);
+</pre>
+					(и не забыть очистить "отброшенные" элементы списка с помощью 
+					<a 
+href="https://developer.gnome.org/gobject/stable/gobject-The-Base-Object-Type.html#g-object-unref">
+					g_object_unref()</a>).
 				
 				<li>
 					Вернем Nemо отфильтрованный список.
@@ -183,7 +184,7 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
 </pre>
 	
 			Нужно ли перехватывать <code>g_volume_monitor_get_volumes()</code>? Вообще-то нужно, но 
-			поскольку я не использую ни RAID, ни LVM, я не ее проигнорирую.
+			поскольку я не использую ни RAID, ни LVM, я ее проигнорирую.
 			
 		<p>
 			В <a 
