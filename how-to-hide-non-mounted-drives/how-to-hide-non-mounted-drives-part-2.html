@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>Несмонтированные диски - с глаз долой. Часть 2 (черновик)</title>
+		<title>Несмонтированные диски - с глаз долой. Часть 2</title>
 	</head>
 
 	<body>
@@ -17,21 +17,21 @@
 
 		<h1>
 			<a href=
-		"здесь будет полная (с именем сервера) ссылка на эту же страницу">
-				Несмонтированные диски - с глаз долой. Часть 2 (черновик)
+		"http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-2.html">
+				Несмонтированные диски - с глаз долой. Часть 2
 			</a>
 		</h1>
 
 		<h2>Proof of Concept</h2>
 
 		<p>
-			Нам поможет функция <code>dlsym()</code> (для развернутых сведений см. <code>man 3 
-			dlopen</code>). Есть очень классная статья на тему перехвата библиотечных функций (без нее бы я 
-			ничего не сделал): 
-			<a href="opensourceforu.efytimes.com/2011/08/lets-hook-a-library-function/">
+			В перехвате функций библиотеки Gnome нам поможет функция <code>dlsym()</code> (за развернутыми 
+			сведениями обращайтесь к <code>man 3 dlopen</code>). Есть очень классная статья на тему 
+			перехвата библиотечных функций (без нее я бы ничего не сделал): 
+			<a href="http://opensourceforu.efytimes.com/2011/08/lets-hook-a-library-function/">
 				Let’s Hook a Library Function
 			<a>. 
-			Но, как в ней сказано, есть некоторые ограничения. 
+			Но, как сказано в статье, есть некоторые ограничения:
 
 		<ol>
 			<li>
@@ -63,8 +63,7 @@ david@athlonx2 / $ ls -l --all --human-readable /usr/bin/nemo
 -rwxr-xr-x 1 root root 1,8M Jan 20  2015 /usr/bin/nemo
 </pre>
 					Как видим, SUID бит не установлен. Так что по этому поводу можно не 
-					беспокоиться (правда, придется повозиться со скриптами оболочки и переменной 
-					PATH, чтобы Nemo "подхватил" поддельную функцию).
+					беспокоиться.
 			
 			<li>
 				<p>
@@ -82,18 +81,20 @@ david@athlonx2 / $ ls -l --all --human-readable /usr/bin/nemo
 		<h2>Ищем функцию-жертву</h2>
 		
 		<p>
-			Начнем с файла <i>nemo-places-sidebar.c</i>, фрагмент которого уже приводился в части 1 !здесь 
-			будет ссылка на листинг 1 из части 1!. Судя по строкам 
+			Посмотрим еще раз на файл <i>nemo-places-sidebar.c</i>, фрагмент которого уже приводился в 
+			<a 
+href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#listing-1">
+			части 1</a>. Судя по строкам 
 <a
 href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L946">
-№946 - №947
+№№ 946 - 947
 </a>
 <pre>
    946	    /* first go through all connected drives */
    947	    drives = g_volume_monitor_get_connected_drives (volume_monitor);
 </pre>
 
-			, Nemo получает список дисков с помощью функции 
+			Nemo получает список дисков с помощью функции 
 			<code>g_volume_monitor_get_connected_drives()</code>. Найдем все вызовы этой функции в Nemo:
 			
 <pre>
@@ -136,12 +137,14 @@ david@athlonx2 ~/Temp/nemo $ grep -C 10 'g_volume_monitor_get_connected_drives' 
 		<h2>Составляем план перехвата</h2>
 			
 		<p>
-			Как говорит официальная 
-<a href="https://developer.gnome.org/gio/stable/GVolumeMonitor.html#g-volume-monitor-get-connected-drives">
-документация по Gnome o g_volume_monitor_get_connected_drives()
-</a>:
+			После вызова <code>g_volume_monitor_get_connected_drives()</code> в цикле перебираются все 
+			диски. Затем во вложенном цикле перебираются все разделы каждого диска. Для получения списка 
+			разделов на конкретном диске вызывается функция <code>g_drive_get_volumes()</code>. Как говорит 
+официальная 
+<a href="https://developer.gnome.org/gio/stable/GDrive.html#g-drive-get-volumes">
+документация по Gnome o g_drive_get_volumes()</a>:
 			<blockquote>
-				Gets a list of drives connected to the system.
+				Get a list of mountable volumes for drive .
 				<br>
 				The returned list should be freed with g_list_free(), after its elements have been 
 				unreffed with g_object_unref().
@@ -150,22 +153,28 @@ david@athlonx2 ~/Temp/nemo $ grep -C 10 'g_volume_monitor_get_connected_drives' 
 			Мы сделаем следующее: 
 			<ol>
 				<li>
-					Перехватим функцию
+					Перехватим функцию <code>g_drive_get_volumes()</code>.
 			
 				<li>
-					Удалим из списка все элементы, которые относятся к несмонтированным дискам 
-					(не забывая очистить память с помощью <code>g_object_unref()</code>).
+					Удалим из возвращенного функцией списка все элементы, которые относятся к 
+					несмонтированным дискам. Нужно лишь воспользоваться 
+					<code>g_volume_get_mount()</code>, как это и делает Nemo (см. строку №965 в
+					в 
+<a href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#listing-1">
+					листинге 1)</a>. Не забывая при этом очистить элементы списка, которые 
+					соответствуют несмонтированным разделам, с помощью 
+					<code>g_object_unref()</code>).
 				
 				<li>
-					Вернем Nemо "отфильтрованный" список.
+					Вернем Nemо отфильтрованный список.
 			</ol>
 			
 
 		<p>
-			В Nemo есть еще одно подозрительное место в строках 
+			Все вроде бы ОК, но в Nemo есть одно подозрительное место в строках 
 <a 
 href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L1046">
-№1046 - №1047:
+№№1046-1047:
 </a>
 			
 <pre>
@@ -173,17 +182,14 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
   1047	    volumes = g_volume_monitor_get_volumes (volume_monitor);
 </pre>
 	
-			Что же оно значит? В Linux том (слово "том", он же "volume" более общее, 
-			чем "диск" или "раздел") может представлять как раздел физического диска, так и несколько 
-			физических дисков (например, если два диска объединены в массив RAID) или части диска(дисков), 
-			например, LVM.
-			В перехвате функции <code>g_volume_monitor_get_volumes()</code> большого смысла нет (я не 
-			использую на своем компьютере ни RAID, ни LVM, ни прочую "экзотику"). В любом случае, она 
-			аналогична аналогична рассмотренной ранее <code>g_volume_monitor_get_connected_drives()</code>.
-			Так что проблем возникнуть не должно.
+			Нужно ли перехватывать <code>g_volume_monitor_get_volumes()</code>? Вообще-то нужно, но 
+			поскольку я не использую ни RAID, ни LVM, я не ее проигнорирую.
 			
 		<p>
-			В части 3 !здесь будет ссылка на часть 3! мы приступим к программированию.
+			В <a 
+href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">части 3</a> мы 
+			приступим непосредственно к программированию.
+			
 		<hr>
 
 		<h1>
