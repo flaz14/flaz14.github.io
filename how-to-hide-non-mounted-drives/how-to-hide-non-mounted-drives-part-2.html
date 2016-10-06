@@ -157,14 +157,16 @@ david@athlonx2 ~/Temp/nemo $ grep -C 10 'g_volume_monitor_get_connected_drives' 
 					Удалим из возвращенного функцией списка все элементы, которые относятся к 
 					несмонтированным дискам. Нужно лишь воспользоваться 
 					<code>g_volume_get_mount()</code> как это и делает Nemo в строке 
-					<a href="">№965</a>:
+					<a 
+href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L965">
+№965</a>:
 <pre>
    965                  mount = g_volume_get_mount (volume);
 </pre>
-					(и не забыть очистить "отброшенные" элементы списка с помощью 
+					И не забыть очистить "отброшенные" элементы списка с помощью 
 					<a 
 href="https://developer.gnome.org/gobject/stable/gobject-The-Base-Object-Type.html#g-object-unref">
-					g_object_unref()</a>).
+					g_object_unref()</a>.
 				
 				<li>
 					Вернем Nemо отфильтрованный список.
