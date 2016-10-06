@@ -5,8 +5,6 @@
 # "Re: How to compile tictactoe widget example in tutorial" e-mail 
 # (https://mail.gnome.org/archives/gtk-app-devel-list/2010-February/msg00035.html)
 
-# TODO use long-named swithies for gcc
-
 GTK_VERSION=gtk+-3.0
 GTK_CFLAGS=`pkg-config --cflags $(GTK_VERSION)`
 GTK_LIBS=`pkg-config --libs $(GTK_VERSION)`
@@ -15,14 +13,14 @@ application:
 	gcc -Wall -g $(GTK_CFLAGS) application.c -o application $(GTK_LIBS)
 
 hook:
-	gcc -Wall -g -shared -ldl -fPIC $(GTK_CFLAGS) libhook.c -o libhook.so $(GTK_LIBS)
+	gcc -Wall -g -shared -ldl -fPIC $(GTK_CFLAGS) libnemohook.c -o libnemohook.so $(GTK_LIBS)
 
 test: application
 	./application
 
 test-hook: application hook
-	LD_PRELOAD=./libhook.so ./application
+	LD_PRELOAD=./libnemohook.so ./application
 
 clean:
 	rm application
-	rm libhook.so
+	rm libnemohook.so
