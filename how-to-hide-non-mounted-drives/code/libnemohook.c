@@ -1,4 +1,5 @@
-#define _GNU_SOURCE		// TODO should I use _GNU_SOURCE macro everywhere in my code???
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdint.h>
 #include <dlfcn.h>

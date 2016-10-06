@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <glib-object.h>
 #include <gio/gio.h>
