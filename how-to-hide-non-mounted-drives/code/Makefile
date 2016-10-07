@@ -21,6 +21,14 @@ test: application
 test-hook: application hook
 	LD_PRELOAD=./libnemohook.so ./application
 
+install: hook
+	cp ./libnemohook.so ~/bin/libnemohook.so
+	chmod 500 ~/bin/libnemohook.so
+	cp ./nemo ~/bin/nemo
+	chmod 500 ~/bin/nemo
+
+uninstall:
+	rm -f -- ~/bin/nemo ~/bin/libnemohook.so
+
 clean:
-	rm application
-	rm libnemohook.so
+	rm -f -- application libnemohook.so
