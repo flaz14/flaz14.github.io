@@ -44,7 +44,7 @@ href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mou
 		<p>
 			Запустим тестовую программу:
 <pre>
-yura@athlonx2 ~/Projects/flaz14.github.io/how-to-hide-non-mounted-drives/code $ make test
+david@athlonx2 ~/Projects/flaz14.github.io/how-to-hide-non-mounted-drives/code $ make test
 ./application
 
 Hi! I'm sample application!
@@ -61,7 +61,7 @@ Bye!
 			Теперь запустим тестовую программу с hook'ом:
 			
 <pre>
-yura@athlonx2 ~/Projects/flaz14.github.io/how-to-hide-non-mounted-drives/code $ make test-hook
+david@athlonx2 ~/Projects/flaz14.github.io/how-to-hide-non-mounted-drives/code $ make test-hook
 gcc -Wall -g -shared -ldl -fPIC `pkg-config --cflags gtk+-3.0` libnemohook.c -o libnemohook.so `pkg-config --libs 
 gtk+-3.0`
 LD_PRELOAD=./libnemohook.so ./application
@@ -115,7 +115,20 @@ Bye!
 		Как видно, несмонтированный раздел куда-то пропал. Именно этого мы и добивались.
 		
 
-			
+		<h2>Собираем костыль воедино</h2>
+		
+		<p>
+			Теперь пришло время сменить оригинальный Nemo на костыль. Чтобы "костыльный" Nemo запускался из 
+			терминала, достаточно создать скрипт с именем <code>nemo</code> (скрипт будет устанавливать 
+			<code>LD_PRELOAD</code>) и добавить путь к этому скрипту в переменную окружения PATH (самый 
+			простой способ - поместить скрипт в <code>~/bin</code>). Но будет, если попытаться запустить 
+			Nemo из стартового меню Cinnamon? Или с помощью горячей клавиши на мультимедийной клавиатуре?
+			Я попробовал все варианты: способ с переменной окружения <code>PATH</code> работает всегда. Так 
+			что установим костыль:
+<pre>
+
+</pre>
+		
 			
 			
 
