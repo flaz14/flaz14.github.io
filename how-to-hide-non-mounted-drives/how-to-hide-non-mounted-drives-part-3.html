@@ -38,8 +38,84 @@
 			Воспроизведем ситуацию, описанную в <a 
 href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#illustration-1-
 1">части 1</a>. 
-			Итак, смонтируем диск с меткой <i>8_ext</i> и оставим несмонтированным диск с меткой 
-			<i>8_ntfs</i>.
+			Итак, подключим флешку, смонтируем диск с меткой <i>8_ext</i> и оставим несмонтированным диск с 
+			меткой <i>8_ntfs</i>. 
+			
+		<p>
+			Запустим тестовую программу:
+<pre>
+yura@athlonx2 ~/Projects/flaz14.github.io/how-to-hide-non-mounted-drives/code $ make test
+./application
+
+Hi! I'm sample application!
+
++ /dev/sdb2 [8_ext]
+- /dev/sdb1 [8_ntfs]
+
+Bye!
+</pre>
+			Как видно из вывода, Nemo "видит" смонтированный диск с меткой <i>8_ext</i> и несмонтированный 
+			диск с меткой <i>8_ntfs</i>.
+			
+		<p>
+			Теперь запустим тестовую программу с hook'ом:
+			
+<pre>
+yura@athlonx2 ~/Projects/flaz14.github.io/how-to-hide-non-mounted-drives/code $ make test-hook
+gcc -Wall -g -shared -ldl -fPIC `pkg-config --cflags gtk+-3.0` libnemohook.c -o libnemohook.so `pkg-config --libs 
+gtk+-3.0`
+LD_PRELOAD=./libnemohook.so ./application
+
+Hi! I'm sample application!
+
+>
+    /dev/sda
+<
+>
+    /dev/sr0
+<
+>
+    /dev/sdb
+<
++ /dev/sdb2 [8_ext]
+
+Bye!
+</pre>
+			
+		Итак, 
+<pre>
+>
+    /dev/...
+<
+</pre>
+		означает, что hook перехватил обращение к функции <code>g_drive_get_volumes()</code>. Так, первым 
+		физическим диском, тома на котром попытался бы получить Nemo, является 
+		<code>/dev/sda</code>. На это диске не нашлось томов, поскольку <code>g_drive_get_volumes()</code> 
+		покажет только те тома, которых нет в <code>/etc/fstab</code>). Далее, для физического диска 
+		<code>/dev/sr0</code> тоже не нашлось дисков (перед запуском тестовой программы в приводе оптических 
+		дисков было пусто). А вот на физическом диске <code>/dev/sdb</code> нашелся один только один том. 
+		Сравним результаты:
+		<ul>
+			<li>
+				Без hook'а:
+<pre>
++ /dev/sdb2 [8_ext]
+- /dev/sdb1 [8_ntfs]
+</pre>
+				
+				
+			
+			<li>
+				C hook'ом:
+<pre>
++ /dev/sdb2 [8_ext]
+</pre>
+		</ul>
+		
+		Как видно, несмонтированный раздел куда-то пропал. Именно этого мы и добивались.
+		
+
+			
 			
 			
 
