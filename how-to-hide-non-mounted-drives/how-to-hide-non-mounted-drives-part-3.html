@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>Несмонтированные диски - с глаз долой. Часть 3 (черновик)</title>
+		<title>Несмонтированные диски - с глаз долой. Часть 3</title>
 	</head>
 
 	<body>
@@ -18,20 +18,29 @@
 		<h1>
 			<a href=
 		"здесь будет полная (с именем сервера) ссылка на эту же страницу">
-				Несмонтированные диски - с глаз долой. Часть 3 (черновик)
+				Несмонтированные диски - с глаз долой. Часть 3
 			</a>
 		</h1>
 
-		<h2>Пробуем перехватить</h2>
+		<h2>Проверяем ограничения</h2>
 
 		<p>
-			Как уже говорилось в части 2 !здесь будет ссылка на часть 2! hook'и имеют некоторые 
-			ограничения. Я создал тестовый репозиторий !здесь будет ссылка на гитхаб!, чтобы проверить, 
-			можно ли перехватить функции <code>g_volume_monitor_get_connected_drives()</code> и 
-			<code>g_volume_monitor_get_volumes()</code>. Заодно поэкспериментируем с очисткой списка 
-			томов от лишних элементов.
+			Кроме самого hook'а я подготовил тестовую программу, которая ведет себя так же, как и Nemo. 
+			Исходные тексты находятся в
+			<a href="http://flaz14.github.io/how-to-hide-non-mounted-drives/code"> том же каталоге, что и 
+			сама статья</a> (или
+<a href="https://github.com/flaz14/flaz14.github.io/tree/master/how-to-hide-non-mounted-drives/code">см. Github</a>.
+			Для начала разберемся с ограничениями, о которых говорилось в  
+<a href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-2.html">части 2
+			</a>. 
 
 		<p>
+			Воспроизведем ситуацию, описанную в <a 
+href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#illustration-1-
+1">части 1</a>. 
+			Итак, смонтируем диск с меткой <i>8_ext</i> и оставим несмонтированным диск с меткой 
+			<i>8_ntfs</i>.
+			
 			
 
 		<hr>
