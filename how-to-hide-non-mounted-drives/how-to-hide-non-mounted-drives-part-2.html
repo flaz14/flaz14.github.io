@@ -41,7 +41,7 @@
 			сведениями обращайтесь к <code>man 3 dlopen</code>). Есть очень классная статья на тему 
 			перехвата библиотечных функций (без нее я бы ничего не сделал): 
 			<a href="http://opensourceforu.efytimes.com/2011/08/lets-hook-a-library-function/">
-				Let’s Hook a Library Function<a>. Но, как сказано в статье, есть некоторые ограничения:
+				Let’s Hook a Library Function</a>. Но, как сказано в статье, есть некоторые ограничения:
 
 		<ol>
 			<li>
@@ -106,14 +106,14 @@ href="https://developer.gnome.org/gio/stable/GVolumeMonitor.html#g-volume-monito
 g_volume_monitor_get_connected_drives()</a>. Найдем все вызовы этой функции в Nemo:
 			
 <pre>
-david@athlonx2 ~/Temp/nemo $ grep -R 'g_volume_monitor_get_connected_drives' .
+david@athlonx2 ~/Temp/nemo $ grep --dereference-recursive 'g_volume_monitor_get_connected_drives' .
 ./src/nemo-places-sidebar.c:    drives = g_volume_monitor_get_connected_drives (volume_monitor);
 ./src/nemo-view.c:        drives = g_volume_monitor_get_connected_drives (volume_monitor);
 </pre>
 			C <i>nemo-places-sidebar.c</i> мы уже разобрались. Взглянем на <i>nemo-view.c</i>:
 			
 <pre>
-david@athlonx2 ~/Temp/nemo $ grep -C 10 'g_volume_monitor_get_connected_drives' ./src/nemo-view.c
+david@athlonx2 ~/Temp/nemo $ grep --context=10 'g_volume_monitor_get_connected_drives' ./src/nemo-view.c
             g_object_unref (mount);
             g_object_unref (icon);
             g_free (name);
