@@ -124,11 +124,57 @@ Bye!
 			простой способ - поместить скрипт в <code>~/bin</code>). Но будет, если попытаться запустить 
 			Nemo из стартового меню Cinnamon? Или с помощью горячей клавиши на мультимедийной клавиатуре?
 			Я попробовал все варианты: способ с переменной окружения <code>PATH</code> работает всегда. Так 
-			что установим костыль:
+			что установим костыль:			
 <pre>
-
+david@athlonx2 ~/Projects/flaz14.github.io/how-to-hide-non-mounted-drives/code $ make install
+gcc -Wall -g -shared -ldl -fPIC `pkg-config --cflags gtk+-3.0` libnemohook.c -o libnemohook.so `pkg-config --libs 
+gtk+-3.0`
+cp ./libnemohook.so ~/bin/libnemohook.so
+chmod 500 ~/bin/libnemohook.so
+cp ./nemo ~/bin/nemo
+chmod 500 ~/bin/nemo
 </pre>
+	
+			Как видим, скрипт-обертка (именно он подсовывает hook) и собственно hook размещаются в каталоге 
+			<code>~/bin/</code>. Чтобы убрать костыль, достаточно набрать <code>make uninstall</code> (или 
+			же удалить файлы вручную).
 		
+			
+		<h2>Тестируем костыль</h2>
+		
+		<p>
+			Возьмем все ту же флешку с двумя разделами: <i>8_ext</i> и <i>8_ntfs</i>: <i>8_ext</i> оставим
+			смонтированным, а <i>8_ntfs</i> размонтируем. Запустим оригинальную версию Nemo 
+			(нужно напрямую вызвать <code>/usr/bin/nemo</code> из командной строки). Увидим картинку, уже 
+			приводившуюся в 
+<a 
+href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#illustration-1-
+1">части 1<a>:
+
+                <h4>
+                        <a id="illustration-3-1">
+                                Рисунок 3.1 - пример отображения несмонтированного диска на боковой панели Nemo
+                        </a>
+                </h4>
+                
+                <img alt="Пример отображения несмонтированного диска на боковой панели Nemo" 
+                src="illustrations/nemo-sidebar-with-unmounted-drive-visible.png" width="240px">
+
+		<p>
+			Теперь запустим Nemo с костылем (как уже говорилось выше, для этого не нужно дополнительных 
+			усилий, достаточно нажать на соответствующую кнопку в стартовом меню) и увидим все то же самое, 
+			только без <i>8_ntfs</i> на боковой панели, что проиллюстрировано на рисунке 3.2:
+
+                <h4>
+                        <a id="illustration-3-2">
+                                Рисунок 3.2 - несмонтировый диск не виден на боковой панели Nemo благодаря hook'у
+                        </a>
+                </h4>
+			
+			
+                <img alt="Несмонтированный диск не отображается на боковой панели Nemo при благодаря hook'у" 
+                src="illustrations/nemo-sidebar-without-unmounted-drive-visible.png" width="240px">
+
 			
 			
 
