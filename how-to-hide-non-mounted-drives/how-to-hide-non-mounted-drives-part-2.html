@@ -42,27 +42,28 @@
 			перехвата библиотечных функций (без нее я бы ничего не сделал): 
 			<a href="http://opensourceforu.efytimes.com/2011/08/lets-hook-a-library-function/">
 				Let’s Hook a Library Function</a>. Но, как сказано в статье, есть некоторые ограничения:
-
-		<ol>
-			<li>
-				<p>
-					<blockquote>
-						Do beware of functions that themselves call dlsym(), when you need to 
-						call __libc_dlsym (handle, symbol) in the hook.
-					</blockquote>
-					Т.е. нельзя перехватить функцию, внутри которой вызывается 
-					<code>dlsym()</code>. Вряд ли библиотеки Gnome используют 
-					<code>dlsym()</code> (в конце концов, Gnome, как большинство 
-					современных Open Source проектов, позиционируется как изящное и надежное 
-					решение, а не нагромождение костылей). Но все-таки это надо проверить.
-
-			<li>
-				<p>
-					<blockquote>
-						Ensure that the SUID bit is not set, otherwise you can’t use LD_PRELOAD.
-					</blockquote>
-					Вряд ли у исполняемого файла Nemo установлен SUID бит. Но на врякий случай 
-					проверим это:
+			<ol>
+				<li>
+					<p>
+						<blockquote>
+							Do beware of functions that themselves call dlsym(), when you 
+							need to call __libc_dlsym (handle, symbol) in the hook.
+						</blockquote>
+						Т.е. нельзя перехватить функцию, внутри которой вызывается 
+						<code>dlsym()</code>. Вряд ли библиотеки Gnome используют 
+						<code>dlsym()</code> (в конце концов, Gnome, как большинство 
+						современных Open Source проектов, позиционируется как изящное и 
+						надежное решение, а не нагромождение костылей). Но все-таки это надо 
+						проверить.
+						
+				<li>
+					<p>
+						<blockquote>
+							Ensure that the SUID bit is not set, otherwise you can’t use 
+							LD_PRELOAD.
+						</blockquote>
+						Вряд ли у исполняемого файла Nemo установлен SUID бит. Но на врякий 
+						случай проверим это:
 <pre>
 david@athlonx2 / $ which nemo
 /usr/bin/nemo
@@ -72,17 +73,18 @@ david@athlonx2 / $ ls -l --all --human-readable /usr/bin/nemo
 					Как видим, SUID бит не установлен. Так что по этому поводу можно не 
 					беспокоиться.
 			
-			<li>
-				<p>
-					<blockquote>
-						Also, internal library function calls are resolved before runtime — say, 
-						if some function in libc calls getaddrinfo() or malloc(), it will never 
-						call the hook from a different library.
-					</blockquote>
-					Вроде бы Nemo полностью полагается на библиотеки Gnome...
-		</ol>
+				<li>
+					<p>
+						<blockquote>
+							Also, internal library function calls are resolved before 
+							runtime — say, if some function in libc calls getaddrinfo() or 
+							malloc(), it will never call the hook from a different library.
+						</blockquote>
+						Вроде бы Nemo полностью полагается на библиотеки Gnome...
+			</ol>
 
-		Начнем с пункта <b>3</b>. Иначе как мы выявим функцию, которую нужно перехватывать?
+		<p>
+			Начнем с пункта <b>3</b>. Иначе как мы выявим функцию, которую нужно перехватывать?
 	
 		<h2>Ищем функцию-жертву</h2>
 		
@@ -157,7 +159,6 @@ href="https://developer.gnome.org/gio/stable/GDrive.html#g-drive-get-volumes">g_
 				The returned list should be freed with g_list_free(), after its elements have been 
 				unreffed with g_object_unref().
 			</blockquote>
-			
 			Мы сделаем следующее: 
 			<ol>
 				<li>
