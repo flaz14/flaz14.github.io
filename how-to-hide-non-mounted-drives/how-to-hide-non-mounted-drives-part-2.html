@@ -51,9 +51,8 @@
 					<blockquote>
 						Ensure that the SUID bit is not set, otherwise you can’t use LD_PRELOAD.
 					</blockquote>
-					Вряд ли у исполняемого файла Nemo установлен SUID бит (по-идее, для всех 
-					исполняемых файлов, поставляемых в составе дистрибутива, в качестве владельца 
-					установлен <i>root</i>). Но на врякий случай проверим это:
+					Вряд ли у исполняемого файла Nemo установлен SUID бит. Но на врякий случай 
+					проверим это:
 <pre>
 david@athlonx2 / $ which nemo
 /usr/bin/nemo
@@ -70,18 +69,19 @@ david@athlonx2 / $ ls -l --all --human-readable /usr/bin/nemo
 						if some function in libc calls getaddrinfo() or malloc(), it will never 
 						call the hook from a different library.
 					</blockquote>
-					Вроде бы Nemo полностью полагается на библиотеки Gnome. Но этот факт, 
-					опять-таки, нужно проверить (как минимум вглянуть на исходный код).
+					Вроде бы Nemo полностью полагается на библиотеки Gnome (т.е. в самом Nemo нет 
+					кода, который обнаруживает подключенные диски). Но это, опять-таки, нужно 
+					проверить (как минимум глянуть на исходный код).
 		</ol>
 
-		Начнем с пункта 3 (иначе как мы выявим функцию, которую будем перехватывать?).
+		Начнем с пункта 3. Иначе как мы выявим функцию, которую нужно перехватывать?
 	
 		<h2>Ищем функцию-жертву</h2>
 		
 		<p>
 			Посмотрим еще раз на файл <i>nemo-places-sidebar.c</i>, фрагмент которого уже приводился в 
 			<a 
-href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#listing-1">
+href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#listing-1-1">
 			части 1</a>. Судя по строкам 
 <a
 href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L946">
@@ -93,7 +93,9 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
 </pre>
 
 			Nemo получает список дисков с помощью функции 
-			<code>g_volume_monitor_get_connected_drives()</code>. Найдем все вызовы этой функции в Nemo:
+			<a 
+href="https://developer.gnome.org/gio/stable/GVolumeMonitor.html#g-volume-monitor-get-connected-drives">
+g_volume_monitor_get_connected_drives()</a>. Найдем все вызовы этой функции в Nemo:
 			
 <pre>
 david@athlonx2 ~/Temp/nemo $ grep -R 'g_volume_monitor_get_connected_drives' .
@@ -136,11 +138,11 @@ david@athlonx2 ~/Temp/nemo $ grep -C 10 'g_volume_monitor_get_connected_drives' 
 			
 		<p>
 			После вызова <code>g_volume_monitor_get_connected_drives()</code> в цикле перебираются все 
-			диски. Затем во вложенном цикле перебираются все разделы каждого диска. Для получения списка 
-			разделов на конкретном диске вызывается функция <code>g_drive_get_volumes()</code>. Как говорит 
-официальная 
-<a href="https://developer.gnome.org/gio/stable/GDrive.html#g-drive-get-volumes">
-документация по Gnome o g_drive_get_volumes()</a>:
+			диски. Затем во вложенном цикле перебираются все тома каждого диска. Для получения списка 
+			томов на конкретном диске вызывается функция 
+			<a 
+href="https://developer.gnome.org/gio/stable/GDrive.html#g-drive-get-volumes">g_drive_get_volumes()</a>. Как говорит 
+официальная документация Gnome</a>:
 			<blockquote>
 				Get a list of mountable volumes for drive .
 				<br>
@@ -156,14 +158,15 @@ david@athlonx2 ~/Temp/nemo $ grep -C 10 'g_volume_monitor_get_connected_drives' 
 				<li>
 					Удалим из возвращенного функцией списка все элементы, которые относятся к 
 					несмонтированным дискам. Нужно лишь воспользоваться 
-					<code>g_volume_get_mount()</code> как это и делает Nemo в строке 
+					<a href="https://developer.gnome.org/gio/stable/GVolume.html#g-volume-get-mount"
+					>g_volume_get_mount()</a> как это и делает Nemo в строке 
 					<a 
 href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L965">
 №965</a>:
 <pre>
    965                  mount = g_volume_get_mount (volume);
 </pre>
-					И не забыть очистить "отброшенные" элементы списка с помощью 
+					"Отброшенные" элементы списка очистим с помощью 
 					<a 
 href="https://developer.gnome.org/gobject/stable/gobject-The-Base-Object-Type.html#g-object-unref">
 					g_object_unref()</a>.
