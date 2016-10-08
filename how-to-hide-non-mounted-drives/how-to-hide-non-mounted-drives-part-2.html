@@ -46,8 +46,10 @@
 				<li>
 					<p>
 						<blockquote>
-							Do beware of functions that themselves call dlsym(), when you 
-							need to call __libc_dlsym (handle, symbol) in the hook.
+							<p>
+								Do beware of functions that themselves call dlsym(), 
+								when you need to call __libc_dlsym (handle, symbol) in 
+								the hook.
 						</blockquote>
 						Т.е. нельзя перехватить функцию, внутри которой вызывается 
 						<code>dlsym()</code>. Вряд ли библиотеки Gnome используют 
