@@ -158,7 +158,7 @@ david@athlonx2 ~/Temp/nemo $ grep --context=10 'g_volume_monitor_get_connected_d
 			томов на конкретном диске вызывается функция 
 			<a 
 href="https://developer.gnome.org/gio/stable/GDrive.html#g-drive-get-volumes">g_drive_get_volumes()</a>. Как говорит 
-официальная документация Gnome</a>:
+официальная документация Gnome:
 			<blockquote>
 				<p>
 					Get a list of mountable volumes for drive .
@@ -167,6 +167,8 @@ href="https://developer.gnome.org/gio/stable/GDrive.html#g-drive-get-volumes">g_
 					The returned list should be freed with g_list_free(), after its elements have 
 					been unreffed with g_object_unref().
 			</blockquote>
+			
+		<p>
 			Мы сделаем следующее: 
 			<ol>
 				<li>
@@ -204,7 +206,8 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
   1046	    /* add all volumes that is not associated with a drive */
   1047	    volumes = g_volume_monitor_get_volumes (volume_monitor);
 </pre>
-	
+
+		<p>
 			Нужно ли перехватывать <code>g_volume_monitor_get_volumes()</code>? Вообще-то нужно, но 
 			поскольку я не использую ни RAID, ни LVM, я ее проигнорирую.
 			
@@ -212,7 +215,7 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
 			В <a 
 href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">части 3</a> мы 
 			приступим непосредственно к программированию.
-			
+
 		<hr>
 
 		<h1>
