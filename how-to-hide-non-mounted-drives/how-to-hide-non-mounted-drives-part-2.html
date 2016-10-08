@@ -106,18 +106,19 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
    946	    /* first go through all connected drives */
    947	    drives = g_volume_monitor_get_connected_drives (volume_monitor);
 </pre> 
+		<p>
 			Nemo получает список дисков с помощью функции 
 			<a 
 href="https://developer.gnome.org/gio/stable/GVolumeMonitor.html#g-volume-monitor-get-connected-drives">
-g_volume_monitor_get_connected_drives()</a>. Найдем все вызовы этой функции в Nemo:
-			
+g_volume_monitor_get_connected_drives()</a>. Найдем все вызовы этой функции в Nemo:	
 <pre>
 david@athlonx2 ~/Temp/nemo $ grep --dereference-recursive 'g_volume_monitor_get_connected_drives' .
 ./src/nemo-places-sidebar.c:    drives = g_volume_monitor_get_connected_drives (volume_monitor);
 ./src/nemo-view.c:        drives = g_volume_monitor_get_connected_drives (volume_monitor);
 </pre>
+
+		<p>
 			C <i>nemo-places-sidebar.c</i> мы уже разобрались. Взглянем на <i>nemo-view.c</i>:
-			
 <pre>
 david@athlonx2 ~/Temp/nemo $ grep --context=10 'g_volume_monitor_get_connected_drives' ./src/nemo-view.c
             g_object_unref (mount);
@@ -142,6 +143,7 @@ david@athlonx2 ~/Temp/nemo $ grep --context=10 'g_volume_monitor_get_connected_d
                     identifier = g_volume_get_identifier (volume, G_VOLUME_IDENTIFIER_KIND_CLASS);
 </pre>
 
+		<p>
 			Выглядит как копипаст из <i>nemo-places-sidebar.c</i> (или наоборот). Главное, 
 			что <code>g_volume_monitor_get_connected_drives()</code> используется по 
 			прямому назначению 
