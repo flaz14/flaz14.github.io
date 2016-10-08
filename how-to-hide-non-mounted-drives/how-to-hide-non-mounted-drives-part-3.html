@@ -40,7 +40,8 @@
 			Кроме самого hook'а, я подготовил тестовую программу, которая ведет себя так же, как и Nemo. 
 			Исходные тексты находятся в
 <a href="https://github.com/flaz14/flaz14.github.io/tree/master/how-to-hide-non-mounted-drives/code">
-подкаталоге code</a>. Для начала разберемся с ограничениями, о которых говорилось в  
+подкаталоге code</a>. 
+			Для начала разберемся с ограничениями, о которых говорилось в  
 <a href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-2.html">
 			части 2</a>. 
 
@@ -50,7 +51,7 @@ href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mou
 1">части 1</a>. 
 			Итак, подключим флешку, смонтируем раздел с меткой <i>8_ext</i> и оставим несмонтированным 
 			раздел с меткой <i>8_ntfs</i>. 
-			
+
 		<p>
 			Запустим тестовую программу:
 <pre>
@@ -64,12 +65,13 @@ Hi! I'm sample application!
 
 Bye!
 </pre>
+
+		<p>
 			Как видно из вывода , Nemo "видит" смонтированный том с меткой <i>8_ext</i> и несмонтированный 
 			том с меткой <i>8_ntfs</i>.
-			
+
 		<p>
 			Теперь запустим тестовую программу с hook'ом:
-			
 <pre>
 david@athlonx2 ~/Projects/flaz14.github.io/how-to-hide-non-mounted-drives/code $ make test-hook
 gcc -Wall -g -shared -ldl -fPIC `pkg-config --cflags gtk+-3.0` libnemohook.c -o libnemohook.so `pkg-config --libs 
@@ -91,6 +93,7 @@ Hi! I'm sample application!
 
 Bye!
 </pre>
+
 		<p>
 			Строки вида 
 <pre>
@@ -98,7 +101,8 @@ Bye!
     /dev/...
 <
 </pre>
-		
+
+		<p>
 			означают, что hook перехватил обращение к функции <code>g_drive_get_volumes()</code>. Так, 
 			первым физическим диском, тома на котором попытался бы получить Nemo, является 
 			<code>/dev/sda</code>. На этом диске не нашлось томов, поскольку 
@@ -116,22 +120,20 @@ Bye!
 + /dev/sdb2 [8_ext]
 - /dev/sdb1 [8_ntfs]
 </pre>
-				
-				
-			
+
 				<li>
 					с hook'ом:
 <pre>
 + /dev/sdb2 [8_ext]
 </pre>
 			</ul>
-		
+
 		<p>
 			Т.е. при запуске тестовой программы с hook'ом несмонтированный раздел пропадает. Именно этого мы 
 			и добивались.
 
 		<h2>Собираем костыль воедино</h2>
-		
+
 		<p>
 			Теперь пришло время подменить оригинальный Nemo костылем. Чтобы "костыльный" Nemo запускался из 
 			терминала, достаточно создать скрипт-обертку с именем <code>nemo</code> (скрипт будет 
@@ -150,13 +152,14 @@ chmod 500 ~/bin/libnemohook.so
 cp ./nemo ~/bin/nemo
 chmod 500 ~/bin/nemo
 </pre>
-	
+
+		<p>
 			Как видим, скрипт-обертка и собственно hook размещаются в каталоге 
 			<code>~/bin/</code>. Чтобы убрать костыль, достаточно набрать <code>make uninstall</code> (или 
 			же удалить файлы вручную).
-			
+
 		<h2>Тестируем костыль</h2>
-		
+
 		<p>
 			Возьмем все ту же флешку с двумя разделами: <i>8_ext</i> и <i>8_ntfs</i>. Раздел <i>8_ext</i> 
 			оставим смонтированным, а <i>8_ntfs</i> - размонтируем. Запустим оригинальную 
@@ -165,12 +168,11 @@ chmod 500 ~/bin/nemo
 href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#illustration-1-
 1">части 1<a>:
 
-                <h4>
-                        <a id="illustration-3-1">
-                                Рисунок 3.1 - оригинальный Nemo показывает и смонтированный том, и не смонтированный том
-                        </a>
-                </h4>
-                
+		<h4>
+			<a id="illustration-3-1">
+				Рисунок 3.1 - оригинальный Nemo показывает и смонтированный том, и не смонтированный том
+			</a>
+                </h4>              
                 <img alt="Пример отображения несмонтированного раздела на боковой панели Nemo" 
                 src="illustrations/nemo-sidebar-with-unmounted-drive-visible.png" width="240px">
 
@@ -180,19 +182,18 @@ href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mou
 			только без <i>8_ntfs</i> на боковой панели, что проиллюстрировано на 
 			<a href="#illustration-3-2">рисунке 3.2</a>:
 
-                <h4>
-                        <a id="illustration-3-2">
-                                Рисунок 3.2 - несмонтировый том не виден на боковой панели Nemo благодаря hook'у
-                        </a>
-                </h4>
-			
-			
-                <img alt="Несмонтированный диск не отображается на боковой панели Nemo при благодаря hook'у" 
-                src="illustrations/nemo-sidebar-without-unmounted-drive-visible.png" width="240px">
+		<h4>
+			<a id="illustration-3-2">
+				Рисунок 3.2 - несмонтировый том не виден на боковой панели Nemo благодаря hook'у
+			</a>
+		</h4>
+
+		<img alt="Несмонтированный диск не отображается на боковой панели Nemo при благодаря hook'у" 
+		src="illustrations/nemo-sidebar-without-unmounted-drive-visible.png" width="240px">
 
                 <p>
 			Костыль работает <sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>!
-			
+
 		<p>
 			Достоинства:
 			<ul>
@@ -223,16 +224,15 @@ href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mou
 href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.
 c#L1019">№№1019-1027 файла <i>nemo-places-sidebar.c</i></a>).
 			</ul>
-		
-		<p>
-                        &#9135;&#9135;&#9135;&#9135;&#9135;
-                        <ol>
-                                <li id="footnote-1-bottom">
-                                        <p>
-                                                <a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
-                                                Я проверял только в Linux Mint 17.1 Cinnamon i686.
 
-                        </ol>
+		<p>
+			&#9135;&#9135;&#9135;&#9135;&#9135;
+			<ol>
+				<li id="footnote-1-bottom">
+					<p>
+						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
+						Я проверил только в Linux Mint 17.1 Cinnamon i686.
+			</ol>
 
 		<hr>
 
