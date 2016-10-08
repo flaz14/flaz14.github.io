@@ -61,8 +61,9 @@
 				<li>
 					<p>
 						<blockquote>
-							Ensure that the SUID bit is not set, otherwise you can’t use 
-							LD_PRELOAD.
+							<p>
+								Ensure that the SUID bit is not set, otherwise you can’t 
+								use LD_PRELOAD.
 						</blockquote>
 						Вряд ли у исполняемого файла Nemo установлен SUID бит. Но на врякий 
 						случай проверим это:
@@ -78,9 +79,11 @@ david@athlonx2 / $ ls -l --all --human-readable /usr/bin/nemo
 				<li>
 					<p>
 						<blockquote>
-							Also, internal library function calls are resolved before 
-							runtime — say, if some function in libc calls getaddrinfo() or 
-							malloc(), it will never call the hook from a different library.
+							<p>
+								Also, internal library function calls are resolved 
+								before runtime — say, if some function in libc calls 
+								getaddrinfo() or malloc(), it will never call the hook 
+								from a different library.
 						</blockquote>
 						Вроде бы Nemo полностью полагается на библиотеки Gnome...
 			</ol>
@@ -156,10 +159,12 @@ david@athlonx2 ~/Temp/nemo $ grep --context=10 'g_volume_monitor_get_connected_d
 href="https://developer.gnome.org/gio/stable/GDrive.html#g-drive-get-volumes">g_drive_get_volumes()</a>. Как говорит 
 официальная документация Gnome</a>:
 			<blockquote>
-				Get a list of mountable volumes for drive .
-				<br>
-				The returned list should be freed with g_list_free(), after its elements have been 
-				unreffed with g_object_unref().
+				<p>
+					Get a list of mountable volumes for drive .
+					
+				<p>
+					The returned list should be freed with g_list_free(), after its elements have 
+					been unreffed with g_object_unref().
 			</blockquote>
 			Мы сделаем следующее: 
 			<ol>
