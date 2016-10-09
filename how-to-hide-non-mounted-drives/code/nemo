@@ -2,4 +2,6 @@
 
 # This is a simple wrapper for Nemo that helps to intercept Gnome library function, but looks exactly as original 
 # application.
-LD_PRELOAD=~/bin/libnemohook.so /usr/bin/nemo
+
+# We need to transfer all command-line arguments from this wrapper to original Nemo.
+LD_PRELOAD=~/bin/libnemohook.so /usr/bin/nemo "$@"
