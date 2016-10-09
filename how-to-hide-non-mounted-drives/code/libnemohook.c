@@ -26,6 +26,7 @@ GList *g_drive_get_volumes(GDrive * drive)
 	trace_in();
 	print_drive_identifier(drive);
 	static GList *(*original_g_drive_get_volumes) (GDrive *) = NULL;
+	// obtain pointer to function we want intercept
 	original_g_drive_get_volumes = dlsym(RTLD_NEXT, "g_drive_get_volumes");
 	GList *original_volumes = original_g_drive_get_volumes(drive);
 	GList *only_mounted_volumes = NULL;
@@ -34,6 +35,8 @@ GList *g_drive_get_volumes(GDrive * drive)
 		for (l = original_volumes; l != NULL; l = l->next) {
 			GVolume *volume = l->data;
 			GMount *mount = g_volume_get_mount(volume);
+			// it's easy to distinguish mounted volume from non-mounted volume:
+			// for non-mounted volume g_volume_get_mount() returns NULL.
 			if (mount != NULL) {
 				only_mounted_volumes =
 				    g_list_append(only_mounted_volumes, volume);
