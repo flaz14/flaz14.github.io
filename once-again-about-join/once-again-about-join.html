@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Еще раз о JOIN</title>
+	</head>
+	<body>
+		<h1>
+			<big>
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+		
+		<hr>
+		
+		<h1>
+			<a href="http://flaz14.github.io/once-again-about-join/once-again-about-join.html">
+				Еще раз о JOIN
+			</a>
+		</h1>	
+		
+		<h2>Начнем, пожалуй</h2>
+		
+		<p>
+			В Интернете полно статей про SQL. Про JOIN уже сказано немало. Но все равно, когда читаешь документацию или 
+			чьи-то статьи, ничего не понятно. Т.е. вроде бы понятно, но не полностью. Особенно для таких как я, кто 
+			знает SQL на уровне <code>SELECT * FROM ...</code>.
+		
+		<p>
+			В качестве СУБД, на которой будем тренироваться, возьмем 
+			<a href="http://www.h2database.com/html/main.html">H2 Database</a>. Эта СУБД хорошо подходит для обучения, 
+			по крайней мере, ничего устанавливать не надо (нужно только иметь установленную Java). Итак, скачаем и 
+			установим H2:
+<pre>
+cd /tmp && \
+wget 'http://www.h2database.com/h2-2016-10-31.zip' && \
+unzip h2-2016-10-31.zip && \
+cd h2/bin/ && \
+chmod u+x h2.sh
+</pre>			
+			Теперь запустим СУБД:
+<pre>
+./h2.sh
+</pre>
+			В Web-браузере откроется следующая страница:
+			
+			Здесь можно сразу нажать на <strong>Connect</strong>. После чего откроется Web-консоль, можно писать запросы
+			и выполнять их.
+			
+		<h2>Придумываем БД</h2>
+		
+		<p>
+			В качестве примера рассмотрим Интернет-магазин. Сейчас полным-полно магазинов, которые всего лишь 
+			переправляют товары из Азии в другие страны. Будем хранить сведения о поставщиках в таблице shops:
+<pre>
+CREATE TABLE shops (
+	shop_id INTEGER PRIMARY KEY,
+	shop_name VARCHAR
+);	
+</pre>			
+			
+		<p>Для информации о товарах заведем таблицу products.
+<pre>
+CREATE TABLE products (
+	product_id INTEGER PRIMARY KEY,
+	product_name VARCHAR
+);	
+</pre>
+
+		<p>
+			Теперь сопоставим поставщиков и поставляемые ими товары. Отношение между поставщиками и товарами будет 
+			<i>многие-ко-многим</i>. Поле published отвечает за наличие/отсутствие товара у поставщика.
+<pre>
+CREATE TABLE shop_products (
+	shop_id INTEGER,
+	product_id INTEGER,
+	published BOOLEAN,
+	FOREIGN KEY (shop_id) REFERENCES shops(shop_id),
+	FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+</pre>
+
+		<h2>Заполняем БД</h2>
+		
+		<p>
+			Пусть у нас будет 3 магазина (т.е. 3 поставщика из Азии):
+<pre>
+INSERT INTO shops (shop_id, shop_name) VALUES (1, 'China');
+INSERT INTO shops (shop_id, shop_name) VALUES (2, 'Vietnam');
+INSERT INTO shops (shop_id, shop_name) VALUES (3, 'Taiwan');
+</pre>	
+		
+		<p>
+			Пусть у нас в каталоге будет 3 товара.
+<pre>
+INSERT INTO products (product_id, product_name) VALUES (1, 'nVidia');
+INSERT INTO products (product_id, product_name) VALUES (2, 'AsRock');
+INSERT INTO products (product_id, product_name) VALUES (3, 'Asus');
+</pre>
+
+		<p>
+			Лучше всех стараются китайцы, они производят два продукта: AsRock и Asus. В то время как Вьетнам и Тайвань -
+			только по одному. Самый популярный продукт - Asus. Его производят в двух странах: Китай и Вьетнам (это для 
+			разнообразия, чтобы было видно, как работает JOIN).
+<pre>
+INSERT INTO shop_products (shop_id, product_id, published) VALUES (1, 2, TRUE);
+INSERT INTO shop_products (shop_id, product_id, published) VALUES (2, 3, FALSE);
+INSERT INTO shop_products (shop_id, product_id, published) VALUES (3, 1, TRUE);
+INSERT INTO shop_products (shop_id, product_id, published) VALUES (1, 3, TRUE);			
+</pre>	
+
+
+
+
+
+		<p>
+			__________
+			<ol>
+				<li id="footnote-1-bottom">
+					<p>
+						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
+						Сноска 1.
+
+				<li id="footnote-2-bottom">
+					<p>
+						<a href="#footnote-2-top" title="Перейти к основному тексту">&uarr;</a> 
+						Сноска 2.
+						
+				<li id="footnote-3-bottom">
+					<p>
+						<a href="#footnote-3-top" title="Перейти к основному тексту">&uarr;</a> 
+						Сноска 3.
+			</ol>
+			
+		<hr>
+		
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+	</body>
+</html>
