@@ -49,27 +49,17 @@ chmod a+x --verbose h2.sh
 		<p>
 			В Web-браузере откроется страница как на <a href="#illustration-1">рисунке 1</a>.
 			
-		<h4>
-			<a id="illustration-1">
-				Рисунок 1 - подключение к СУБД H2 из Web-браузера
-			</a>
-		</h4>
-		
+		<h4 id="illustration-1">Рисунок 1 - подключение к СУБД H2 из Web-браузера</h4>
 		<p>
-			<img src="illustrations/connect-to-h2-database.png" width="480px"/>
+			<img src="illustrations/connect-to-h2-database.png" width="480px">
 
 		<p>
 			Здесь сразу нажмем на <strong>Connect</strong>. После чего откроется Web-консоль, изображенная на 
 			<a href="#illustration-2">рисунке 2</a>, в которой можно писать запросы и выполнять их.
 
-		<h4>
-			<a id="illustration-2">
-				Рисунок 2 - общий вид Web-консоли СУБД H2
-			</a>
-		</h4>			
-			
+		<h4 id="illustration-2">Рисунок 2 - общий вид Web-консоли СУБД H2</h4>			
 		<p>
-			<img src="illustrations/overlook-of-h2-console.png" width="480px"/>
+			<img src="illustrations/overlook-of-h2-console.png" width="480px">
 					
 		<h2>Придумываем структуру БД</h2>
 		
@@ -110,13 +100,9 @@ CREATE TABLE shop_products (
 		<p>
 			Получится структура, изображенная на <a href="#illustration-3">рисунке 3</a>.
 		
-		<h4>
-			<a id="illustration-3">
-				Рисунок 3 - структура тестовой БД
-			</a>
-		</h4>			
+		<h4 id="illustration-3">Рисунок 3 - структура тестовой БД</h4>			
 		<p>
-			<img src="illustrations/structure-of-exemplary-database.png" width="640px"/>
+			<img src="illustrations/structure-of-exemplary-database.png" width="640px">
 	
 
 		<h2>Заполняем БД</h2>
@@ -151,13 +137,9 @@ INSERT INTO shop_products (shop_id, product_id, published) VALUES (1, 3, TRUE);
 		<p>
 			Содержимое тестовой БД приведено на <a href="#illustration-4">рисунке 4</a>.
 			
-		<h4>
-			<a id="illustration-4">
-				Рисунок 4 - содержимое тестовой БД
-			</a>
-		</h4>			
+		<h4 id="illustration-4">Рисунок 4 - содержимое тестовой БД</a>
 		<p>
-			<img src="illustrations/contents-of-exemplary-database.png" width="320px"/>
+			<img src="illustrations/contents-of-exemplary-database.png" width="320px">
 
 		<h2>Выполняем запросы</h2>
 		
@@ -175,13 +157,9 @@ WHERE products.product_id = shop_products.product_id;
 			нужен для "склеивания" данных из нескольких таблиц, а какой - для фильтрации данных по значениям какого-либо
 			поля? Как бы то ни было, результат приведен на <a href="#illustration-5">рисунке 5</a>.
 				
-		<h4>
-			<a id="illustration-5">
-				Рисунок 5 - выборка из нескольких таблиц с использованием WHERE
-			</a>
-		</h4>			
+		<h4 id="illustration-5">Рисунок 5 - выборка из нескольких таблиц с использованием WHERE</a>
 		<p>
-			<img src="illustrations/example-1.png" width="480px"/>
+			<img src="illustrations/example-1.png" width="480px">
 				
 		<h3 id="example-2">Пример 2</h3>
 		
@@ -199,13 +177,9 @@ JOIN shop_products ON products.product_id = shop_products.product_id;
 			сопоставить поля <code>product_id</code>). Как видно из <a href="#illustration-6">рисунка 6</a>, результат 
 			получился таким же, как и на <a href="#illustration-5">рисунке 5</a>.
 			
-		<h4>
-			<a id="illustration-6">
-				Рисунок 6 - выборка из нескольких таблиц с использованием оператора JOIN
-			</a>
-		</h4>			
+		<h4 id="illustration-6">Рисунок 6 - выборка из нескольких таблиц с использованием оператора JOIN</h4>			
 		<p>
-			<img src="illustrations/example-2.png" width="480px"/>
+			<img src="illustrations/example-2.png" width="480px">
 			
 		<h3 id="example-3">Пример 3</h3>
 		
@@ -237,13 +211,9 @@ WHERE shop_products.published = TRUE
 			</ol>
 			Результат приведен на <a href="#illustration-7">рисунке 7</a>.
 			
-		<h4>
-			<a id="illustration-7">
-				Рисунок 7 - использование JOIN и WHERE
-			</a>
-		</h4>			
+		<h4 id="illustration-7">Рисунок 7 - использование JOIN и WHERE</h4>			
 		<p>
-			<img src="illustrations/example-3.png" width="480px"/>			
+			<img src="illustrations/example-3.png" width="480px">	
 			
 		<h3 id="example-4">Пример 4</h3>
 		
@@ -267,7 +237,7 @@ WHERE shop_products.published = TRUE
 					
 					<h5 id="illustration-8">Рисунок 8</h5>
 					<p>
-						<img src="illustrations/example-3-a.png" width="480px"/>	
+						<img src="illustrations/example-3-a.png" width="480px">
 				
 				<li>
 					Из получившейся на <a href="#example-4-step-1">шаге 1</a> таблицы остются только те строки, у которых 
@@ -275,7 +245,7 @@ WHERE shop_products.published = TRUE
 					
 					<h5 id="illustration-9">Рисунок 9</h5>
 					<p>
-						<img src="illustrations/example-3-b.png" width="480px"/>	
+						<img src="illustrations/example-3-b.png" width="480px">
 
 			</ol>
 		Тут еще можно заметить, что в итоге получилась таблица из 6 столбцов, т.е. столбец <code>product_id</code>
