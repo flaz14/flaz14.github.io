@@ -100,6 +100,17 @@ drwxr-xr-x  8 root root 4,0K Nov 29 20:53 jdk1.8.0_111
 			tar
 			     -p, --preserve-permissions, --same-permissions
            extract information about file permissions (default for superuser)
+           
+           
+                --same-owner
+           try extracting files with the same ownership as exists in the archive (default for superuser)
+
+     --no-same-owner
+           extract files as yourself (default for ordinary users)
+
+     --no-same-permissions
+           apply the user's umask when extracting permissions from the archive (default for ordinary users)
+
 			--------
 			</pre>
 			
