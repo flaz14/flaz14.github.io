@@ -53,7 +53,10 @@
 			Пусть мы скачали JDK в <code>~/Downloads</code>. Теперь, чтобы поместить содержимое тарбола в 
 			<code>/usr/local/java</code> достаточно выполнить (от имени <i>root</i>, естественно):
 <pre>
-david$ sudo tar --extract --directory /usr/local/java/ --file ~/Downloads/jdk-8u111-linux-x64.tar.gz	
+david$ sudo tar \
+    --extract \
+    --directory /usr/local/java/ \
+    --file ~/Downloads/jdk-8u111-linux-x64.tar.gz
 </pre>
 
 		<p>
@@ -72,7 +75,12 @@ drwxr-xr-x  8 uucp  143 4,0K Sep 23 02:27 jdk1.8.0_111
 		<p>
 			Что ж, попробуем исправиться:
 <pre>
-david$ tar --extract --directory /tmp --file ~/Downloads/jdk-8u111-linux-x64.tar.gz && sudo mv /tmp/jdk1.8.0_111 /usr/local/java
+david$ tar 
+    --extract \
+    --directory /tmp \
+    --file ~/Downloads/jdk-8u111-linux-x64.tar.gz \
+&& \
+    sudo mv /tmp/jdk1.8.0_111 /usr/local/java
 </pre>
 
 		<p>
@@ -87,7 +95,14 @@ drwxr-xr-x  8 david david 4,0K Sep 23 02:27 jdk1.8.0_111
 		<p>
 			Усложним команду, чтобы уж наверняка получилось:
 <pre>
-david$ tar --extract --directory /tmp --file ~/Downloads/jdk-8u111-linux-x64.tar.gz && sudo cp -r /tmp/jdk1.8.0_111 /usr/local/java && rm -rf -- /tmp/jdk1.8.0_111/
+david$ tar 
+    --extract \
+    --directory /tmp \
+    --file ~/Downloads/jdk-8u111-linux-x64.tar.gz \
+&& \
+    sudo cp --recursive /tmp/jdk1.8.0_111 /usr/local/java \
+&& \
+    rm -rf -- /tmp/jdk1.8.0_111/
 </pre>
 
 		<p>
@@ -96,39 +111,43 @@ david$ tar --extract --directory /tmp --file ~/Downloads/jdk-8u111-linux-x64.tar
 drwxr-xr-x  8 root root 4,0K Dec  3 15:25 jdk1.8.0_111
 </pre>
 		
-		<p>Но командна расстраивает, особенно присутствие <code>rm -rf</code>.
+		<p>Но командна расстраивает, особенно присутствие <code>rm -rf</code>...
 			
 		<h2>Все намного проще</h2>
 		
-			
-			<pre>
-			tar
-			     -p, --preserve-permissions, --same-permissions
-           extract information about file permissions (default for superuser)
-           
-           
-                --same-owner
-           try extracting files with the same ownership as exists in the archive (default for superuser)
+		<p>
+			У <strong>tar</strong> есть переключатели, которые значительно упрощают жизнь:
+			<blockquote>
+				<p>
+					<code>--no-same-owner</code><br>
+					extract files as yourself (default for ordinary users)
+	
+				<p>	
+					<code>--no-same-permissions</code><br>
+					apply the user's umask when extracting permissions from the archive (default for ordinary users)
+			</blockquote>
 
-     --no-same-owner
-           extract files as yourself (default for ordinary users)
+		<p>
+			Применим их:
 
-     --no-same-permissions
-           apply the user's umask when extracting permissions from the archive (default for ordinary users)
+<pre>
+david$ sudo tar \
+	--extract \
+	--directory /usr/local/java/ \
+	--no-same-owner \
+	--no-same-permissions \
+	--file ~/Downloads/jdk-8u111-linux-x64.tar.gz
+</pre>
+			
+		<p>
+			Получилось:
+<pre>
+drwxr-xr-x  8 root root 4,0K Sep 23 02:27 jdk1.8.0_111
+</pre>
 
-			--------
-			</pre>
+		<p>
+			Теперь все OK!
 			
-			
-			
-			
-			
-			
-			
-		<h2>Теперь точно ничего лишнего</h2>
-			__________
-		
-		
 		<h1>
 			<big>
 				<a href="#" title="Перейти к началу страницы">&uarr;</a>
