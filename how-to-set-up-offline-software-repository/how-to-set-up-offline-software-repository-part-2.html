@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Как сделать off-line репозиторий ПО для LinuxMint 17.1. Часть 2</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a href=
+		"http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html">
+				Как сделать off-line репозиторий ПО для LinuxMint 17.1. Часть 2
+			</a>
+		</h1>
+		
+		<h3>[2016, Декабрь]</h3>
+
+		<h3>
+			<a href=
+		"http://flaz14.github.io/how-to-set-up-offline-software-repository/how-to-set-up-offline-software-repository-part-1.html">
+				Часть 1
+			</a>
+			|
+			<a href=
+		"http://flaz14.github.io/how-to-set-up-offline-software-repository/how-to-set-up-offline-software-repository-part-3.html">
+				Часть 3
+			</a>
+			|
+			<a href=
+		"http://flaz14.github.io/how-to-set-up-offline-software-repository/how-to-set-up-offline-software-repository-part-4.html">
+				Часть 4
+			</a>			
+			|
+			<a href=
+		"https://github.com/flaz14/flaz14.github.io/tree/master/this_source_code_does_not_exist_yet">
+				Исходный код
+			</a>
+		</h3>
+
+		<h2></h2>
+		
+		<p>
+			Скрипт будет простым. Т.е. все параметры будут задаваться в самом скрипте, без всяких аргументов командной 
+			строки, переменных окружения т.д. Скачивать будем все файлы (т.е. для всех архитектур, исходный код тоже).
+			Но в первую очередь будем скачивать файлы, содержащие контрольные суммы. Почему? Потому что, каким бы не был
+			классным <strong>wget</strong>, возможны обрывы соединения. Т.е. придется докачивать большие файлы. А чтобы 
+			быть уверенным, что все докачалось нормально, нужно перво-наперво проверить контрольные суммы. Есть еще один
+			нюанс: во время файлы на сервере архивов Ubuntu довольно часто меняются. Посмотрим еще раз на рисунок ...
+			
+			
+			
+
+
+        <p>
+			__________
+			<ol>
+				<li id="footnote-1-bottom">
+					<p>
+						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
+						Слово "диск" не совсем уместно. Правильнее было бы сказать "том". Том 
+						объединить в том с помощью LVM.
+
+				<li id="footnote-2-bottom">
+					<p>
+						<a href="#footnote-2-top" title="Перейти к основному тексту">&uarr;</a> 
+						Я так и не разобрался, что все это значит: <i>udisks</i>, <i>GVfs</i>, 
+			</ol>
+
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+	</body>
+</html>
