@@ -44,53 +44,47 @@
 		<h2>Proof of Concept</h2>
 
 		<p>
-			В перехвате функций библиотеки Gnome нам поможет функция <code>dlsym()</code> (за развернутыми 
-			сведениями обращайтесь к <code>man 3 dlopen</code>). Есть очень классная статья на тему 
-			перехвата библиотечных функций (без нее я бы ничего не сделал): 
+			В перехвате функций библиотеки Gnome нам поможет функция <code>dlsym()</code> (за развернутыми сведениями 
+			обращайтесь к <code>man 3 dlopen</code>). Есть очень классная статья на тему перехвата библиотечных функций 
+			(без нее я бы ничего не сделал): 
 			<a href="http://opensourceforu.efytimes.com/2011/08/lets-hook-a-library-function/">
-				Let’s Hook a Library Function</a>. Но, как сказано в статье, есть некоторые ограничения:
+				Let’s Hook a Library Function</a>. 
+			Но, как сказано в статье, есть некоторые ограничения:
 			<ol>
 				<li>
 					<p>
 						<blockquote>
 							<p>
-								Do beware of functions that themselves call dlsym(), 
-								when you need to call __libc_dlsym (handle, symbol) in 
-								the hook.
+								Do beware of functions that themselves call dlsym(), when you need to call __libc_dlsym 
+								(handle, symbol) in the hook.
 						</blockquote>
-						Т.е. нельзя перехватить функцию, внутри которой вызывается 
-						<code>dlsym()</code>. Вряд ли библиотеки Gnome используют 
-						<code>dlsym()</code> (в конце концов, Gnome, как большинство 
-						современных Open Source проектов, позиционируется как изящное и 
-						надежное решение, а не нагромождение костылей). Но все-таки это надо 
-						проверить.
+						Т.е. нельзя перехватить функцию, внутри которой вызывается <code>dlsym()</code>. Вряд ли 
+						библиотеки Gnome используют <code>dlsym()</code> (в конце концов, Gnome, как большинство 
+						современных Open Source проектов, позиционируется как изящное и надежное решение, а не 
+						нагромождение костылей). Но все-таки это надо проверить.
 
 				<li>
 					<p>
 						<blockquote>
 							<p>
-								Ensure that the SUID bit is not set, otherwise you can’t 
-								use LD_PRELOAD.
+								Ensure that the SUID bit is not set, otherwise you can’t use LD_PRELOAD.
 						</blockquote>
-						Вряд ли у исполняемого файла Nemo установлен SUID бит. Но на врякий 
-						случай проверим это:
+						Вряд ли у исполняемого файла Nemo установлен SUID бит. Но на врякий случай проверим это:
 <pre>
 david@athlonx2 / $ which nemo
 /usr/bin/nemo
 david@athlonx2 / $ ls -l --all --human-readable /usr/bin/nemo
 -rwxr-xr-x 1 root root 1,8M Jan 20  2015 /usr/bin/nemo
 </pre>
-					Как видим, SUID бит не установлен. Так что по этому поводу можно не 
-					беспокоиться.
+					Как видим, SUID бит не установлен. Так что по этому поводу можно не беспокоиться.
 
 				<li>
 					<p>
 						<blockquote>
 							<p>
-								Also, internal library function calls are resolved 
-								before runtime — say, if some function in libc calls 
-								getaddrinfo() or malloc(), it will never call the hook 
-								from a different library.
+								Also, internal library function calls are resolved before runtime — say, if some 
+								function in libc calls getaddrinfo() or malloc(), it will never call the hook from a 
+								different library.
 						</blockquote>
 						Вроде бы Nemo полностью полагается на библиотеки Gnome...
 			</ol>
@@ -104,7 +98,8 @@ david@athlonx2 / $ ls -l --all --human-readable /usr/bin/nemo
 			Посмотрим еще раз на файл <i>nemo-places-sidebar.c</i>, фрагмент которого уже приводился в 
 			<a 
 href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#listing-1-1">
-			части 1</a>. Судя по строкам 
+			части 1</a>. 
+			Судя по строкам 
 <a
 href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L946">
 №№946-947
@@ -152,28 +147,26 @@ david@athlonx2 ~/Temp/nemo $ grep --context=10 'g_volume_monitor_get_connected_d
 </pre>
 
 		<p>
-			Выглядит как копипаст из <i>nemo-places-sidebar.c</i> (или наоборот). Главное, 
-			что <code>g_volume_monitor_get_connected_drives()</code> используется по 
-			прямому назначению 
-			(об этом свидетельствуют комментарии в исходниках) и что эта функция находиться не в Nemo, а 
-			в библиотеках Gnome. 
+			Выглядит как копипаст из <i>nemo-places-sidebar.c</i> (или наоборот). Главное, что 
+			<code>g_volume_monitor_get_connected_drives()</code> используется по прямому назначению (об этом 
+			свидетельствуют комментарии в исходниках) и что эта функция находится не в Nemo, а в библиотеках Gnome. 
 
 		<h2>Составляем план перехвата</h2>
 
 		<p>
-			После вызова <code>g_volume_monitor_get_connected_drives()</code> в цикле перебираются все 
-			диски. Затем во вложенном цикле перебираются все тома каждого диска. Для получения списка 
-			томов на конкретном диске вызывается функция 
+			После вызова <code>g_volume_monitor_get_connected_drives()</code> в цикле перебираются все диски. Затем во 
+			вложенном цикле перебираются все тома каждого диска. Для получения списка томов на конкретном диске 
+			вызывается функция 
 			<a 
-href="https://developer.gnome.org/gio/stable/GDrive.html#g-drive-get-volumes">g_drive_get_volumes()</a>. Как говорит 
-официальная документация Gnome:
+href="https://developer.gnome.org/gio/stable/GDrive.html#g-drive-get-volumes">g_drive_get_volumes()</a>. 
+			Как говорит официальная документация Gnome:
 			<blockquote>
 				<p>
 					Get a list of mountable volumes for drive.
 
 				<p>
-					The returned list should be freed with g_list_free(), after its elements have 
-					been unreffed with g_object_unref().
+					The returned list should be freed with g_list_free(), after its elements have been unreffed with 
+					g_object_unref().
 			</blockquote>
 
 		<p>
@@ -183,10 +176,12 @@ href="https://developer.gnome.org/gio/stable/GDrive.html#g-drive-get-volumes">g_
 					Перехватим функцию <code>g_drive_get_volumes()</code>.
 
 				<li>
-					Удалим из возвращенного функцией списка все элементы, которые относятся к 
-					несмонтированным дискам. Нужно лишь воспользоваться 
-					<a href="https://developer.gnome.org/gio/stable/GVolume.html#g-volume-get-mount"
-					>g_volume_get_mount()</a> как это и делает Nemo в строке 
+					Удалим из возвращенного функцией списка все элементы, которые относятся к несмонтированным дискам. 
+					Нужно лишь воспользоваться 
+					<a href="https://developer.gnome.org/gio/stable/GVolume.html#g-volume-get-mount">
+					g_volume_get_mount()
+					</a>
+					как это и делает Nemo в строке 
 					<a 
 href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L965">
 №965</a>:
@@ -196,7 +191,8 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
 					"Отброшенные" элементы списка очистим с помощью 
 					<a 
 href="https://developer.gnome.org/gobject/stable/gobject-The-Base-Object-Type.html#g-object-unref">
-					g_object_unref()</a>.
+					g_object_unref()
+					</a>.
 
 				<li>
 					Вернем Nemо отфильтрованный список.
@@ -214,13 +210,15 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
 </pre>
 
 		<p>
-			Нужно ли перехватывать <code>g_volume_monitor_get_volumes()</code>? Вообще-то нужно, но 
-			поскольку я не использую ни RAID, ни LVM, я ее проигнорирую.
+			Нужно ли перехватывать функцию <code>g_volume_monitor_get_volumes()</code>? Вообще-то нужно, но поскольку я 
+			не использую ни RAID, ни LVM, я ее проигнорирую.
 
 		<p>
-			В <a 
-href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">части 3</a> мы 
-			приступим непосредственно к программированию.
+			В 
+			<a href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">
+				части 3
+			</a> 
+			мы приступим непосредственно к программированию.
 
 		<hr>
 
