@@ -99,27 +99,33 @@
 					<p>
 						Если взглянуть на 
 <a href="https://github.com/flaz14/flaz14.github.io/blob/master/how-to-set-up-offline-software-repository/code/apt-get_update_sample.log">
-						вывод команды apt-get update
+						вывод команды <code>apt-get update</code>
 </a>, 
 						то можно увидеть серверы, с которых <strong>apt-get</strong> будет скачивать пакеты. Выделим
-						ссылки на серверы с помощью скрипта <a href="link will be here">extract-http-links.sh</a>:
+						ссылки на серверы с помощью скрипта 
+<a href="https://github.com/flaz14/flaz14.github.io/blob/master/how-to-set-up-offline-software-repository/code/extract-http-links.sh">
+						extract-http-links.sh
+</a>:
+
+<pre>
+david $ ./extract-http-links.sh 
+http://archive.canonical.com
+http://archive.ubuntu.com
+http://extra.linuxmint.com
+http://packages.linuxmint.com
+http://security.ubuntu.com
+</pre>
 						
-						!!!пока что тут ничего нет, нужно "допилить" скрипт
-						
-						Если перейти по этим ссылкам, то можно заметить общую черту: все они указывают на списки файлов 
-						или что-нибудь в таком роде.
-						
-						Теперь выделим уникальные имена доменов из этих ссылок с помощью скрипта 
-						
-						Применительно к Ubuntu об этом рассказано
-						в <a href="https://help.ubuntu.com/community/AptGet/Offline/Repository">документации</a>. Но тут
-						придется постараться: самим проверять контрольные суммы и предотвращать коллизии.
+						Если перейти по этим ссылкам, то можно заметить их сходство: все указывают на списки файлов 
+						или что-нибудь в таком роде. О создании репозитория Ubuntu рассказано
+						в <a href="https://help.ubuntu.com/community/AptGet/Offline/Repository">документации</a>. Но 
+						придется еще скачать ПО с <strong>linuxmint.com</strong> и с <strong>canonical.com</strong>. 
+						Кроме того, придется вручную проверять контрольные суммы и грамотно обрабатывать колизии.
 			</ol>
 			
 		<p>
 			Вполне возможно, что для каждого из вышеперечисленых подходов существуют скрипты и даже программы, которые 
-			делают все сами. Но мы сделаем вид, что ничего подобного нет. И изобретем очередной велосипед. Кроме того, 
-			LinuxMint требует особого внимания, поскольку использует, кроме репозиториев Ubuntu, свои собственные.
+			делают все сами. Но мы сделаем вид, что ничего подобного нет. И изобретем очередной велосипед. 
 
 		<h2>Приступим!</h2>
 
