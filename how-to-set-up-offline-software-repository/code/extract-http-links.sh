@@ -12,6 +12,6 @@ while read line; do
 	http_links+=("$pretty_link")
 done < apt-get_update_sample.log
 
-printf '%s\n' "${http_links[@]}" | uniq
+printf '%s\n' "${http_links[@]}" | sort | uniq
 
 
