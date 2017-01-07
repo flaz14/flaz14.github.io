@@ -25,15 +25,9 @@
 		<h3>[2016, Сентябрь]</h3>
 
 		<h3>
-			<a href=
-		"http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html">
-				Часть 1
-			</a>
+			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html">Часть 1</a>
 			|
-			<a href=
-		"http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">
-				Часть 3
-			</a>
+			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">Часть 3</a>
 			|
 			<a href=
 		"https://github.com/flaz14/flaz14.github.io/tree/master/how-to-hide-non-mounted-drives/code">
@@ -48,7 +42,8 @@
 			обращайтесь к <code>man 3 dlopen</code>). Есть очень классная статья на тему перехвата библиотечных функций 
 			(без нее я бы ничего не сделал): 
 			<a href="http://opensourceforu.efytimes.com/2011/08/lets-hook-a-library-function/">
-				Let’s Hook a Library Function</a>. 
+				Let’s Hook a Library Function
+			</a>. 
 			Но, как сказано в статье, есть некоторые ограничения:
 			<ol>
 				<li>
@@ -69,7 +64,7 @@
 							<p>
 								Ensure that the SUID bit is not set, otherwise you can’t use LD_PRELOAD.
 						</blockquote>
-						Вряд ли у исполняемого файла Nemo установлен SUID бит. Но на врякий случай проверим это:
+						Вряд ли у исполняемого файла Nemo установлен SUID бит. На врякий случай проверим это:
 <pre>
 david@athlonx2 / $ which nemo
 /usr/bin/nemo
@@ -96,9 +91,7 @@ david@athlonx2 / $ ls -l --all --human-readable /usr/bin/nemo
 
 		<p>
 			Посмотрим еще раз на файл <i>nemo-places-sidebar.c</i>, фрагмент которого уже приводился в 
-			<a 
-href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#listing-1-1">
-			части 1</a>. 
+			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#listing-1-1">части 1</a>. 
 			Судя по строкам 
 <a
 href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L946">
@@ -210,15 +203,13 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
 </pre>
 
 		<p>
-			Нужно ли перехватывать функцию <code>g_volume_monitor_get_volumes()</code>? Вообще-то нужно, но поскольку я 
+			Нужно ли перехватывать функцию <code>g_volume_monitor_get_volumes()</code>? Вообще-то нужно, но, поскольку я 
 			не использую ни RAID, ни LVM, я ее проигнорирую.
 
 		<p>
 			В 
-			<a href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">
-			части 3
-			</a> 
-			мы приступим непосредственно к программированию.
+			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">части 3</a> мы приступим
+			непосредственно к программированию.
 
 		<hr>
 

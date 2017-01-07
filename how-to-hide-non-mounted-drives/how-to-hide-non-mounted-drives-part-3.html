@@ -24,13 +24,9 @@
 		<h3>[2016, Сентябрь]</h3>
 		
 		<h3>
-			<a href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html">
-				Часть 1
-			</a>
+			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html">Часть 1</a>
 			|
-			<a href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-2.html">
-				Часть 2
-			</a>
+			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-2.html">Часть 2</a>
 			|
 			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/how-to-hide-non-mounted-drives/code">
 				Исходный код
@@ -142,12 +138,12 @@ Bye!
 
 		<p>
 			Теперь пришло время подменить оригинальный Nemo костылем. Чтобы костыльный Nemo запускался из командной 
-			строки, достаточно создать скрипт-обертку с именем <code>nemo</code> (скрипт будет устанавливать 
-			<strong>LD_PRELOAD</strong>) и добавить путь к нему в переменную окружения <code>PATH</code> (самый простой 
-			способ - поместить скрипт в <i>~/bin</i>). Но сработает ли скрипт-обертка, если попытаться запустить Nemo из
+			строки, достаточно создать скрипт-обертку с именем <em>nemo</em> (скрипт будет устанавливать 
+			<strong>LD_PRELOAD</strong>) и добавить путь к нему в переменную окружения <strong>PATH</strong> (самый 
+			простой способ - поместить скрипт в <i>~/bin</i>). Но сработает ли скрипт-обертка, если запустить Nemo из
 			стартового меню Cinnamon? Или с помощью горячей клавиши (например, <kbd>Windows</kbd>+<kbd>E</kbd>)? Или с 
 			помощью клавиши на мультимедийной клавиатуре? Я попробовал все варианты: способ с переменной окружения 
-			<code>PATH</code> работает всегда. Так что установим костыль:
+			<strong>PATH</strong> работает всегда. Так что установим костыль:
 <pre>
 david@athlonx2 ~/Projects/flaz14.github.io/how-to-hide-non-mounted-drives/code $ make install
 gcc -Wall -g -shared -ldl -fPIC `pkg-config --cflags gtk+-3.0` libnemohook.c -o libnemohook.so `pkg-config --libs 
@@ -160,7 +156,7 @@ chmod 500 ~/bin/nemo
 
 		<p>
 			Как видим, скрипт-обертка и собственно hook размещаются в каталоге <i>~/bin/</i>. Чтобы убрать костыль, 
-			достаточно набрать <code>make uninstall</code> (или же удалить файлы вручную).
+			достаточно набрать <samp>make uninstall</samp> (или же удалить файлы вручную).
 
 		<h2>Тестируем костыль</h2>
 
@@ -168,11 +164,9 @@ chmod 500 ~/bin/nemo
 			Возьмем все ту же флешку с двумя разделами: <i>8_ext</i> и <i>8_ntfs</i>. Раздел <i>8_ext</i> оставим 
 			смонтированным, а <i>8_ntfs</i> - размонтируем. Запустим оригинальную версию Nemo (нужно напрямую вызвать 
 			<code>/usr/bin/nemo</code> из командной строки). Увидим картинку, как в 
-<a 
-href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#illustration-1-
-1">
-части 1
-</a>:
+			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#illustration-1-1">
+				части 1
+			</a>:
 
 		<h4 id="illustration-3-1">
 				Рисунок 3.1 - оригинальный Nemo показывает и смонтированный том, и несмонтированный том
@@ -183,8 +177,8 @@ href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mou
 
 		<p>
 			Теперь запустим Nemo с костылем (как уже говорилось выше, для этого не нужно дополнительных усилий, 
-			достаточно нажать на <b>Files</b> в стартовом меню) и увидим все то же самое, только без <i>8_ntfs</i> на 
-			боковой панели, что проиллюстрировано на <a href="#illustration-3-2">рисунке 3.2</a>:
+			достаточно нажать на <strong>Files</strong> в стартовом меню) и увидим все то же самое, только без 
+			<i>8_ntfs</i> на боковой панели, что проиллюстрировано на <a href="#illustration-3-2">рисунке 3.2</a>:
 
 		<h4 id="illustration-3-2">
 				Рисунок 3.2 - несмонтированный том не виден на боковой панели Nemo благодаря hook'у

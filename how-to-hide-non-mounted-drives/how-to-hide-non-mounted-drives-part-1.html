@@ -24,13 +24,9 @@
 		<h3>[2016, Сентябрь]</h3>
 
 		<h3>
-			<a href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-2.html">
-				Часть 2
-			</a>
+			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-2.html">Часть 2</a>
 			|
-			<a href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">
-				Часть 3
-			</a>
+			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">Часть 3</a>
 			|
 			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/how-to-hide-non-mounted-drives/code">
 				Исходный код
@@ -40,7 +36,7 @@
 		<h2>Что не так с Nemo?</h2>
 
 		<p>
-			В Linux Mint Cinnamon в качестве файлового менеджера по-умолчанию установлен 
+			В LinuxMint Cinnamon в качестве файлового менеджера по-умолчанию установлен 
 			<a href="https://github.com/linuxmint/nemo">Nemo</a>. По-моему, это очень хорошая программа: быстрая и в 
 			меру функциальная. Но есть в ней один недостаток: Nemo всегда отображает несмонтированные диски 
 			<sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>. 
@@ -149,8 +145,8 @@ nemo-places-sidebar.c
 			Недостатки:
 			<ul>
 				<li>
-					для компиляции и сборки, кроме собственно <i>gcc</i>, <i>make</i> и набора библиотек Gnome для 
-					разработчика, придется установить дополнительные утилиты: всякие <i>autotools</i> и т.п. А после 
+					для компиляции и сборки, кроме собственно <em>gcc</em>, <em>make</em> и набора библиотек Gnome для 
+					разработчика, придется установить дополнительные утилиты: всякие <em>autotools</em> и т.п. А после 
 					того как все заработает, придется еще очистить систему от ненужных более пакетов;
 
 				<li>
@@ -197,9 +193,7 @@ nemo-places-sidebar.c
 			Перехватываем функцию библиотеки Gnome, которая отвечает за перечисление томов (несмонтированных в том 
 			числе), отбрасываем несмонтированные тома и возвращаем отфильтрованный список Nemo. Nemo "увидит" только 
 			смонтированные тома. Этому подходу и посвящена 
-			<a 
-href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-2.html">
-			часть 2</a>.
+			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-2.html">часть 2</a>.
 
         <p>
 			__________
@@ -215,8 +209,9 @@ href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mou
 				<li id="footnote-2-bottom">
 					<p>
 						<a href="#footnote-2-top" title="Перейти к основному тексту">&uarr;</a> 
-						Я так и не разобрался, что все это значит: <i>udisks</i>, <i>GVfs</i>, <i>volume-monitor</i> и 
-						т.д. Возможно, этот пункт стоит выкинуть вообще, но я его оставлю на всякий случай.
+						Я так и не разобрался, что все это значит: <em>udisks</em>, <em>GVfs</em>, 
+						<em>volume-monitor</em> и т.д. Возможно, этот пункт стоит выкинуть вообще, но я его оставлю на 
+						всякий случай.
 			</ol>
 
 		<hr>
