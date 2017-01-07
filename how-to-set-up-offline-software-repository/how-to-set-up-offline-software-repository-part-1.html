@@ -47,9 +47,9 @@
 					<h4>Использование <strong>apt-get</strong> для скачивания всех-всех пакетов</h4>
 						
 					<p>
-						Нам поможет опция <code>--download-only</code>. Т.о. все, что нужно сделать - пробежаться по 
+						Нам поможет опция <samp>--download-only</samp>. Т.о. все, что нужно сделать - пробежаться по 
 						списку доступных пакетов и для каждого из них выполнить 
-						<code>sudo apt-get --download-only install ...</code> 
+						<samp>sudo apt-get --download-only install ...</samp> 
 						
 					<p>
 						Достоинства такого подхода: все получается естественным путем, автоматически проверяются 
@@ -90,21 +90,21 @@
 					<p>
 						Если взглянуть на 
 <a href="https://github.com/flaz14/flaz14.github.io/blob/master/how-to-set-up-offline-software-repository/code/apt-get_update_sample.log">
-						вывод команды <code>apt-get update</code>
+						вывод команды <samp>apt-get update</samp>
 </a>, 
 						то можно увидеть серверы, с которых <strong>apt-get</strong> скачивает пакеты. Выделим
 						неповторяющиеся ссылки на серверы с помощью скрипта 
-<a href="https://github.com/flaz14/flaz14.github.io/blob/master/how-to-set-up-offline-software-repository/code/extract-http-links.sh">
-						extract-http-links.sh
+<a href="https://github.com/flaz14/flaz14.github.io/blob/master/how-to-set-up-offline-software-repository/code/extract-domain-names.sh">
+						extract-domain-names.sh
 </a>:
 
 <pre>
-david $ ./extract-http-links.sh 
-http://archive.canonical.com
-http://archive.ubuntu.com
-http://extra.linuxmint.com
-http://packages.linuxmint.com
-http://security.ubuntu.com
+david $ ./extract-domain-names.sh
+archive.canonical.com
+archive.ubuntu.com
+extra.linuxmint.com
+packages.linuxmint.com
+security.ubuntu.com
 </pre>
 					<p>					
 						Если перейти по этим ссылкам, то можно заметить их сходство: все указывают на списки файлов или 
@@ -155,28 +155,25 @@ VERSION_ID="14.04"
 			<a href="http://help.ubuntu.ru/wiki/%D1%80%D0%B5%D0%BF%D0%BE%D0%B7%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%B9">
 				документации по Ubuntu
 			</a>. Приведем здесь выдержку, сделанную методом copy-and-paste:
-			<ul>
-				<li>
-					<i>trusty</i> - пакеты на момент выхода релиза;
+			<dl>
+				<dt>trusty
+				<dd>пакеты на момент выхода релиза
 					
-				<li>
-					<i>trusty-security</i> - пакеты критических обновлений безопасности;
+				<dt>trusty-security
+				<dd>пакеты критических обновлений безопасности
 					
-				<li>
-					<i>trusty-updates</i> - пакеты обновления системы (т.е. более поздние версии ПО, вышедшие уже после 
-					релиза);
+				<dt>trusty-updates
+				<dd>пакеты обновления системы (т.е. более поздние версии ПО, вышедшие уже после релиза)
 					
-				<li>
-					<i>trusty-backports</i> - бэкпорты более новых версий некоторого ПО, которое доступно только в 
-					нестабильных версиях Ubuntu;
+				<dt>trusty-backports
+				<dd>бэкпорты более новых версий некоторого ПО, которое доступно только в нестабильных версиях Ubuntu
 					
-				<li>
-					<i>trusty-proposed</i> - пакеты, соответсвующие ПО, в котором исправлены ошибки (bug fix), но еще 
-					не прошедшие тестирование.
-			</ul>
+				<dt>trusty-proposed
+				<dd>пакеты, соответсвующие ПО, в котором исправлены ошибки (bug fix), но еще не прошедшие тестирование
+			</dl>
 
 		<p>
-			В принципе, пакеты из <i>trusty-backports</i> и <i>trusty-proposed</i> нам не понадобятся (они не 
+			В принципе, пакеты из <dfn>trusty-backports</dfn> и <dfn>trusty-proposed</dfn> нам не понадобятся (они не 
 			используются при обновлении посредством <strong>apt-get</strong>). Но их мы тоже скачаем, на всякий случай.
 
 		<p>
@@ -218,7 +215,7 @@ bin/blockdev-wipe                                           admin/ubiquity
 
 					<p>
 						Т.е. все файлы перечислены в алфавитном порядке. В целом, это очень полезный список, т.к. имея 
-						его	под рукой, несложно с помощью <code>grep</code> определить, какой файл какому пакету 
+						его	под рукой, несложно с помощью <samp>grep</samp> определить, какой файл какому пакету 
 						принадлежит (о чем собственно и сказано в комментарии в начале файла). Так что однозначно 
 						скачаем эти списки.
 
@@ -248,27 +245,27 @@ MD5Sum:
 					Файл <strong>Release.gpg</strong> содержит цифровую подпись - все понятно. Обязательно проверим.
 					
 				<li>
-					<strong>main</strong>, <strong>multiverse</strong>, <strong>restricted</strong>, 
-					<strong>restricted</strong> - о них сказано во все той же 
+					<dfn>main</dfn>, <dfn>multiverse</dfn>, <dfn>restricted</dfn>, <dfn>restricted</dfn> - о них сказано
+					во все той же 
 <a href="http://help.ubuntu.ru/wiki/%D1%80%D0%B5%D0%BF%D0%BE%D0%B7%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%B9">
 	документации по Ubuntu
 </a>.
 					Скопипастим немножко:
-					<ul>
-						<li>
-							<i>main</i> - свободное ПО, официально поддерживаемое компанией Canonical;
+					<dl>
+						<dt>main
+						<dd>свободное ПО, официально поддерживаемое компанией Canonical
 							
-						<li>
-							<i>restricted</i> - проприетарное ПО (в основном - драйверы устройств), официально 
-							поддерживаемое компанией Canonical;
+						<dt>restricted
+						<dd>проприетарное ПО (в основном - драйверы устройств), официально поддерживаемое компанией 
+							Canonical
 							
-						<li>
-							<i>universe</i> - свободное ПО, официально не поддерживаемое компанией Canonical (но 
-							поддерживаемое сообществом пользователей);
+						<dt>universe
+						<dd>свободное ПО, официально не поддерживаемое компанией Canonical (но поддерживаемое 
+							сообществом пользователей)
 							
-						<li>
-							<i>multiverse</i> - проприетарное ПО, не поддерживаемое компанией Canonical.
-					</ul>
+						<dt>multiverse
+						<dd>проприетарное ПО, не поддерживаемое компанией Canonical
+					</dl>
 					
 					Будем качать и официальное, и неофициальное...
 			</ol>
@@ -277,7 +274,6 @@ MD5Sum:
 			На <a href="#illustration-1-2">рисунке 1.2</a> можно заметить, что последнее изменение содержимого произошло
 			в 2014 году, что соответствует фразе "на момент выхода релиза".
 		
-
 		<p>
 			Заглянем в каталог <a href="http://archive.ubuntu.com/ubuntu/dists/trusty/main/">main</a>. И увидим кучу 
 			папок, приведенную на <a href="#illustration-1-3">рисунке 1.3</a>:
