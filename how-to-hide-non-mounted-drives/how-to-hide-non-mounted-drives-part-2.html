@@ -24,9 +24,9 @@
 		<h3>[2016, Сентябрь]</h3>
 
 		<h3>
-			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html">Часть 1</a>
+			<a href="how-to-hide-non-mounted-drives-part-1.html">Часть 1</a>
 			|
-			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">Часть 3</a>
+			<a href="how-to-hide-non-mounted-drives-part-3.html">Часть 3</a>
 			|
 			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/how-to-hide-non-mounted-drives/code">
 				Исходный код
@@ -89,7 +89,7 @@ david@athlonx2 / $ ls -l --all --human-readable /usr/bin/nemo
 
 		<p>
 			Посмотрим еще раз на файл <i>nemo-places-sidebar.c</i>, фрагмент которого уже приводился в 
-			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#listing-1-1">части 1</a>. 
+			<a href="how-to-hide-non-mounted-drives-part-1.html#listing-1-1">части 1</a>. 
 			Судя по строкам 
 <a
 href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L946">
@@ -148,8 +148,7 @@ david@athlonx2 ~/Temp/nemo $ grep --context=10 'g_volume_monitor_get_connected_d
 			После вызова <code>g_volume_monitor_get_connected_drives()</code> в цикле перебираются все диски. Затем во 
 			вложенном цикле перебираются все тома каждого диска. Для получения списка томов на конкретном диске 
 			вызывается функция 
-			<a 
-href="https://developer.gnome.org/gio/stable/GDrive.html#g-drive-get-volumes">g_drive_get_volumes()</a>. 
+			<a href="https://developer.gnome.org/gio/stable/GDrive.html#g-drive-get-volumes">g_drive_get_volumes()</a>. 
 			Как говорит официальная документация Gnome:
 			<blockquote>
 				<p>
@@ -206,7 +205,7 @@ href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1f
 
 		<p>
 			В 
-			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">части 3</a> мы приступим
+			<a href="how-to-hide-non-mounted-drives-part-3.html">части 3</a> мы приступим
 			непосредственно к программированию.
 
 		<hr>
