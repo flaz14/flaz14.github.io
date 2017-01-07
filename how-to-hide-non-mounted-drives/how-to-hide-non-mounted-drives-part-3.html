@@ -36,23 +36,19 @@
 		<h2>Проверяем ограничения</h2>
 
 		<p>
-			Кроме самого hook'а, я подготовил тестовую программу, которая ведет себя так же, как и Nemo. Исходные тексты
-			находятся в
-<a href="https://github.com/flaz14/flaz14.github.io/tree/master/how-to-hide-non-mounted-drives/code">
-подкаталоге code
-</a>. 
-Для начала разберемся с ограничениями, о которых говорилось в  
-<a href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-2.html">
-части 2
-</a>. 
+			Кроме самого hook'а, я подготовил тестовую программу, которая ведет себя точно так же, как и Nemo. Исходные 
+			тексты находятся в
+			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/how-to-hide-non-mounted-drives/code">
+				подкаталоге code
+			</a>. 
+			Для начала разберемся с ограничениями, о которых говорилось в  
+			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-2.html">части 2</a>. 
 
 		<p>
 			Воспроизведем ситуацию, описанную в 
-<a 
-href="http://flaz14.github.io/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#illustration-1-
-1">
-части 1
-</a>. 
+			<a href="how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-1.html#illustration-1-1">
+				части 1
+			</a>. 
 			Итак, подключим флешку, смонтируем раздел с меткой <i>8_ext</i> и оставим несмонтированным раздел с меткой 
 			<i>8_ntfs</i>. 
 
@@ -172,8 +168,8 @@ chmod 500 ~/bin/nemo
 				Рисунок 3.1 - оригинальный Nemo показывает и смонтированный том, и несмонтированный том
         </h4>              
 		<p>
-			<img alt="Пример отображения несмонтированного раздела на боковой панели Nemo" 
-			src="illustrations/nemo-sidebar-with-unmounted-drive-visible.png" width="240px">
+			<img src="illustrations/nemo-sidebar-with-unmounted-drive-visible.png" width="240px"
+			alt="здесь изображен фрагмент скриншота программы Nemo">
 
 		<p>
 			Теперь запустим Nemo с костылем (как уже говорилось выше, для этого не нужно дополнительных усилий, 
@@ -184,8 +180,8 @@ chmod 500 ~/bin/nemo
 				Рисунок 3.2 - несмонтированный том не виден на боковой панели Nemo благодаря hook'у
 		</h4>
 		<p>
-			<img alt="Несмонтированный диск не отображается на боковой панели Nemo при благодаря hook'у" 
-			src="illustrations/nemo-sidebar-without-unmounted-drive-visible.png" width="240px">
+			<img src="illustrations/nemo-sidebar-without-unmounted-drive-visible.png" width="240px"
+			alt="здесь изображен фрагмент скриншота программы Nemo" >
 
         <p>
 			Костыль работает <sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>
