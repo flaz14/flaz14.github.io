@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Автоподключающийся Cisco VPN в LinuxMint</title>
+	</head>
+	<body>
+		<h1>
+			<big>
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+		
+		<hr>
+		
+		<h1>
+			<a href="http://flaz14.github.io/cisco-vpn-autoconnect/cisco-vpn-autoconnect.html">
+				Автоподключающийся Cisco VPN в LinuxMint
+			</a>
+		</h1>
+		
+		<h3>[2015, Июнь]</h3>
+			
+		<h2>Скачиваем</h2>
+		
+		<p>
+			Зайдем на официальный сайт <a href="http://www.oracle.com">Oracle</a>. Затем наведем курсор на 
+			<strong>Downloads</strong> и в выпадающем списке нажмем на <strong>Java for Developers</strong>. Далее
+			нажмем на большую кнопку с логотипом Java и подписью <strong>Java Platform (JDK) xxx / yyy</strong>. 
+			Откроется страничка с таблицей для разных ОС и архитектур. Например, для <i>Linux x86</i> предлагается 
+			скачать <i>rpm</i>-пакет или тарбол. Для Ubuntu <i>rpm</i>-пакет не подходит (да, преобразовать <i>rpm</i> 
+			в <i>deb</i> возможно, но лучше этого не делать). Так что скачаем тарбол 
+			(<i>jdk-8u111-linux-i586.tar.gz</i>). Все, у нас есть официальный дистрибутив: не из зеркала или 
+			репозитория, а от самой Oracle (правда, контрольную сумму для скачанного архива придется проверить вручную).
+			
+		<h2>Распаковываем</h2>
+		
+		<p>
+			Теперь надо распаковать тарбол и разобраться с переменными окружения. В большинстве случаев достаточно 
+			добавить подкаталог <i>bin</i> распакованного JDK в переменную окружения <strong>PATH</strong>. Не помешает и 
+
+
+
+
+
+
+
+
+<h2>Подготовка пакетов</h2>
+Устанавливаем пакеты <code>vpnc</code> и <code>network-manager-vpnc-gnome</code>:<br>
+<pre>sudo apt-get install vpnc network-manager-vpnc-gnome</pre>
+
+
+<br>
+<h2>Создание нового VPN-соединения с помощью графического интерфейса</h2>
+Открываем <b>Network Connections</b> из апплета на панели задач. Нажимаем <b>Add</b>. В качестве <b>Connection Type</b> выбираем <b>Cisco Compatible VPN (vpnc)</b>. В появившемся окне вводим следующие параметры:<br>
+<pre>
+Gateway: {имя или ip-адрес шлюза}
+User name:  {имя пользователя}
+User password: {пароль пользователя}
+Group name: {имя группы}
+Group password: {пароль для группы}
+</pre>
+В качестве <b>Connection name</b> есть смысл ввести короткое и узнаваемое имя, чтобы потом было легче найти соответствующий ему конфиг (например, <i>OfficeVPN</i>). Далее щелкаем по апплету сети на панели задач и пробуем включить только что созданное VPN-соединение. Если получилось, то переходим к следующему шагу. Если нет, то скорее всего где-то опечатка в логине/пароле т.п.<br>
+
+
+<br>
+<h2>Дополнительная правка конфигурационных файлов</h2>
+Заходим в каталог Network Manager'а:<br>
+<pre>cd /etc/NetworkManager</pre>
+
+Ищем конфиг, соответствующий только что созданному соединению (<i>OfficeVPN</i>):<br>
+<pre>sudo grep -l -- 'OfficeVPN' system-connections/*</pre>
+<i>(выведет <code>system-connections/VPN connection 1</code> или что-то похожее)</i><br><br>
+
+Редактируем найденный файл (предварительно не забыв сделать его резервную копию).<br><br>
+
+Исправляем в секции <b>[connection]</b> <code>autoconnect=false</code> на <code>autoconnect=custom</code>.<br><br>
+
+Предполагается, что наше шаманство затрагивает только одно VPN соединение, и только одно соединение может быть активным. Поэтому если в одном из конфигов уже выставлено <code>autoconnect=custom</code>, то в других нужно установить <code>autoconnect=false</code> (или же вообще не трогать, т.к. это по умолчанию). Бывает, что после редактирования этого параметра он снова становится <code>false</code>. Лучше еще раз потом проверить, иначе скрипт проигнорирует конфиг без <code>autoconnect=custom</code>.<br><br>
+
+Исправляем в секции <b>[vpn]</b>:<br>
+<code>IPSec secret-flags=1</code> на <code>IPSec secret-flags=0</code><br>
+<code>Xauth password-flags=1</code> на <code>Xauth password-flags=0</code><br><br>
+
+Добавляем после секции <b>[vpn]</b> и перед секцией <b>[ipv4]</b> новую секцию следующего содержания:
+<pre>
+[vpn-secrets]
+IPSec secret={пароль для группы}
+Xauth password={пароль пользователя}
+</pre>
+
+<br>
+<h2>Теперь сделаем так, чтобы VPN подключался/переподключался автоматически каждые 5 минут</h2>
+Создаем новый скрипт /etc/NetworkManager/ConstantlySetUpVpn.sh (и делаем его исполняемым и доступным только <code>root</code>'у):<br>
+<pre>
+#!/bin/bash
+
+### Starts up VPN connection configured with 'autoconnect=custom' option.
+### If VPN connection is already up, then try to set MTU to 1300.
+### If setting MTU failed then shutdown connection.
+
+declare -r pathToVpnConfigFiles="/etc/NetworkManager/system-connections/*"
+declare -r optimalMTU="1300"
+
+# Regular expressions for extracting data from configuration files.
+# Most of them used in to steps: extract whole line from file using dirty expression 
+# and then extract piece of data from this line using more specific expression.
+declare -r regexForAutoconnectOption='^autoconnect=custom'
+declare -r regexForConnectionNameLine='^id='
+declare -r regexForConnectionName='^id=(.*)'
+declare -r regexForUUIDLine='^uuid=.*$'
+declare -r regexForUUID='uuid=([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12})'
+declare -r regexForMTULine='MTU:([0-9])+ '
+declare -r regexForMTU='MTU:([0-9]+)* '
+
+# Bash trick for use in bye() function
+trap "exit 0" TERM
+export TOP_PID=$$
+# Terminates execution of the whole script, but with exit code 0
+function bye() {
+ kill -s TERM $TOP_PID
+}
+
+
+echo "INFO: looking for VPN connections..."
+# Walk thought all VPN configuration files (which has 'autoconnect=custom' option) and 
+# manage each connection via its UUID
+grep -l -- $regexForAutoconnectOption $pathToVpnConfigFiles | while read -r connectionConfigFileName; do
+ echo "INFO: exploring configuration file ${connectionConfigFileName}"
+
+ # Try to find UUID in configuration file
+ uuidLine=$(grep "${regexForUUIDLine}" "${connectionConfigFileName}")
+ if [ "${uuidLine}" == "" ]; then
+   echo " ERROR: uuid is not found in configuration file."
+   continue
+ fi
+ [[ $uuidLine =~ $regexForUUID ]] && uuid="${BASH_REMATCH[1]}"
+ echo " INFO: uuid ${uuid}"
+
+ # Extract connection name
+ idLine=$(grep "${regexForConnectionNameLine}" "${connectionConfigFileName}")
+ [[ $idLine =~ $regexForConnectionName ]] && id="${BASH_REMATCH[1]}"
+ echo " INFO: connection name ${id}"
+
+ # Connection's UUID is found, analyze whether connection is already up 
+ # (use Network Manager command line interface)
+ export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+ isVpnUp=$(nmcli con status | grep "${uuid}" | wc -l) 
+ if [ "${isVpnUp}" == "1" ]; then
+  # Current connection is up
+  echo " INFO: connection is already up. Try to set MTU="${optimalMTU}" ..."
+ else 
+  # Current connection is down, try to start up it
+  nmcli con up uuid "${uuid}"
+  if [ "$?" == "0" ]; then
+   echo " INFO: connection has been successfully established. Try to set MTU=${optimalMTU} ..."
+  else       
+   echo " INFO: connection has not been successfully established. Skip it."
+   continue
+  fi 
+ fi
+
+ # Try to set correct value of MTU
+ ifconfig tun0 mtu "${optimalMTU}"
+
+ # Analyze whether already affected MTU is correct
+ mtuLine=$(ifconfig tun0 | grep -E "${regexForMTULine}")
+ [[ $mtuLine =~ $regexForMTU ]]
+ if [ "${BASH_REMATCH[1]}" == "${optimalMTU}" ]; then
+  echo " INFO: MTU is correct"
+ else 
+  # MTU is not correct, shutdown current connection
+  echo " ERROR: MTU is not correct, shutdown connection ${id}."
+  nmcli con down uuid "${uuid}" && notify-send "VPN Message" "Connection ${id} has been disconnected due to incorrect MTU"  
+ fi
+ bye 
+done
+echo "WARNING: there are not VPN connections found"
+</pre>
+
+Создаем задачу <b>cron</b> (<code>sudo crontab -e</code>) для запуска нашего скрипта каждые 5 минут. А именно, добавляем такую строчку:
+
+<pre>*/5 * * * * /etc/NetworkManager/ConstantlySetUpVpn.sh >> /var/log/syslog 2>&1</pre>
+
+На всякий случай можно попробовать запустить от root'а этот скрипт вручную (для первого раза лучше с правами обычного пользователя, в том числе с уже подключенным VPN и в прочих нестандартных условиях). В консоль в случае возникновения внештатных ситуаций выводятся соответствующие сообщения. Если скрипт заработает при запуске вручную - заработает и автоматически.
+
+<br>
+<h3>PS</h3>
+Такое шаманство понадобилось, потому что странички с сайтов, которые доступны во внутренней сети, загружаются только при определенном значении MTU, а с MTU по умолчанию (1440) - нет. Ну и еще при обрыве соединения оно переподключается автоматически.<br>
+Кроме того, есть определенный смысл убедиться, что владельцем/группой как для конфигурационных файлов, так и скрипта является <code>root</code>, и больше никто другой не может прочитать или выполнить эти файлы.
+<br>
+<h3>Другие дистрибутивы</h3>
+Все проделывалось на LinuxMint 17.1 Cinnamon 32bit. Network Manager может немного отличаться в различных графических средах, но пакет vpnc нужно устанавливать обязательно. 
+
+<br />
+
+
+
+
+
+			
+		<hr>
+			
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+	</body>
+</html>
