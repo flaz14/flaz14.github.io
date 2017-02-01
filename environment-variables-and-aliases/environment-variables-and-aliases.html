@@ -1,0 +1,42 @@
+<br />
+<h1>Obstacles with setting up environment variables and aliases</h1>
+
+<h4>
+Goal</h4>
+<p>Set custom environment variables and aliases of console commands for specific user.</p>
+<br />
+
+<h4>
+Deal with environment variables</h4>
+<p>Put definitions of environment variables into <span style="color: #6aa84f;"><code>.profile</code></span> in home directory. For example:</p>
+<pre># ~/.profile: executed by the command interpreter for login shells.
+# This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
+# exists.
+...
+####### Environment variables for miscellaneous software #######
+# Oracle JDK
+<span style="color: #6aa84f;">export JAVA_HOME=/usr/local/jdk1.8.0_40
+export PATH=$JAVA_HOME/bin:$PATH</span>
+
+# Groovy
+<span style="color: #6aa84f;">export GROOVY_HOME=$HOME/bin/groovy-2.4.1
+export PATH=$GROOVY_HOME/bin:$PATH</span>
+</pre>
+<br />
+<h4>
+Deal with aliases</h4>
+<p>
+Create <span style="color: #6aa84f;"><code>.bashrc</code></span> in home directory (if it doesn't exist) and put definitions of aliases into it. For example:</p>
+
+<pre>####### Custom aliases ########################################
+# reset terminal
+<span style="color: #6aa84f;">alias tclear='setterm -reset'</span>
+# long and human readable listing of a directory
+<span style="color: #6aa84f;">alias ll='ls -alh'</span>
+</pre>
+<br />
+<h4>
+Where are obstacles?</h4>
+<p>Putting definitions of environment variables into <span style="color: #6aa84f;"><code>.bashrc</code></span> enables them only in a shell. Thus if program was ran from terminal it can access environment variables. If program was ran from desktop shortcut it can not discover environment variables.</p>
+<p>Aliases are used only from terminal. So they should be declared in <span style="color: #6aa84f;"><code>.bashrc</code></span> (or <code>.bash_aliases</code> depending on a distro). Putting aliases into <span style="color: #6aa84f;"><code>.profile</code></span> makes them unaccessible for <code>bash</code> commands.</p>
+<p>Competent explanation is <a href="http://superuser.com/questions/183870/difference-between-bashrc-and-bash-profile">here</a>.</p>
