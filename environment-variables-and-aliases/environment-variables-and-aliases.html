@@ -1,42 +1,87 @@
-<br />
-<h1>Obstacles with setting up environment variables and aliases</h1>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+		<head>
+				<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+				<title>Obstacles with setting up environment variables and aliases</title>
+		</head>
+		<body>
+				<h1>
+						<big>
+							<a href="/" title="Go to the main page">&#8962;</a>
+						</big>
+				</h1>
 
-<h4>
-Goal</h4>
-<p>Set custom environment variables and aliases of console commands for specific user.</p>
-<br />
+				<hr>
 
-<h4>
-Deal with environment variables</h4>
-<p>Put definitions of environment variables into <span style="color: #6aa84f;"><code>.profile</code></span> in home directory. For example:</p>
-<pre># ~/.profile: executed by the command interpreter for login shells.
+				<h1>
+						<a href=
+				"http://flaz14.github.io/environment-variables-and-aliases/environment-variables-and-aliases.html">
+							Obstacles with setting up environment variables and aliases
+						</a>
+				</h1>
+
+				<h3>[2015]</h3>
+
+				<h2>Goal</h2>
+				
+				<p>
+					Set custom environment variables and aliases of console commands for specific user.
+			
+				<h2>Deal with environment variables</h2>
+
+				<p>
+					Put definitions of environment variables into <i>~/.profile</i>. For example:
+<pre>
+# ~/.profile: executed by the command interpreter for login shells.
 # This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
 # exists.
 ...
-####### Environment variables for miscellaneous software #######
-# Oracle JDK
-<span style="color: #6aa84f;">export JAVA_HOME=/usr/local/jdk1.8.0_40
-export PATH=$JAVA_HOME/bin:$PATH</span>
-
-# Groovy
-<span style="color: #6aa84f;">export GROOVY_HOME=$HOME/bin/groovy-2.4.1
-export PATH=$GROOVY_HOME/bin:$PATH</span>
+export JAVA_HOME=/usr/local/jdk1.8.0_40
+...
 </pre>
-<br />
-<h4>
-Deal with aliases</h4>
-<p>
-Create <span style="color: #6aa84f;"><code>.bashrc</code></span> in home directory (if it doesn't exist) and put definitions of aliases into it. For example:</p>
 
-<pre>####### Custom aliases ########################################
-# reset terminal
-<span style="color: #6aa84f;">alias tclear='setterm -reset'</span>
-# long and human readable listing of a directory
-<span style="color: #6aa84f;">alias ll='ls -alh'</span>
+				<h2>Deal with aliases</h4>
+				
+				<p>
+					Create <i>~/.bashrc</i> if it doesn't exist and put definitions of aliases into it. For example:
+<pre>
+alias tclear='setterm -reset'
+alias ll='ls -alh'
 </pre>
-<br />
-<h4>
-Where are obstacles?</h4>
-<p>Putting definitions of environment variables into <span style="color: #6aa84f;"><code>.bashrc</code></span> enables them only in a shell. Thus if program was ran from terminal it can access environment variables. If program was ran from desktop shortcut it can not discover environment variables.</p>
-<p>Aliases are used only from terminal. So they should be declared in <span style="color: #6aa84f;"><code>.bashrc</code></span> (or <code>.bash_aliases</code> depending on a distro). Putting aliases into <span style="color: #6aa84f;"><code>.profile</code></span> makes them unaccessible for <code>bash</code> commands.</p>
-<p>Competent explanation is <a href="http://superuser.com/questions/183870/difference-between-bashrc-and-bash-profile">here</a>.</p>
+
+				<h2>Where are obstacles?</h2>
+				
+				<p>
+					Putting definitions of environment variables into <i>~/.bashrc</i> enables them only in a shell. 
+					Thus if program was ran from terminal it can access environment variables. If program was ran from 
+					desktop shortcut it can not discover environment variables.
+					
+				<p>
+					Aliases are used only from terminal. So they should be declared in <i>~/.bashrc</i> (or 
+					<i>~/.bash_aliases</i> depending on a distro). Putting aliases into <i>~/.profile</i> makes them 
+					unaccessible for <code>bash</code> commands.
+					
+				</p>
+					Competent explanation is in
+					<a href="http://superuser.com/a/183980">
+						the answer for question "Difference between .bashrc and .bash_profile"
+					</a>.
+
+				<hr>
+
+				<h1>
+						<big>
+								<a href="#" title="Go to top of the page">&uarr;</a>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								<a href="/" title="Go to the main page">&#8962;</a>
+						</big>
+				</h1>
+		</body>
+</html>
+
+
+
+
+
+
