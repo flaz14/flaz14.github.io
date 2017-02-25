@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# This wrapper is almost the same as the wrapper for Nemo.
+LD_PRELOAD=~/bin/libnemohook.so /usr/bin/firefox "$@"
