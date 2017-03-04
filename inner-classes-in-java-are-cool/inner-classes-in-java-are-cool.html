@@ -196,6 +196,44 @@ public class VisibilityOfInnerClassTest {
 		
 		
 		
+		<h2>Почему не enum?</h2>
+		
+		Попробуем сгруппировать константы, но с помощью enum:
+		
+		Листинг 5 - константы оформленные в виде enum
+		
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class Constants_3_Enum_Test {
+
+    private enum CustomerId {
+        VALID("12345"),
+        INVALID("!!!"),
+        NON_EXISTING("000");
+
+        public final String id;
+
+        private CustomerId(String id) {
+            this.id = id;
+        }
+    }
+
+    @Test
+    public void someTest() throws Exception {
+        System.out.println(CustomerId.VALID.id);
+        System.out.println(CustomerId.INVALID.id);
+        System.out.println(CustomerId.NON_EXISTING.id);
+    }
+}
+</pre>
+		
+		Очевидно, что использование enum ведет к чрезмерному усложнению при той же функциональности. Да, enum вне конкуренции
+		в случаях общедоступных классов, которые повторно используются во многих частях программы. Но если константы релевантны
+		только в пределах одного класса, лучше упаковать их во внутренний класс.
+		
 		
 		
 		
