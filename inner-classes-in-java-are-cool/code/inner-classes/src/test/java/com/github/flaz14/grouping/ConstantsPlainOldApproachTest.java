@@ -2,7 +2,7 @@ package com.github.flaz14.grouping;
 
 import org.junit.Test;
 
-public class Constants_1_PlainOldApproach_Test {
+public class ConstantsPlainOldApproachTest {
 
     private static final String CUSTOMER_ID = "12345";
     private static final String INVALID_CUSTOMER_ID = "!!!";

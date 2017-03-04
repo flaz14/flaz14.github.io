@@ -2,7 +2,7 @@ package com.github.flaz14.grouping;
 
 import org.junit.Test;
 
-public class Constants_3_Enum_Test {
+public class ConstantsEnumTest {
 
     private enum CustomerId {
         VALID("12345"),

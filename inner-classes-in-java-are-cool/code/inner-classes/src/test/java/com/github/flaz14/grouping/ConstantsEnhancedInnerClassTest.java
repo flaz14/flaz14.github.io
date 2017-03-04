@@ -2,12 +2,12 @@ package com.github.flaz14.grouping;
 
 import org.junit.Test;
 
-public class Constants_2_InnerClass_Test {
+public class ConstantsEnhancedInnerClassTest {
 
     private static class CustomerId {
-        private static final String VALID = "12345";
-        private static final String INVALID = "!!!";
-        private static final String NON_EXISTING = "000";
+        static final String VALID = "12345";
+        static final String INVALID = "!!!";
+        static final String NON_EXISTING = "000";
     }
 
     @Test
