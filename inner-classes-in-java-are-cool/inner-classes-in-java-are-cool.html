@@ -22,33 +22,177 @@
 		
 		<h3>[2017, Февраль]</h3>
 		
-		Внутренние классы, они же вложенные классы (inner classes, nested classes) появились в Java версии 1.1 (не уверен). 
+		Внутренние классы, они же вложенные классы (inner classes, nested classes) появились в Java версии 1.1 (не 
+		уверен насчет 1.1,
+		знакомые Java-эксперты говорят, что в версии 1.1.8 внутренние классы точно были). 
 		Как говорится в 
 		<a href="https://docs.oracle.com/javase/tutorial/java/javaOO/nested.html">
 			официальном туториале от Oracle
 		</a> внутренние классы (тут немного по-другому сказано, но основные идеи те же):
 		
-		<ol>
+		<ul>
 			<li>
-				помогают сгруппировать основной класс и его "помощник" в одном месте, т.е. без необходимости оформлять вспомогательный
+				помогают сгруппировать основной класс и его "помощник" в одном месте, т.е. без необходимости оформлять 
+				вспомогательный
 				класс в виде публичного класса;
 			
 			<li>
 				улучшают инкапсуляцию: вспомогательный можно сделать невидимым за пределами основного класса;
 				
 			<li>
-				придают коду дополнительную удобоваримость (хотя clean code - понятие растяжимое).
-		</ol>
+				придают коду дополнительную удобоваримость.
+		</ul>
     
-		Я не 
-
-    
-
-    
-
+		Посмотрим, на что способны внутренние классы.
 		
+		<h2>Немного о "песочнице"</h2>
+
+		Все примеры сделаны в виде Maven-проекта (тут будет ссылка на исходный код). Для каждого примера - свой 
+		класс/файл/пакет.
+		Каждое заметное улучшение кода предствлено в виде нового класса. Все примеры приводятся с тестами, и могут быть 
+		выполнены
+		из командной строки.
 		
+		<h2>Группировка констант</h2>
 		
+		В своей рутинной работе я часто сталкиваюсь с примерно таким кодом (в остовном в тестах):
+		
+		Листинг 1 - PlainOldConstants_1_Test - примитивный подход к константам в тестах
+		
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class Constants_1_PlainOldApproach_Test {
+
+    private static final String CUSTOMER_ID = "12345";
+    private static final String INVALID_CUSTOMER_ID = "!!!";
+    private static final String NON_EXISTING_CUSTOMER_ID = "000";
+
+    @Test
+    public void someTest() throws Exception {
+        System.out.println(CUSTOMER_ID);
+        System.out.println(INVALID_CUSTOMER_ID);
+        System.out.println(NON_EXISTING_CUSTOMER_ID);
+    }
+}
+</pre>
+		
+		Первое, что бросается в глаза и что хотелось бы улучшить - это имена констант. Так, в имени каждой константы 
+		повторяются
+		слова <tt>CUSTOMER_ID</tt>. Само по себе дублирование кода в тестах - не так уж и плохо. Тем более, что два 
+		слова - не пять.
+		Но чтобы использовать такие константы в коде, приходится больше печатать. Потому что одна константа начинается со слова
+		<tt>CUSTOMER</tt>, вторая - со слова <tt>INVALID</tt>, а третья с другого слова. Т.о. функция автодополнения IDE не сильно 
+		помогает. Кроме этого, каждая из констант - самостоятельное, не связанное с другими, поле класса. В зависимости от того, 
+		как исходный код отформатирован, логически связанные константы могут быть разбросанными по всему классу. Что ухудшает 
+		читаемость кода. Да, можно задействовать formatter и отсортировать константы в алфавитном порядке, но 
+		откуда ему знать, что все эти константы имеют отношение к одной сущности? Чтобы учесть логическую связь придется
+		 использоватьочень нетривиальные средства форматирования исходного кода. Что, попробуем переделать констатны с 
+		 использованием	внутреннего класса.
+		
+		Листинг 2 - константы сгруппированы с помощью внутреннего класса
+		
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class Constants_2_InnerClass_Test {
+
+    private static class CustomerId {
+        private static final String VALID = "12345";
+        private static final String INVALID = "!!!";
+        private static final String NON_EXISTING = "000";
+    }
+
+    @Test
+    public void someTest() throws Exception {
+        System.out.println(CustomerId.VALID);
+        System.out.println(CustomerId.INVALID);
+        System.out.println(CustomerId.NON_EXISTING);
+    }
+}
+</pre>	
+
+		Выглядит лучше. Прежде всего, все константы находятся внутри вспомогательного класса. Т.е. никакое, даже самое 
+		дикое форматирование
+		исходного текста не сможет разлучить их. Имя вспомогательного класса - говорящее. Так что нет нужды дублировать слова
+		CUSTOMER и ID в именах самих констант. И IDE нам поможет: не надо держать в голове все возможные вариации 
+		идентификаторов клиента,
+		достаточно набрать Cust - IDE предложит дополнить до CustomerId. После набора точки IDE выведет список вариантов - осталось
+		только выбрать нужный. Тем не менее, внутренний статический класс выглядит громоздким. И в самом деле, мы уменьшили
+		длину имени каждой константы, но добавили строчку <code>private static class CustomerId {</code>. Так что не такое уж 
+		изящное получилось решение. Попробуем убрать лишнее.
+		
+		Листинг 3 - улучшенный класс для группировки констант
+		
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class Constants_3_EnhancedInnerClass_Test {
+
+    private static class CustomerId {
+        static final String VALID = "12345";
+        static final String INVALID = "!!!";
+        static final String NON_EXISTING = "000";
+    }
+
+    @Test
+    public void someTest() throws Exception {
+        System.out.println(CustomerId.VALID);
+        System.out.println(CustomerId.INVALID);
+        System.out.println(CustomerId.NON_EXISTING);
+    }
+}
+</pre>
+		
+		Модификатор <code>private</code> с <code>CustomerId</code> убирать не будем, иначе выставим напоказ константы, 
+		которые другие
+		классы интересовать не должны. От модификатора <code>static</code> тоже никуда не денешься. А вот модификатор
+		<code>private</code> с собственно самих констант можно убрать. Поле вложенного класса всегда доступно из класса, в который
+		он вложен (да-да, в листинге 2 сами константы приватные, и тем не менее, их можно прочитать в методе someTest). Так что 
+		можно оставить константы с модификатором по-умолчанию, т.е. с доступом package-private. Но, поскольку класс CustomerId
+		приватный, то и все, что в нем находится, будет невидимо для внешнего мира, невзирая на структуру пакетов. Продемонстрируем это
+		
+		Создадим пакет <code>package com.github.flaz14.foo</code>. И добавим в него такой тест:
+		
+			
+		Листинг 4 - приватный вложенный класс виден только в классе, в который он вложен
+		
+<pre>
+package com.github.flaz14.foo;
+
+import org.junit.Test;
+
+public class VisibilityOfInnerClassTest {
+
+    @Test
+    public void packagePrivateFieldsOfPrivateInnerClass() throws Exception {
+        System.out.println(
+                com.github.flaz14.grouping.Constants_3_EnhancedInnerClass_Test.CustomerId.VALID
+        );
+    }
+}
+</pre>
+		
+		Попробуем скомпилировать и получим:
+		
+<pre>
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/yura/Projects/flaz14.github.io/inner-classes-in-java-are-cool/code/inner-classes/src/test/java/com/github/flaz14/foo/VisibilityOfInnerClassTest.java:[10,79] com.github.flaz14.grouping.Constants_3_EnhancedInnerClass_Test.CustomerId has private access in com.github.flaz14.grouping.Constants_3_EnhancedInnerClass_Test
+[INFO] 1 error
+[INFO] -------------------------------------------------------------
+</pre>		
+		
+		То же самое будет и при любом модификоре поля, главное, чтобы сам вложенный класс был приватным.
+		
+		Т.о. образом привиденный в листинге 3 класс оптимально подходит для группировки костант [1].
 		
 		
 		
@@ -131,9 +275,12 @@ AdminIdentities=unix-group:mypolkit
 				<li id="footnote-1-bottom">
 					<p>
 						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
-						Для большей уверенности можно удалить и конфиг <i>/etc/pam.d/polkit-1</i>. Но, как выяснилось, 
-						наличие/отсутствие этого конфига не влияет на запрашиваемый PolicyKit пароль. Так что лучше 
-						оставить.
+						
+						Для пущей константности можно было бы добавить к классу <code>CustomerId</code> модификтор 
+						<code>final</code>, но это излишне - класс <code>CustomerId</code> невидим для внешнего мира. Вряд ли
+						кому-то придет в голову написать еще один внутренний класс и уже в нем унаследовать 
+						<code>CustomerId</code>.
+						
 
 				<li id="footnote-2-bottom">
 					<p>
