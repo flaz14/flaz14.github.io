@@ -6,8 +6,8 @@ public class VisibilityOfInnerClassTest {
 
     @Test
     public void packagePrivateFieldsOfPrivateInnerClass() throws Exception {
-        // System.out.println(
-        //         com.github.flaz14.grouping.Constants_3_EnhancedInnerClass_Test.CustomerId.VALID
-        // );
+         // System.out.println(
+         //         com.github.flaz14.grouping.ConstantsEnhancedInnerClassTest.CustomerId.VALID
+         // );
     }
 }

@@ -22,11 +22,18 @@
 		
 		<h3>[2017, Февраль]</h3>
 		
+		<h3>
+<a href=
+"https://github.com/flaz14/flaz14.github.io/tree/master/inner-classes-in-java-are-cool/code/inner-classes/src/test/java/com/github/flaz14">
+Исходный код
+</a>
+		</h3>
+		
 		<h2>Немного теории</h2>
 			
 		<p>
 			Внутренние классы (inner classes), они же вложенные классы (nested classes), появились в Java версии 1.1 (не 
-			уверен насчет 1.1, знакомые Java-эксперты говорят, что в версии 1.1.8 внутренние классы точно были). Как 
+			уверен насчет 1.1; знакомые Java-эксперты говорят, что в Java 1.1.8 внутренние классы точно были). Как 
 			говорится в 
 			<a href="https://docs.oracle.com/javase/tutorial/java/javaOO/nested.html">
 				официальном туториале от Oracle
@@ -48,23 +55,26 @@
 		<h2>О "песочнице"</h2>
 
 		<p>
-			Все примеры оформлены в виде Maven-проекта (тут будет ссылка на исходный код). Для каждого примера 
-			(следовательно, для каждого листинга)- свой класс. Каждое заметное улучшение кода предствлено в виде нового 
-			класса. Имена классов нестандартные. Это нужно для того, чтобы файлы отображались в IDE в том же порядке, в 
-			каком они упоминаются в статье.
+			Все примеры оформлены в виде 
+			<a href=
+			"https://github.com/flaz14/flaz14.github.io/tree/master/inner-classes-in-java-are-cool/code/inner-classes">
+			Maven-проекта</a>. Для каждого примера (следовательно, для каждого листинга) - свой класс. Каждое заметное 
+			улучшение представлено в виде нового класса.
 		
 		<h2>Группировка констант</h2>
 		
 		<p>
 			В своей рутинной работе я часто сталкиваюсь с примерно таким кодом (в остовном в тестах):
 		
-		<h4 id="listing-1">Листинг 1 - PlainOldConstants_1_Test - примитивный подход к константам в тестах</h4>	
+		<h4 id="listing-1">
+			Листинг 1 - ConstantsPlainOldApproachTest - примитивный подход к константам в тестах
+		</h4>	
 <pre>
 package com.github.flaz14.grouping;
 
 import org.junit.Test;
 
-public class Constants_1_PlainOldApproach_Test {
+public class ConstantsPlainOldApproachTest {
 
     private static final String CUSTOMER_ID = "12345";
     private static final String INVALID_CUSTOMER_ID = "!!!";
@@ -82,28 +92,28 @@ public class Constants_1_PlainOldApproach_Test {
 		<p>
 			Первое, что бросается в глаза и что хотелось бы улучшить - это имена констант. Так, в имени каждой константы 
 			повторяeтся <tt>CUSTOMER_ID</tt>. Само по себе дублирование чего бы то ни было в тестах - не так уж плохо. 
-			Тем более, что два слова - не пять.	Но чтобы использовать такие константы в коде, приходиться больше 
-			печатать. И функция автодополнения в IDE не силоно помогает. Потому что одна константа начинается со слова
-			<tt>CUSTOMER</tt>, вторая - со слова <tt>INVALID</tt>, а третья с совершенно другого слова.	Кроме этого, 
+			Тем более, что два слова - не пять.	Но чтобы использовать такие константы в тестах, приходиться много	
+			печатать. И функция автодополнения IDE не сильно помогает. Потому что первая константа начинается со слова
+			<tt>CUSTOMER</tt>, вторая - со слова <tt>INVALID</tt>, а третья с совершенно другого слова.	Кроме того, 
 			каждая из констант - самостоятельное, не связанное с другими, поле класса. В зависимости от того, как 
 			исходный код отформатирован, логически связанные константы могут быть или собраны в одном месте, или 
-			разбросаны по всему файлу (или перемешанными с константами другого рода). Что ухудшает читаемость кода. Да, 
-			можно задействовать formatter и отсортировать константы в алфавитном порядке, но откуда ему знать, что все 
-			эти константы имеют отношение к одной сущности? Чтобы учесть логическую связь придеться	использоватьочень 
-			нетривиальные средства форматирования исходного кода. 
+			разбросаны по всему файлу (или быть перемешанными с константами другого рода), что ухудшает читаемость кода.
+			Да, можно задействовать formatter и разместить константы в алфавитном порядке, но откуда formatter'у знать, 
+			что все три константы имеют отношение к одной сущности? Чтобы учесть логическую связь придеться	использовать
+			очень нетривиальные средства форматирования исходного кода. 
 			
 		<p>
 			Призовем на помощь внутренний класс и получим <a href="#listing-2">листинг 2</a>!
 		
 		<h4 id="listing-2">
-			Листинг 2 - тут будет имя класса и ссылка на github - константы сгруппированы с помощью внутреннего класса
+			Листинг 2 - ConstantsInnerClassTest - константы сгруппированы с помощью внутреннего класса
 		</h4>		
 <pre>
 package com.github.flaz14.grouping;
 
 import org.junit.Test;
 
-public class Constants_2_InnerClass_Test {
+public class ConstantsInnerClassTest {
 
     private static class CustomerId {
         private static final String VALID = "12345";
@@ -132,15 +142,14 @@ public class Constants_2_InnerClass_Test {
 			<a href="#listing-3">листинге 3</a>:
 		
 		<h4 id="listing-3">
-			Листинг 3 - тут будет ссылка на Github или просто название класса - 
-			улучшенный внутренний класс для группировки констант
+			Листинг 3 - ConstantsEnhancedInnerClassTest - улучшенный внутренний класс для группировки констант
 		</h4>
 <pre>
 package com.github.flaz14.grouping;
 
 import org.junit.Test;
 
-public class Constants_3_EnhancedInnerClass_Test {
+public class ConstantsEnhancedInnerClassTest {
 
     private static class CustomerId {
         static final String VALID = "12345";
@@ -158,24 +167,23 @@ public class Constants_3_EnhancedInnerClass_Test {
 </pre>
 		
 		<p>
-			Убирать модификатор <code>private</code> с <code>CustomerId</code> убирать не будем. От модификатора 
-			<code>static</code> тоже оставим. А вот модификатор	<code>private</code> с собственно самих констант можно 
-			убрать. 
+			Убирать модификатор <code>private</code> с <code>CustomerId</code> не будем. Модификатор <code>static</code>
+			тоже оставим. А вот модификатор	<code>private</code> с самих констант можно смело убрать. 
 			
 		<p>
 			Поле вложенного класса всегда доступно из класса, в который	он вложен (да-да, в 
 			<a href="#listing-2">листинге 2</a> константы приватные, и тем не менее, их можно прочитать в методе 
-			<code>someTest</code>). Так уровень доступа <strong>package-private</strong> сойдет: класс 
-			<code>CustomerId</code>	- приватный, и все, что в нем находится, будет невидимо для внешнего мира. 
-			Продемонстрируем это, а именно: создадим пакет <code>package com.github.flaz14.foo</code> и добавим в тест,
+			<code>someTest</code>). Так что уровень доступа <strong>package-private</strong> сойдет: класс 
+			<code>CustomerId</code>	- приватный, и все, что в нем находится, невидимо для внешнего мира. 
+			Продемонстрируем это, а именно: создадим пакет <code>com.github.flaz14.bar</code> и добавим в него тест, 
 			приведенный в <a href="#listing-4">листинге 4</a>.
 		
 		<h4 id="listing-4">
-			Листинг 4 - тут будем имя класса-теста - приватный вложенный класс виден только в классе, в который он 
+			Листинг 4 - VisibilityOfInnerClassTest - приватный вложенный класс виден только в классе, в который он 
 			вложен
 		</h4>
 <pre>
-package com.github.flaz14.foo;
+package com.github.flaz14.bar;
 
 import org.junit.Test;
 
@@ -183,20 +191,20 @@ public class VisibilityOfInnerClassTest {
 
     @Test
     public void packagePrivateFieldsOfPrivateInnerClass() throws Exception {
-        System.out.println(
-                com.github.flaz14.grouping.Constants_3_EnhancedInnerClass_Test.CustomerId.VALID
-        );
+          System.out.println(
+                  com.github.flaz14.grouping.ConstantsEnhancedInnerClassTest.CustomerId.VALID
+          );
     }
 }
 </pre>
 		
 		<p>
-			Попробуем скомпилировать и получим ошибку компиляции: 
-			<code>
-				com.github.flaz14.grouping.Constants_3_EnhancedInnerClass_Test.CustomerId has private access in 
-				com.github.flaz14.grouping.Constants_3_EnhancedInnerClass_Test
-			</code>. То же самое будет и при любом другом модификоре поля, главное, чтобы сам вложенный класс был 
-			приватным.
+			Попробуем скомпилировать и получим ошибку: 
+			<blockquote>
+				com.github.flaz14.grouping.ConstantsEnhancedInnerClassTest.CustomerId has private access in 
+				com.github.flaz14.grouping.ConstantsEnhancedInnerClassTest
+			</blockquote>
+			То же самое будет и при любом другом модификоре поля, главное, чтобы сам вложенный класс был приватным.
 		
 		<p>
 			Т.о. образом привиденный в <a href="#listing-3">листинге 3</a> класс оптимально подходит для группировки 
@@ -209,14 +217,14 @@ public class VisibilityOfInnerClassTest {
 			Попробуем сгруппировать константы, но с помощью <code>enum</code>:
 		
 		<h4>
-			Листинг 5 - тут будет имя класса - константы оформленные в виде <code>enum</code>
+			Листинг 5 - ConstantsEnumTest - константы оформлены в виде <code>enum</code>
 		</h4>
 <pre>
 package com.github.flaz14.grouping;
 
 import org.junit.Test;
 
-public class Constants_3_Enum_Test {
+public class ConstantsEnumTest {
 
     private enum CustomerId {
         VALID("12345"),
@@ -253,7 +261,7 @@ public class Constants_3_Enum_Test {
 			<a href="#listing-6">листинг 6</a>:
 		
 		<h4 id="listing-6">
-			Листинг 6 - тут будет имя класса - использование внутренних классов для организации static factory
+			Листинг 6 - DtoFactoryTest - использование внутренних классов для организации static factory
 		</h4>
 <pre>
 package com.github.flaz14.factory;
