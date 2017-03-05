@@ -1,4 +1,4 @@
-package com.github.flaz14.bar;
+package com.github.flaz14.grouping;
 
 import org.junit.Test;
 
