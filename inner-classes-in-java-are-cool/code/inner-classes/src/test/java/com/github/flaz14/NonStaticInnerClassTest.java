@@ -7,7 +7,6 @@ public class NonStaticInnerClassTest {
     @Test
     public void test() throws Exception {
         final ChatBot bot = new ChatBot(new XmppClient());
-
         bot.startConversation();
         bot.broadcast();
     }
@@ -26,7 +25,7 @@ class ChatBot {
 
     public void broadcast() {
         for (int i = 0; i < 100; i++) {
-            new Message("Spam...").sendAsynchonously();
+            new Message("Spam...").sendAsynchronously();
         }
     }
 
@@ -42,7 +41,7 @@ class ChatBot {
             return 0;
         }
 
-        public void sendAsynchonously() {
+        public void sendAsynchronously() {
             // ...
         }
     }
