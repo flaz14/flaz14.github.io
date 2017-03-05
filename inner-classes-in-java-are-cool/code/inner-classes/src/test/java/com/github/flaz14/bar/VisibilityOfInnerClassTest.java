@@ -1,4 +1,4 @@
-package com.github.flaz14.foo;
+package com.github.flaz14.bar;
 
 import org.junit.Test;
 
