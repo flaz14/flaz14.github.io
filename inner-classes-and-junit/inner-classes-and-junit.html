@@ -23,7 +23,7 @@
 		<h3>[2017, Март]</h3>
 		
 		<p>
-			Я не сильно люблю тесты, но делаю ТDD. Начинаю с самого простого, что может быть в классе - конструктора. И 
+			Я не сильно люблю тесты, но делаю ТDD. Обычно начинаю с самого простого, что может быть в классе - конструктора. И 
 			по мере дополнения класса появляются новые тестовые методы. Каждый тестовый метод выглядит примерно так (это
 			не я придумал, так сказано в Code Style компании):
 			
@@ -45,6 +45,24 @@
 			
 			happyPath()
 			throwsException_whenUnderlyingLayerIsNotAvailable()
+			
+			Запустим эти тесты:
+			
+			<code>mvn clean test '-Dtest=*CustomerService_*'</code>
+			
+			и получим
+
+<pre>
+Running com.github.flaz14.boilerplate.CustomerServiceTest.CustomerService_readTest
+read - happyPath
+read - returnsNull_whenDesiredCustomerDoesNotExist
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.143 sec
+Running com.github.flaz14.boilerplate.CustomerServiceTest.CustomerService_createTest
+create - happyPath
+create - throwsException_whenUnderlyingLayerIsNotAvailable
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 sec
+</pre>
+
 			
 			Преимущества такого подхода перед изложенным в Code Style:
 			
@@ -70,7 +88,150 @@
 			Собственно, на основании того поста и написана эта статья. Я лишь попытался систематизировать разные подходы
 			и сказать о достоинствах и недостатках каждого из них.
 			
-			
+		<h2>Стиль JUnit 3</h2>
+		
+		Чтобы тесты, размещенные во внутренних классах заработали, нужно строго следовать стилю JUnit 3. Так, необходимо 
+		унаследовать класс <code>junit.framework.TestCase</code> (во внутреннем классе, а не во внешнем). Каждый 
+		тестовый метод должен, как и принято в JUnit,
+		начинаться с префикcа <code>test</code>. В результате получается такая конструкция:
+		
+		Листинг 1 - - стиль JUnit 3
+
+<pre>
+package com.github.flaz14.junit3;
+
+import junit.framework.TestCase;
+
+public class CustomerServiceTest {
+
+    public static class Create extends TestCase {
+        public void test_happyPath() throws Exception {
+            System.out.println("create - happyPath");
+        }
+
+        public void test_throwsException_whenUnderlyingLayerIsNotAvailable() throws Exception {
+            System.out.println("create - throwsException_whenUnderlyingLayerIsNotAvailable");
+        }
+    }
+
+    public static class Read extends TestCase {
+        public void test_happyPath() throws Exception {
+            System.out.println("read - happyPath");
+        }
+
+        public void test_returnsNull_whenDesiredCustomerDoesNotExist() throws Exception {
+            System.out.println("read - throwsException_whenUnderlyingLayerIsNotAvailable");
+        }
+    }
+}
+</pre>
+
+		Запускать тесты нужно особым образом: ссылаясь на внутренние классы (имя внутреннего класса, как известно, 
+		получается в результате склеивания полного имени внешнего класса и знака доллара). Например, так:
+		
+		<code>mvn clean test '-Dtest=com.github.flaz14.junit3.CustomerServiceTest$Create,-Dtest=com.github.flaz14.junit3.CustomerServiceTest$Read'</code>
+		
+		В результате получим:
+		
+<pre>
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.github.flaz14.junit3.CustomerServiceTest$Create
+create - happyPath
+create - throwsException_whenUnderlyingLayerIsNotAvailable
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.071 sec
+
+Results :
+
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+</pre>
+
+		Не так уж плохо. Современная (и даже не очень современая) IDE переварит такие тесты. Да и в Maven можно настроить
+		правило для запуска тестов из внутренних классов. Но в качестве Clean Code такой подход не годится (но может 
+		вдохнуть жизнь в старый проект).
+		
+		<h2>Использование <code>@RunWith(Enclosed.class)</code></h2>
+		
+		Я так и не знаю, как работают т.н. runner'ы в JUnit. Но <code>org.junit.experimental.runners.Enclosed</code>
+		делает работу:
+		
+		Листинг 2 - - Использование специализированного runner'а JUnit
+<pre>
+package com.github.flaz14.junit4.enclosedrunner;
+
+import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
+
+@RunWith(Enclosed.class)
+public class CustomerServiceTest {
+
+    public static class Create {
+        @Test
+        public void happyPath() throws Exception {
+            System.out.println("create - happyPath");
+        }
+
+        @Test
+        public void throwsException_whenUnderlyingLayerIsNotAvailable() throws Exception {
+            System.out.println("create - throwsException_whenUnderlyingLayerIsNotAvailable");
+        }
+    }
+
+    public static class Read {
+        @Test
+        public void happyPath() throws Exception {
+            System.out.println("read - happyPath");
+        }
+
+        @Test
+        public void returnsNull_whenDesiredCustomerDoesNotExist() throws Exception {
+            System.out.println("read - throwsException_whenUnderlyingLayerIsNotAvailable");
+        }
+    }
+}
+</pre>		
+		
+		
+		
+		
+		
+		Запускаем:
+		
+<pre>
+mvn clean test '-Dtest=com.github.flaz14.junit4.enclosedrunner.CustomerServiceTest'
+</pre>
+	
+		Получаем:
+		
+<pre>
+	-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.github.flaz14.junit4.enclosedrunner.CustomerServiceTest
+read - happyPath
+read - throwsException_whenUnderlyingLayerIsNotAvailable
+create - happyPath
+create - throwsException_whenUnderlyingLayerIsNotAvailable
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.14 sec
+
+Results :
+
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+</pre>		
+		
+		Вроде все в порядке. Остается открытым вопрос: можно 
+		
+	
+		
+		
+		
+		!здесь будет листинг!
+		
+		Запустим тесты:
+		
+		
 			
 			
 			
