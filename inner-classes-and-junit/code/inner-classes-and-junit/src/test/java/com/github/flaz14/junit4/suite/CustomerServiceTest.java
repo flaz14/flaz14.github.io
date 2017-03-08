@@ -1,11 +1,11 @@
-package com.github.flaz14.junit4.enclosedrunner;
+package com.github.flaz14.junit4.suite;
 
 import com.github.flaz14.CustomerService;
-import com.github.flaz14.spring.DaoConfiguration;
+import com.github.flaz14.spring.SampleConfiguration;
 import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Suite;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
@@ -20,14 +20,14 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.runners.Parameterized.Parameter;
 import static org.junit.runners.Parameterized.Parameters;
+import static org.junit.runners.Suite.*;
 
-@RunWith(Enclosed.class)
-public class ComplicatedTest {
-
+@RunWith(Suite.class)
+@SuiteClasses({CustomerServiceTest.Hello.class, CustomerServiceTest.Goodbye.class})
+public class CustomerServiceTest {
     @RunWith(SpringJUnit4ClassRunner.class)
-    @ContextConfiguration(classes = {DaoConfiguration.class})
+    @ContextConfiguration(classes = {SampleConfiguration.class})
     public static class Hello {
-
         @Autowired
         @Qualifier("customerService")
         private CustomerService service;
@@ -46,7 +46,6 @@ public class ComplicatedTest {
 
     @RunWith(Parameterized.class)
     public static class Goodbye {
-
         @Parameters
         public static Collection<Object[]> data() {
             return unmodifiableCollection(asList(new Object[][]{

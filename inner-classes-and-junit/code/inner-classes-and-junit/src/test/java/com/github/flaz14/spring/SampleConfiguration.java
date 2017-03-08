@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 
 @Configuration
-public class DaoConfiguration {
+public class SampleConfiguration {
     @Bean
     @Qualifier("customerService")
     public CustomerService customerService() {
