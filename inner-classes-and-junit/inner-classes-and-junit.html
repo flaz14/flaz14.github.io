@@ -292,16 +292,80 @@ Results :
 Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
 </pre>		
 		
-		Вроде все в порядке. Остается открытым вопрос: можно 
+		<p>
+			Все на месте. Остается только открытым вопрос: можно ли "навесить" runner'ы и на внутренние классы? В JUnit 4
+			у класса может быть только один runner. Не будем гадать, а попробуем. В <a href="#listing-5">листинге 5</a>
+			приведен пример внутреннего класса внутри внутреннего класса (сладкая парочка Foo-Bar тоже присутствует).
+			
+		<h4 id="listing-5">
+			Листинг 5 - OneMoreTimeEnclosedTest - пример тестового внутреннего класса внутри внутреннего класса
+		</h4>
+<pre>
+package com.github.flaz14.junit4.enclosed;
+
+import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
+
+@RunWith(Enclosed.class)
+public class OneMoreTimeEnclosedTest {
+
+    @RunWith(Enclosed.class)
+    public static class FirstEnclosed {
+
+        public static class SecondEnclosed {
+            @Test
+            public void test() throws Exception {
+                System.out.println("I am test from SecondEnclosed!");
+            }
+        }
+    }
+
+    public static class Foo {
+        @Test
+        public void test() throws Exception {
+            System.out.println("I am test from Foo!");
+        }
+    }
+
+    public static class Bar {
+        @Test
+        public void test() throws Exception {
+            System.out.println("I am test from Bar!");
+        }
+    }
+}
+</pre>
+
+		<p>
+			Проверяем (как видно из командной строки, мы указываем только внешний класс):
+<pre>
+mvn clean test '-Dtest=com.github.flaz14.junit4.enclosed.OneMoreTimeEnclosedTest'
+</pre>			
 		
-	
+		<p>
+			И в результате получим:
+<pre>
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.github.flaz14.junit4.enclosed.OneMoreTimeEnclosedTest
+I am test from Bar!
+I am test from Foo!
+I am test from SecondEnclosed!
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.19 sec
+
+Results :
+
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+</pre>			
 		
-		
-		
-		!здесь будет листинг!
-		
-		Запустим тесты:
-		
+		<p>
+			Фантастика! Вложенные <code>Enclosed</code> работают (и не только они, тесты из классов <code>Foo</code>
+			и <code>Bar</code> тоже запустились)!
+			
+		<p>
+			Что ж, попробуем еще парочку runner'ов. 
 		
 			
 			
