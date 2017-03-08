@@ -25,6 +25,7 @@ import static org.junit.runners.Suite.*;
 @RunWith(Suite.class)
 @SuiteClasses({CustomerServiceTest.Hello.class, CustomerServiceTest.Goodbye.class})
 public class CustomerServiceTest {
+
     @RunWith(SpringJUnit4ClassRunner.class)
     @ContextConfiguration(classes = {SampleConfiguration.class})
     public static class Hello {

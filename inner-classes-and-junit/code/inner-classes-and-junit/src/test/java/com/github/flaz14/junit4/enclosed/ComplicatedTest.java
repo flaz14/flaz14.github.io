@@ -23,6 +23,7 @@ import static org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Enclosed.class)
 public class ComplicatedTest {
+
     @RunWith(SpringJUnit4ClassRunner.class)
     @ContextConfiguration(classes = {SampleConfiguration.class})
     public static class Hello {
