@@ -23,64 +23,136 @@
 		<h3>[2017, Март]</h3>
 		
 		<p>
-			Я не сильно люблю тесты, но делаю ТDD. Обычно начинаю с самого простого, что может быть в классе - конструктора. И 
-			по мере дополнения класса появляются новые тестовые методы. Каждый тестовый метод выглядит примерно так (это
-			не я придумал, так сказано в Code Style компании):
+			Я не сильно люблю тесты, но делаю ТDD. Обычно начинаю с самого простого, что может быть в классе - 
+			конструктора. По мере дополнения класса появляются новые тестовые методы. Название каждого тестового метода
+			выглядит примерно так (это не я придумал, так сказано в Code Style компании):
 			
-			названиеМетодаКоторыйНужноПроверить_делаетЧтоТо_когдаВыполняетсяКакоеЛибоУсловие
+		<p>
+			<i>имяМетодаКоторыйНужноПроверить_делаетЧтоТо_когдаВыполняетсяКакоеЛибоУсловие</i>
 			
+		<p>
 			И называется такой стиль Expressive Tests (по-моему, очень даже хороший стиль).
 			
 		<p>
-			Пусть нам нужно реализовать самый обычный service-класс. На класс будут возложены задачи создания объектов, 
-			их сохранения в БД, чтения по ID и т.п. Для простоты будем считать, что у нас есть два метода: create и read.
-			Нужно сделать тесты для них.
+			Пусть нам нужно сделать тесты для самого обычного service-класса, который приведен в 
+			<a href="#listing-1">листинге 1</a>.
+			
+		<h4 id="listing-1">
+			Листинг 1 - CustomerService - простой service-класс
+		</h4>
+<pre>
+package com.github.flaz14;
+
+public class CustomerService {
+    public String hello() {
+        return "Hello! I am stupid CustomerService.";
+    }
+
+    public String goodbye() {
+        return "Good bye! I am stupid CustomerService.";
+    }
+}	
+</pre>
+	
+		<h2>Примитивный подход</h2>
+	
+		<p>
+			Поначалу я организовывал тесты таким образом:
+			<ol>
+				<li>
+					Создавал пакет вида <i>ИмяТестируемогоКлассаTest</i>.
+				
+				<li>
+					В новом пакете для каждого тестируемого метода создавал класс с таким именем: 
+					<i>имяТестируемогоКласса_имяТестируемогоМетодаTest</i>.
+					
+				<li>
+					В каждом новом классе создавал методы (для каждого сценария) с именами вида:
+					<i>делаетЧтоТо_когдаВыполняетсяКакоеЛибоУсловие</i>. В тесте для <code>CustomerService</code> не будем давать 
+					тестовым методам сложные имена, возьмем <code>happyPath()</code> и <code>unhappyPath()</code> для краткости.				
+			</ol>
 			
 		<p>
-			Поначалу я организовывал тесты таким образом: 
-			Создавал пакет имяКласса + 'Test' (т.е. CustomerServiceTest ), а в нем для каждого тестируемого метода создавал класс
-			следующего вида: имяКласса + '_' + имяМетода + 'Test' (например, CustomerService_createTest). А уже в каждом классе
-			создавал методы (для каждого сценария) с именами: делаетЧтоТо_когдаВыполняетсяКакоеЛибоУсловие.
-			Например, в тесте для метода create() (CustomerService_createTest) будут такие методы:
-			
-			happyPath()
-			throwsException_whenUnderlyingLayerIsNotAvailable()
-			
-			Запустим эти тесты:
-			
-			<code>mvn clean test '-Dtest=*CustomerService_*'</code>
-			
-			и получим
-
+			Т.о. тесты имеют следующую структуру:
 <pre>
-Running com.github.flaz14.boilerplate.CustomerServiceTest.CustomerService_readTest
-read - happyPath
-read - returnsNull_whenDesiredCustomerDoesNotExist
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.143 sec
-Running com.github.flaz14.boilerplate.CustomerServiceTest.CustomerService_createTest
-create - happyPath
-create - throwsException_whenUnderlyingLayerIsNotAvailable
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 sec
+boilerplate/
+└── CustomerServiceTest
+    ├── CustomerService_goodbyeTest.java
+    └── CustomerService_helloTest.java	
 </pre>
+			
+		<p>
+			Тест для метода <code>hello()</code> выглядит следующим образом:
+			
+		<h4 id="listing-2">
+			Листинг 2 - CustomerService_helloTest - пример примитивного подхода к организации Unit-тестов
+		</h4>
+<pre>
+package com.github.flaz14.boilerplate.CustomerServiceTest;
 
+import org.junit.Test;
+
+public class CustomerService_helloTest {
+    @Test
+    public void happyPath() throws Exception {
+        // ...
+    }
+
+    @Test
+    public void unhappyPath() throws Exception {
+        // ...
+    }
+}
+</pre>			
+		
+		<p>
+			Запустим эти тесты: 
 			
-			Преимущества такого подхода перед изложенным в Code Style:
+<pre>
+mvn clean test '-Dtest=*CustomerService_*'
+</pre>
 			
-			1. Каждый тестируемый метод тестируется в изоляции от остальных. Это уменьшает вероятность ошибок и случайного
-			влияния одних тестов на другие.
+		<p>
+			И получим:
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.github.flaz14.boilerplate.CustomerServiceTest.CustomerService_helloTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.168 sec
+Running com.github.flaz14.boilerplate.CustomerServiceTest.CustomerService_goodbyeTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 sec
+
+Results :
+
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+<pre>
+		
+		<p>
+			Преимущества такого подхода:
+			<ol>
+				<li>
+					Каждый тестируемый метод проверяется в изоляции от остальных (уже просто потому, что размещается в
+					отдельном классе). Это уменьшает вероятность (случайных) ошибок и влияния одних тестов на другие.
 			
-			2. Найти требуемый тестовый сценарий намного проще - сценарии не свалены в одну кучу, а разбиты на группы.
+				<li>
+					Найти требуемый сценарий намного проще: сценарии не свалены в одну кучу, а разбиты на группы.
 			
-			2. В именах тестовых методов не нужно дублировать название тестируемого метода. Потому что оно отражено в название
-			тестового класса.
-			
+				<li>В именах тестовых методов не нужно дублировать название тестируемого метода. Потому что оно отражено
+					в названии тестового класса.
+			</ol>
+		
+		<p>
 			Недостатки тоже есть:
+			<ol>
+				<li>
+					Нестандарное название пакетов и классов. Вообще-то для тестов названия не так критичны. Но необычные
+					названия нарушают общепринятые в Java соглашения, что многим не нравится.
 			
-			1. Нестандарное название классов и пакетов. Вообще-то для тестов названия не так критичны. Но необычные названия
-			нарушают общепринятые в Java соглашения. Что многим не нравиться.
-			
-			2. Дублирование в именах: только повторяются не названия тестируемых методов, а название тестируемого класса.
-			
+				<li>
+					Дублирование в именах все же имеет место, только повторяются не названия тестируемых методов, а 
+					название тестируемого класса.
+		
+		<p>
 			Поэтому я задался вопросом организации тестов. Теорию мне читать не пришлось. На Stackoverflow
 			нашелся готовый ответ: 
 			<a href="http://stackoverflow.com/questions/8758294/test-cases-in-inner-classes-with-junit">
@@ -90,131 +162,130 @@ Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 sec
 			
 		<h2>Стиль JUnit 3</h2>
 		
-		Чтобы тесты, размещенные во внутренних классах заработали, нужно строго следовать стилю JUnit 3. Так, необходимо 
+		Чтобы тесты, размещенные во внутренних классах заработали, нужно строго следовать стилю 
+		<strong>JUnit 3</strong>. Так, необходимо 
 		унаследовать класс <code>junit.framework.TestCase</code> (во внутреннем классе, а не во внешнем). Каждый 
-		тестовый метод должен, как и принято в JUnit,
-		начинаться с префикcа <code>test</code>. В результате получается такая конструкция:
+		тестовый метод должен, как принято в JUnit 3, начинаться с префикcа <code>test</code>. В результате получается 
+		такая конструкция:
 		
-		Листинг 1 - - стиль JUnit 3
-
+		<h4 id="listing-3">Листинг 3 - стиль JUnit 3</h4>
 <pre>
 package com.github.flaz14.junit3;
 
 import junit.framework.TestCase;
 
 public class CustomerServiceTest {
-
-    public static class Create extends TestCase {
-        public void test_happyPath() throws Exception {
-            System.out.println("create - happyPath");
+    public static class Hello extends TestCase {
+        public void testHappyPath() throws Exception {
+            // ...
         }
 
-        public void test_throwsException_whenUnderlyingLayerIsNotAvailable() throws Exception {
-            System.out.println("create - throwsException_whenUnderlyingLayerIsNotAvailable");
+        public void testUnhappyPath() throws Exception {
+            // ...
         }
     }
 
-    public static class Read extends TestCase {
-        public void test_happyPath() throws Exception {
-            System.out.println("read - happyPath");
+    public static class Goodbye extends TestCase {
+        public void testHappyPath() throws Exception {
+            // ...
         }
 
-        public void test_returnsNull_whenDesiredCustomerDoesNotExist() throws Exception {
-            System.out.println("read - throwsException_whenUnderlyingLayerIsNotAvailable");
+        public void testUnhappyPath() throws Exception {
+            // ...
         }
     }
 }
 </pre>
 
-		Запускать тесты нужно особым образом: ссылаясь на внутренние классы (имя внутреннего класса, как известно, 
-		получается в результате склеивания полного имени внешнего класса и знака доллара). Например, так:
-		
-		<code>mvn clean test '-Dtest=com.github.flaz14.junit3.CustomerServiceTest$Create,-Dtest=com.github.flaz14.junit3.CustomerServiceTest$Read'</code>
-		
-		В результате получим:
-		
+		<p>
+			Как видно из приведенная в <a href="#listing-3">листинга 3</a> сценарии для каждого тестируемого метода 
+			находятся внутри своего класса (имя которого совпадает с именем тестируемого метода, только начинается с
+			заглавной буквы: <em>СamelCase</em> все-таки). Внутренние классы в данном случае ничуть не хуже обычных. С
+			ними можно делать все, что угодно. Просто нет необходимости создавать пакет. И Java-соглашения не нарушены.
+			
+		<p>
+			Но запускать такие тесты нужно особым образом: нужно ссылаться на внутренние классы. Например, так:
+<pre>
+mvn clean test '-Dtest=com.github.flaz14.junit3.CustomerServiceTest$*'
+</pre>
+	
+		<p>
+			Проверим, не потерялось ли чего:
 <pre>
 -------------------------------------------------------
  T E S T S
 -------------------------------------------------------
-Running com.github.flaz14.junit3.CustomerServiceTest$Create
-create - happyPath
-create - throwsException_whenUnderlyingLayerIsNotAvailable
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.071 sec
+Running com.github.flaz14.junit3.CustomerServiceTest$HelloTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.048 sec
+Running com.github.flaz14.junit3.CustomerServiceTest$GoodbyeTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 sec
 
 Results :
 
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
 </pre>
-
-		Не так уж плохо. Современная (и даже не очень современая) IDE переварит такие тесты. Да и в Maven можно настроить
-		правило для запуска тестов из внутренних классов. Но в качестве Clean Code такой подход не годится (но может 
-		вдохнуть жизнь в старый проект).
+	
+		<p>
+			Не так уж плохо. Современная (и даже не очень современная) IDE переварит такие тесты. Да и в Maven можно настроить
+			правило для запуска тестов из внутренних классов. Но в качестве Clean Code такой подход не годится (но может 
+			вдохнуть жизнь в старый проект).
 		
 		<h2>Использование <code>@RunWith(Enclosed.class)</code></h2>
 		
-		Я так и не знаю, как работают т.н. runner'ы в JUnit. Но <code>org.junit.experimental.runners.Enclosed</code>
-		делает работу:
+		<p>
+			Я не знаю, как работают т.н. runner'ы в JUnit 4. Но использовать 
+			<code>org.junit.experimental.runners.Enclosed</code> несложно, что и показано в <a href="#listing-4">листинге 4</a>.
 		
-		Листинг 2 - - Использование специализированного runner'а JUnit
+		<h4 id="listing-4">Листинг 4 - Использование специализированного runner'а JUnit 4</h4>
 <pre>
-package com.github.flaz14.junit4.enclosedrunner;
+package com.github.flaz14.junit4.enclosed;
 
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
 @RunWith(Enclosed.class)
-public class CustomerServiceTest {
-
-    public static class Create {
+public class TrivialTest {
+    public static class Hello {
         @Test
         public void happyPath() throws Exception {
-            System.out.println("create - happyPath");
+            // ...
         }
 
         @Test
-        public void throwsException_whenUnderlyingLayerIsNotAvailable() throws Exception {
-            System.out.println("create - throwsException_whenUnderlyingLayerIsNotAvailable");
+        public void unhappyPath() throws Exception {
+            // ...
         }
     }
 
-    public static class Read {
+    public static class Goodbye {
         @Test
         public void happyPath() throws Exception {
-            System.out.println("read - happyPath");
+            // ...
         }
 
         @Test
-        public void returnsNull_whenDesiredCustomerDoesNotExist() throws Exception {
-            System.out.println("read - throwsException_whenUnderlyingLayerIsNotAvailable");
+        public void unhappyPath() throws Exception {
+            // ...
         }
     }
 }
 </pre>		
 		
-		
-		
-		
-		
-		Запускаем:
-		
+		<p>
+			Запускаем (как видно из командной строки, нужно указать всего лишь класс - никаких wildcards и т.п.):
 <pre>
-mvn clean test '-Dtest=com.github.flaz14.junit4.enclosedrunner.CustomerServiceTest'
+mvn clean test '-Dtest=com.github.flaz14.junit4.enclosed.TrivialTest'
 </pre>
-	
-		Получаем:
-		
+
+		<p>
+			Проверяем:
 <pre>
-	-------------------------------------------------------
+-------------------------------------------------------
  T E S T S
 -------------------------------------------------------
-Running com.github.flaz14.junit4.enclosedrunner.CustomerServiceTest
-read - happyPath
-read - throwsException_whenUnderlyingLayerIsNotAvailable
-create - happyPath
-create - throwsException_whenUnderlyingLayerIsNotAvailable
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.14 sec
+Running com.github.flaz14.junit4.enclosed.TrivialTest
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.127 sec
 
 Results :
 
