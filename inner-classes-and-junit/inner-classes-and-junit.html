@@ -365,11 +365,160 @@ Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
 			и <code>Bar</code> тоже запустились)!
 			
 		<p>
-			Что ж, попробуем еще парочку runner'ов. 
+			Что ж, продолжим копание. Часто в реальных проектах используется Spring Framework. Например,  
+			SpringJUnit4ClassRunner  !!!здесь будет ссылка на официальный джавадок спринга!!! помогает поднять контекст и сделать
+			прочие инициализации в духе Spring. Я сделал маленькую конфигурацию Spring !!!здесь будет ссылка на пакет spring
+			на моем гитхабе!!!. А в <a href="#listing-6">листинге 6</a> проиллюстрировано настоящее безумие c 
+			внутренними классами.
 		
+		<h4 id="listing-6">
+			Листинг 6 - Сложный пример комбинирования runner'ов (import'ы опущены для краткости)
+		</h4>
+<pre>
+package com.github.flaz14.junit4.enclosed;
+
+// imports are omitted from brevity
+
+@RunWith(Enclosed.class)
+public class ComplicatedTest {
+
+    @RunWith(Enclosed.class)
+    public static class EnclosedSpringRunner {
+
+        @RunWith(SpringJUnit4ClassRunner.class)
+        @ContextConfiguration(classes = {SampleConfiguration.class})
+        public static class Hello {
+            @Autowired
+            @Qualifier("customerService")
+            private CustomerService service;
+
+            @Test
+            public void happyPath() throws Exception {
+                final String actualMessage = service.hello();
+                assertThat(actualMessage, equalTo("Hello! I am stupid CustomerService."));
+            }
+
+            @Test
+            public void unhappyPath() throws Exception {
+                System.out.println("I am unhappyPath() test for hello() method.");
+            }
+        }
+    }
+
+    @RunWith(Parameterized.class)
+    public static class Goodbye {
+        @Parameters
+        public static Collection<Object[]> data() {
+            return unmodifiableCollection(asList(new Object[][]{
+                    {1, "1"},
+                    {2, "2"}
+                    // ...
+            }));
+        }
+
+        @Parameter(0)
+        public int input;
+
+        @Parameter(1)
+        public String expected;
+
+        @Test
+        public void happyPath() throws Exception {
+            final String output = format("%d", input);
+            assertThat(output, equalTo(expected));
+        }
+
+        @Test
+        public void unhappyPath() throws Exception {
+            final String message = format(
+                    "I am parameterized test. And the parameters are: input=[%s], expected=[%s]",
+                    input, expected);
+            System.out.println(message);
+        }
+    }
+}
+</pre>
+		
+		<p>
+			Запускаем (опять-таки, достаточно указать только внешний класс):
+<pre>
+mvn clean test '-Dtest=com.github.flaz14.junit4.enclosed.ComplicatedTest'
+</pre>
+
+		<p>
+			И получаем:
+<pre>
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.github.flaz14.junit4.enclosed.ComplicatedTest
+Mar 08, 2017 7:34:50 PM org.springframework.test.context.support.DefaultTestContextBootstrapper getDefaultTestExecutionListenerClassNames
+INFO: Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]
+Mar 08, 2017 7:34:50 PM org.springframework.test.context.support.DefaultTestContextBootstrapper instantiateListeners
+INFO: Could not instantiate TestExecutionListener [org.springframework.test.context.web.ServletTestExecutionListener]. Specify custom listener classes or make the default listener classes (and their required dependencies) available. Offending class: [javax/servlet/ServletContext]
+Mar 08, 2017 7:34:50 PM org.springframework.test.context.support.DefaultTestContextBootstrapper instantiateListeners
+INFO: Could not instantiate TestExecutionListener [org.springframework.test.context.transaction.TransactionalTestExecutionListener]. Specify custom listener classes or make the default listener classes (and their required dependencies) available. Offending class: [org/springframework/transaction/TransactionDefinition]
+Mar 08, 2017 7:34:50 PM org.springframework.test.context.support.DefaultTestContextBootstrapper instantiateListeners
+INFO: Could not instantiate TestExecutionListener [org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]. Specify custom listener classes or make the default listener classes (and their required dependencies) available. Offending class: [org/springframework/transaction/interceptor/TransactionAttribute]
+Mar 08, 2017 7:34:50 PM org.springframework.test.context.support.DefaultTestContextBootstrapper getTestExecutionListeners
+INFO: Using TestExecutionListeners: [org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@190c9c3, org.springframework.test.context.support.DependencyInjectionTestExecutionListener@e6e9c3, org.springframework.test.context.support.DirtiesContextTestExecutionListener@56dfcb]
+I am parameterized test. And the parameters are: input=[1], expected=[1]
+I am parameterized test. And the parameters are: input=[2], expected=[2]
+Mar 08, 2017 7:34:51 PM org.springframework.context.support.GenericApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@a3ffec: startup date [Wed Mar 08 19:34:51 MSK 2017]; root of context hierarchy
+I am unhappyPath() test for hello() method.
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.042 sec
+Mar 08, 2017 7:34:51 PM org.springframework.context.support.GenericApplicationContext doClose
+INFO: Closing org.springframework.context.support.GenericApplicationContext@a3ffec: startup date [Wed Mar 08 19:34:51 MSK 2017]; root of context hierarchy
+
+Results :
+
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+</pre>
+
+		<p>
+			В вывод попали сообщения Spring. Но строки вроде <i>I am ...</i> говорят о том, что тесты отработали так, как
+			ожидалось.
+			
+		<h2>Suite'ы тоже хороши</h2>
+		
+		<p>
+			В том посте !!!здесь будет ссылка!!! на Stackoverflow есть еще ответ, согласно которому тесты во внутренних 
+			классам можно оживить с помощью Suite'ов, т.е. runner'а !!!тут будет !!! могутговорилось о том, что 
 			
 			
-			
+<pre>
+mvn clean test '-Dtest=com.github.flaz14.junit4.suite.CustomerServiceTest'
+</pre>
+
+<pre>
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.github.flaz14.junit4.suite.CustomerServiceTest
+Mar 08, 2017 7:44:27 PM org.springframework.test.context.support.DefaultTestContextBootstrapper getDefaultTestExecutionListenerClassNames
+INFO: Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]
+Mar 08, 2017 7:44:27 PM org.springframework.test.context.support.DefaultTestContextBootstrapper instantiateListeners
+INFO: Could not instantiate TestExecutionListener [org.springframework.test.context.web.ServletTestExecutionListener]. Specify custom listener classes or make the default listener classes (and their required dependencies) available. Offending class: [javax/servlet/ServletContext]
+Mar 08, 2017 7:44:27 PM org.springframework.test.context.support.DefaultTestContextBootstrapper instantiateListeners
+INFO: Could not instantiate TestExecutionListener [org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]. Specify custom listener classes or make the default listener classes (and their required dependencies) available. Offending class: [org/springframework/transaction/interceptor/TransactionAttribute]
+Mar 08, 2017 7:44:27 PM org.springframework.test.context.support.DefaultTestContextBootstrapper instantiateListeners
+INFO: Could not instantiate TestExecutionListener [org.springframework.test.context.transaction.TransactionalTestExecutionListener]. Specify custom listener classes or make the default listener classes (and their required dependencies) available. Offending class: [org/springframework/transaction/TransactionDefinition]
+Mar 08, 2017 7:44:27 PM org.springframework.test.context.support.DefaultTestContextBootstrapper getTestExecutionListeners
+INFO: Using TestExecutionListeners: [org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@61f5df, org.springframework.test.context.support.DependencyInjectionTestExecutionListener@1551a94, org.springframework.test.context.support.DirtiesContextTestExecutionListener@11be3c5]
+Mar 08, 2017 7:44:27 PM org.springframework.context.support.GenericApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@acaea5: startup date [Wed Mar 08 19:44:27 MSK 2017]; root of context hierarchy
+I am unhappyPath() test for hello() method.
+I am parameterized test. And the parameters are: input=[1], expected=[1]
+I am parameterized test. And the parameters are: input=[2], expected=[2]
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.908 sec
+
+Results :
+
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+</pre>
+
+
 			
 			
 			

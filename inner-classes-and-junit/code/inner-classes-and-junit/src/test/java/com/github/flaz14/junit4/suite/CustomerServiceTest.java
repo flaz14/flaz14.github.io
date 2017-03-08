@@ -20,57 +20,68 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.runners.Parameterized.Parameter;
 import static org.junit.runners.Parameterized.Parameters;
-import static org.junit.runners.Suite.*;
+import static org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({CustomerServiceTest.Hello.class, CustomerServiceTest.Goodbye.class})
+@SuiteClasses({
+        CustomerServiceTest.NestedStub.NestedNestedStub.Hello.class,
+        CustomerServiceTest.OneMoreNestedStub.Goodbye.class})
 public class CustomerServiceTest {
 
-    @RunWith(SpringJUnit4ClassRunner.class)
-    @ContextConfiguration(classes = {SampleConfiguration.class})
-    public static class Hello {
-        @Autowired
-        @Qualifier("customerService")
-        private CustomerService service;
+    public static class NestedStub {
+        public static class NestedNestedStub {
+            @RunWith(SpringJUnit4ClassRunner.class)
+            @ContextConfiguration(classes = {SampleConfiguration.class})
+            public static class Hello {
+                @Autowired
+                @Qualifier("customerService")
+                private CustomerService service;
 
-        @Test
-        public void happyPath() throws Exception {
-            final String actualMessage = service.hello();
-            assertThat(actualMessage, equalTo("Hello! I am stupid CustomerService."));
-        }
+                @Test
+                public void happyPath() throws Exception {
+                    final String actualMessage = service.hello();
+                    assertThat(actualMessage, equalTo("Hello! I am stupid CustomerService."));
+                }
 
-        @Test
-        public void unhappyPath() throws Exception {
-            // ...
+                @Test
+                public void unhappyPath() throws Exception {
+                    System.out.println("I am unhappyPath() test for hello() method.");
+                }
+            }
         }
     }
 
-    @RunWith(Parameterized.class)
-    public static class Goodbye {
-        @Parameters
-        public static Collection<Object[]> data() {
-            return unmodifiableCollection(asList(new Object[][]{
-                    {1, "1"},
-                    {2, "2"}
-                    // ...
-            }));
-        }
+    public static class OneMoreNestedStub {
+        @RunWith(Parameterized.class)
+        public static class Goodbye {
+            @Parameters
+            public static Collection<Object[]> data() {
+                return unmodifiableCollection(asList(new Object[][]{
+                        {1, "1"},
+                        {2, "2"}
+                        // ...
+                }));
+            }
 
-        @Parameter(0)
-        public int input;
+            @Parameter(0)
+            public int input;
 
-        @Parameter(1)
-        public String expected;
+            @Parameter(1)
+            public String expected;
 
-        @Test
-        public void happyPath() throws Exception {
-            final String output = format("%d", input);
-            assertThat(output, equalTo(expected));
-        }
+            @Test
+            public void happyPath() throws Exception {
+                final String output = format("%d", input);
+                assertThat(output, equalTo(expected));
+            }
 
-        @Test
-        public void unhappyPath() throws Exception {
-            // ...
+            @Test
+            public void unhappyPath() throws Exception {
+                final String message = format(
+                        "I am parameterized test. And the parameters are: input=[%s], expected=[%s]",
+                        input, expected);
+                System.out.println(message);
+            }
         }
     }
 }

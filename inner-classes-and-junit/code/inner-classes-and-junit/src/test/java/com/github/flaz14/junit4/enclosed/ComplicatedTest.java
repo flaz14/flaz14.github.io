@@ -24,22 +24,26 @@ import static org.junit.runners.Parameterized.Parameters;
 @RunWith(Enclosed.class)
 public class ComplicatedTest {
 
-    @RunWith(SpringJUnit4ClassRunner.class)
-    @ContextConfiguration(classes = {SampleConfiguration.class})
-    public static class Hello {
-        @Autowired
-        @Qualifier("customerService")
-        private CustomerService service;
+    @RunWith(Enclosed.class)
+    public static class EnclosedSpringRunner {
 
-        @Test
-        public void happyPath() throws Exception {
-            final String actualMessage = service.hello();
-            assertThat(actualMessage, equalTo("Hello! I am stupid CustomerService."));
-        }
+        @RunWith(SpringJUnit4ClassRunner.class)
+        @ContextConfiguration(classes = {SampleConfiguration.class})
+        public static class Hello {
+            @Autowired
+            @Qualifier("customerService")
+            private CustomerService service;
 
-        @Test
-        public void unhappyPath() throws Exception {
-            // ...
+            @Test
+            public void happyPath() throws Exception {
+                final String actualMessage = service.hello();
+                assertThat(actualMessage, equalTo("Hello! I am stupid CustomerService."));
+            }
+
+            @Test
+            public void unhappyPath() throws Exception {
+                System.out.println("I am unhappyPath() test for hello() method.");
+            }
         }
     }
 
@@ -68,7 +72,10 @@ public class ComplicatedTest {
 
         @Test
         public void unhappyPath() throws Exception {
-            // ...
+            final String message = format(
+                    "I am parameterized test. And the parameters are: input=[%s], expected=[%s]",
+                    input, expected);
+            System.out.println(message);
         }
     }
 }
