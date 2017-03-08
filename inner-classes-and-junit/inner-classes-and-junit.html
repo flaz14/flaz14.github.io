@@ -377,7 +377,7 @@ Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
 <pre>
 package com.github.flaz14.junit4.enclosed;
 
-// imports are omitted from brevity
+// Imports are omitted from brevity.
 
 @RunWith(Enclosed.class)
 public class ComplicatedTest {
@@ -484,13 +484,86 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 		
 		<p>
 			В том посте !!!здесь будет ссылка!!! на Stackoverflow есть еще ответ, согласно которому тесты во внутренних 
-			классам можно оживить с помощью Suite'ов, т.е. runner'а !!!тут будет !!! могутговорилось о том, что 
+			классам можно оживить с помощью Suite'ов, т.е. runner'а !!!тут будет на официальный джавадок!!!. Завернем 
+			из покруче и покажем в <a href="listing-7">листинге 7</a> (почти копипаст из <a href="#listing-6">листинга 6</a>).
+<pre>
+package com.github.flaz14.junit4.suite;
+
+// Imports are omitted for brevity.
+
+@RunWith(Suite.class)
+@SuiteClasses({
+        CustomerServiceTest.NestedStub.NestedNestedStub.Hello.class,
+        CustomerServiceTest.OneMoreNestedStub.Goodbye.class})
+public class CustomerServiceTest {
+
+    public static class NestedStub {
+        public static class NestedNestedStub {
+            @RunWith(SpringJUnit4ClassRunner.class)
+            @ContextConfiguration(classes = {SampleConfiguration.class})
+            public static class Hello {
+                @Autowired
+                @Qualifier("customerService")
+                private CustomerService service;
+
+                @Test
+                public void happyPath() throws Exception {
+                    final String actualMessage = service.hello();
+                    assertThat(actualMessage, equalTo("Hello! I am stupid CustomerService."));
+                }
+
+                @Test
+                public void unhappyPath() throws Exception {
+                    System.out.println("I am unhappyPath() test for hello() method.");
+                }
+            }
+        }
+    }
+
+    public static class OneMoreNestedStub {
+        @RunWith(Parameterized.class)
+        public static class Goodbye {
+            @Parameters
+            public static Collection<Object[]> data() {
+                return unmodifiableCollection(asList(new Object[][]{
+                        {1, "1"},
+                        {2, "2"}
+                        // ...
+                }));
+            }
+
+            @Parameter(0)
+            public int input;
+
+            @Parameter(1)
+            public String expected;
+
+            @Test
+            public void happyPath() throws Exception {
+                final String output = format("%d", input);
+                assertThat(output, equalTo(expected));
+            }
+
+            @Test
+            public void unhappyPath() throws Exception {
+                final String message = format(
+                        "I am parameterized test. And the parameters are: input=[%s], expected=[%s]",
+                        input, expected);
+                System.out.println(message);
+            }
+        }
+    }
+}	
+</pre>			
 			
-			
+		<p>
+			Запускаем:
 <pre>
 mvn clean test '-Dtest=com.github.flaz14.junit4.suite.CustomerServiceTest'
 </pre>
 
+		<p>
+			И получаем результат, который не удивляет
 <pre>
 -------------------------------------------------------
  T E S T S
@@ -517,6 +590,15 @@ Results :
 
 Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 </pre>
+	
+		<p>
+			Т.о. Suite'ы дают тот же результат, что и вложенные Enclosed. Единственное различие: тестовые классы нужно 
+			указывать явно как параметры аннотации SuiteClasses !!!здесь будет ссылка на официальный Джавадок JUnit!!!.
+			Если забыть указать класс, то JUnit не будет запускать содержащиеся в нем тестовые методы. Но есть и преимущество:
+			в случае с Enclosed нужно писать аннотацию возле каждого внутреннего класса, а в случае с Suite имя тестового 
+			класса нужно указать лишь в возле SuiteClasses.
+			
+		
 
 
 			
