@@ -4,23 +4,23 @@ import junit.framework.TestCase;
 
 public class CustomerServiceTest {
 
-    public static class Create extends TestCase {
-        public void test_happyPath() throws Exception {
-            System.out.println("create - happyPath");
+    public static class Hello extends TestCase {
+        public void testHappyPath() throws Exception {
+            // ...
         }
 
-        public void test_throwsException_whenUnderlyingLayerIsNotAvailable() throws Exception {
-            System.out.println("create - throwsException_whenUnderlyingLayerIsNotAvailable");
+        public void testUnhappyPath() throws Exception {
+            // ...
         }
     }
 
-    public static class Read extends TestCase {
-        public void test_happyPath() throws Exception {
-            System.out.println("read - happyPath");
+    public static class Goodbye extends TestCase {
+        public void testHappyPath() throws Exception {
+            // ...
         }
 
-        public void test_returnsNull_whenDesiredCustomerDoesNotExist() throws Exception {
-            System.out.println("read - throwsException_whenUnderlyingLayerIsNotAvailable");
+        public void testUnhappyPath() throws Exception {
+            // ...
         }
     }
 }

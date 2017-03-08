@@ -1,12 +1,11 @@
 package com.github.flaz14;
 
 public class CustomerService {
-    public void create(Customer customer) {
-        // ...
+    public String hello() {
+        return "Hello! I am stupid CustomerService.";
     }
 
-    public Customer read(int customerId) {
-        // ...
-        return new Customer();
+    public String goodbye() {
+        return "Good bye! I am stupid CustomerService.";
     }
 }
