@@ -22,6 +22,13 @@
 		
 		<h3>[2017, Март]</h3>
 		
+		<h3>
+			<a href=
+			"https://github.com/flaz14/flaz14.github.io/tree/master/inner-classes-in-java-are-cool/code/inner-classes">
+				Исходный код
+			<a>
+		</h3>
+		
 		<h2>My Concern</h2>
 		
 		<p>
@@ -71,7 +78,7 @@ public class CustomerService {
 				<li>
 					В каждом новом классе создавал методы (для каждого сценария) с именами вида 
 					<i>делаетЧтоТо_когдаВыполняетсяКакоеЛибоУсловие</i>. В тестах для <code>CustomerService</code> отвергнем
-					<em>Expressive Tests</em> для краткости, возьмем <code>happyPath()</code> и <code>unhappyPath()</code>)
+					<em>Expressive Tests</em> для краткости: возьмем <code>happyPath()</code> и <code>unhappyPath()</code>)
 			</ol>
 			
 		<p>
@@ -135,7 +142,7 @@ Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
 			<ul>
 				<li>
 					Каждый тестируемый метод проверяется в изоляции от остальных (уже просто потому, что находится в
-					отдельном классе). Это уменьшает вероятность (случайных) ошибок и влияния одних тестов на другие.
+					отдельном классе). Это уменьшает вероятность случайных ошибок и влияния одних тестов на другие.
 			
 				<li>
 					Найти требуемый сценарий намного проще: сценарии не свалены в одну кучу, а разбиты на группы.
@@ -149,8 +156,8 @@ Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
 			Недостатки тоже есть:
 			<ul>
 				<li>
-					Нестандарные названия пакетов и классов. Для тестов названия не так критичны. Но необычные
-					имена нарушают общепринятые в Java соглашения, что многим не нравится (в том числе и IDE).
+					Нестандарные названия пакетов и классов. Для тестов названия не очень критичны. Но необычные
+					имена нарушают общепринятые в Java соглашения, что многим не нравится (в том числе IDE).
 			
 				<li>
 					Дублирование в именах все же имеет место, только повторяются не имена тестируемых методов, а 
@@ -162,7 +169,7 @@ Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
 			нашелся хороший пост: 
 			<a href="http://stackoverflow.com/questions/8758294/test-cases-in-inner-classes-with-junit">
 				Test cases in inner classes with JUnit</a>. 
-			Собственно, на его основе и написана эта статья. Я лишь попытался систематизировать разные подходы
+			На его основе и написана эта статья. Я лишь попытался систематизировать разные подходы
 			и рассказать о достоинствах и недостатках каждого из них.
 			
 		<h2>Стиль JUnit 3</h2>
@@ -205,7 +212,7 @@ public class CustomerServiceTest {
 </pre>
 
 		<p>
-			Как видно из <a href="#listing-3">листинга 3</a> сценарии для каждого тестируемого метода 
+			Как видно из <a href="#listing-3">листинга 3</a>, сценарии для каждого тестируемого метода 
 			находятся внутри своего класса (имя которого совпадает с именем тестируемого метода, только начинается с
 			заглавной буквы: <em>СamelCase</em> все-таки). Внутренние классы в данном случае ничуть не хуже обычных. С
 			ними можно делать все, что угодно. Просто нет необходимости создавать пакет. И соглашения Java не нарушены.
@@ -379,7 +386,7 @@ Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
 <a href=
 "http://docs.spring.io/spring/docs/4.3.7.RELEASE/javadoc-api/org/springframework/test/context/junit4/SpringJUnit4ClassRunner.html">
 SpringJUnit4ClassRunner</a>
-			помогает "поднять" контекст. Я сделал 
+			помогает "поднять контекст". Я сделал 
 <a href=
 "https://github.com/flaz14/flaz14.github.io/tree/master/inner-classes-and-junit/code/inner-classes-and-junit/src/test/java/com/github/flaz14/spring">
 			маленькую конфигурацию в духе Spring</a>. А в <a href="#listing-6">листинге 6</a> проиллюстрировал настоящее безумие c 
@@ -492,8 +499,12 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 			В том посте на Stackoverflow есть еще <a href="http://stackoverflow.com/a/22546453">ответ</a>, согласно 
 			которому тесты во внутренних классах можно оживить с помощью 
 			<a href="http://junit.org/junit4/javadoc/4.12/org/junit/runners/Suite.SuiteClasses.html">Suite</a>. Завернем 
-			их покруче и покажем в <a href="listing-7">листинге 7</a>, на что они способны (почти копипаст из 
+			их покруче и покажем в <a href="#listing-7">листинге 7</a>, на что они способны (почти копипаст из 
 			<a href="#listing-6">листинга 6</a>).
+			
+		<h4 id="listing-7">
+			Листинг 7 - Куча вложенных тестов, объединенная в комплект
+		</h4>
 <pre>
 package com.github.flaz14.junit4.suite;
 
@@ -599,7 +610,7 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 			<a href="http://junit.org/junit4/javadoc/4.12/org/junit/runners/Suite.SuiteClasses.html">SuiteClasses</a>.
 			Если забыть указать класс, то JUnit не будет запускать содержащиеся в нем тестовые методы. Но есть и преимущество:
 			в случае с <code>Enclosed</code> нужно писать аннотацию возле каждого внутреннего класса, а в случае со 
-			<code>Suite</code> имя тестового класса нужно указать лишь в возле <code>SuiteClasses</code>.
+			<code>Suite</code> имя тестового класса нужно указать лишь в <code>SuiteClasses</code>.
 			
 		<h2>Further Reading</h2>
 		
@@ -610,9 +621,9 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 			нужно приложить некоторые усилия (не забывать про аннотации и ссылки на классы). И еще: 
 			<code>Enclosed</code> - это экспериментальный
 			runner (имя пакета <code>org.junit.experimental.runners</code> красноречиво), и не факт, что он будет работать 
-			в будущих версих JUnit. Однако, есть библиотека 
+			в будущих версиях JUnit. Однако, есть библиотека 
 			<a href="https://github.com/NitorCreations/CoreComponents/tree/master/junit-runners">JUnit Runners</a>. Она 
-			заметно упрощает организацию тестов. Про нее (и не только про нее) <em>Petri Kainulainen</em> написал
+			заметно упрощает организацию тестов. Про нее (и не только про нее) <b>Petri Kainulainen</b> написал
 			отличную статью: 
 			<a href="https://www.petrikainulainen.net/programming/testing/writing-clean-tests-small-is-beautiful/">
 				Writing Clean Tests – Small Is Beautiful</a>.
@@ -626,7 +637,7 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 				<li id="footnote-1-bottom">
 					<p>
 						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
-						Я не знаю, как перевести <i>runner</i> на русский: в словаре куча значений, но ни одно из них не "звучит".
+						Как перевести <i>runner</i> на русский?.. В словаре есть дюжина значений, но ни одно из них подходит.
 						Так что везде в тексте употребляется слово <i>runner</i>.
 			</ol>
 			
