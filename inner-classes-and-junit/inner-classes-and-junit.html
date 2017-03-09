@@ -59,23 +59,23 @@ public class CustomerService {
 		<h2>Примитивный подход</h2>
 	
 		<p>
-			Поначалу я организовывал тесты таким образом:
+			Поначалу я организовывал тесты так:
 			<ol>
 				<li>
 					Создавал пакет вида <i>ИмяТестируемогоКлассаTest</i>.
 				
 				<li>
-					В новом пакете для каждого тестируемого метода создавал класс с именем: 
+					В новом пакете для каждого тестируемого метода создавал класс с именем 
 					<i>имяТестируемогоКласса_имяТестируемогоМетодаTest</i>.
 					
 				<li>
-					В каждом новом классе создавал методы (для каждого сценария) с именами вида:
-					<i>делаетЧтоТо_когдаВыполняетсяКакоеЛибоУсловие</i> (в тестах для <code>CustomerService</code> не будем давать 
-					тестовым методам сложные имена, возьмем <code>happyPath()</code> и <code>unhappyPath()</code> для краткости)
+					В каждом новом классе создавал методы (для каждого сценария) с именами вида 
+					<i>делаетЧтоТо_когдаВыполняетсяКакоеЛибоУсловие</i>. В тестах для <code>CustomerService</code> отвергнем
+					<em>Expressive Tests</em> для краткости, возьмем <code>happyPath()</code> и <code>unhappyPath()</code>)
 			</ol>
 			
 		<p>
-			Т.о. тесты имеют следующую структуру:
+			Т.о. тесты для <code>CustomerService</code> имеют следующую структуру:
 <pre>
 boilerplate/
 └── CustomerServiceTest
@@ -84,7 +84,7 @@ boilerplate/
 </pre>
 			
 		<p>
-			Тест для метода <code>hello()</code> выглядит следующим образом:
+			Тест для метода <code>hello()</code> приведен в <a href="#listing-2">листинге 2</a>.
 			
 		<h4 id="listing-2">
 			Листинг 2 - CustomerService_helloTest - пример примитивного подхода к организации Unit-тестов
@@ -108,9 +108,8 @@ public class CustomerService_helloTest {
 </pre>			
 		
 		<p>
-			Запустим эти тесты (В проекте с примерами много тестовых классов.
-			Для демонстрации листинга 1 мы запускаем только релевантные тесты. Вот почему используется *): 
-			
+			В проекте с примерами много тестовых классов. Для демонстрации мы запускаем только релевантные тесты. Вот 
+			почему в командной строке используется <strong>*</strong>. Запустим же наконец тесты:
 <pre>
 mvn clean test '-Dtest=*CustomerService_*'
 </pre>
@@ -142,35 +141,37 @@ Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
 					Найти требуемый сценарий намного проще: сценарии не свалены в одну кучу, а разбиты на группы.
 			
 				<li>
-					В именах тестовых методов не нужно дублировать название тестируемого метода, потому что оно отражено
-					в названии тестового класса.
+					В именах тестовых методов не нужно дублировать название тестируемого метода, потому что оно уже 
+					отражено в названии тестового класса.
 			</ul>
 		
 		<p>
 			Недостатки тоже есть:
 			<ul>
 				<li>
-					Нестандарное название пакетов и классов. Для тестов названия не так критичны. Но необычные
-					имена нарушают общепринятые в Java соглашения, что многим не нравится.
+					Нестандарные названия пакетов и классов. Для тестов названия не так критичны. Но необычные
+					имена нарушают общепринятые в Java соглашения, что многим не нравится (в том числе и IDE).
 			
 				<li>
-					Дублирование в именах все же имеет место, только повторяются не названия тестируемых методов, а 
+					Дублирование в именах все же имеет место, только повторяются не имена тестируемых методов, а 
 					название тестируемого класса.
 			</ul>
 		
 		<p>
 			Поэтому я задался вопросом организации тестов. Теорию мне читать не пришлось. На Stackoverflow
-			нашелся готовый ответ: 
+			нашелся хороший пост: 
 			<a href="http://stackoverflow.com/questions/8758294/test-cases-in-inner-classes-with-junit">
 				Test cases in inner classes with JUnit</a>. 
-			Собственно, на основании того поста и написана эта статья. Я лишь попытался систематизировать разные подходы
-			и сказать о достоинствах и недостатках каждого из них.
+			Собственно, на его основе и написана эта статья. Я лишь попытался систематизировать разные подходы
+			и рассказать о достоинствах и недостатках каждого из них.
 			
 		<h2>Стиль JUnit 3</h2>
 		
-		Чтобы тесты, размещенные во внутренних классах заработали, нужно строго следовать стилю 
-		<strong>JUnit 3</strong>. Так, необходимо 
-		унаследовать класс <code>junit.framework.TestCase</code> (во внутреннем классе, а не во внешнем). Каждый 
+		Чтобы тесты, размещенные во внутренних классах заработали, нужно строго следовать 
+		<strong>стилю JUnit 3</strong>. Так, необходимо 
+		унаследовать 
+		<a href="http://junit.sourceforge.net/junit3.8.1/javadoc/junit/framework/TestCase.html">TestCase</a> 
+		(во внутреннем классе, а не во внешнем). Каждый 
 		тестовый метод должен, как принято в JUnit 3, начинаться с префикcа <code>test</code>. В результате получается 
 		такая конструкция:
 		
@@ -207,18 +208,17 @@ public class CustomerServiceTest {
 			Как видно из <a href="#listing-3">листинга 3</a> сценарии для каждого тестируемого метода 
 			находятся внутри своего класса (имя которого совпадает с именем тестируемого метода, только начинается с
 			заглавной буквы: <em>СamelCase</em> все-таки). Внутренние классы в данном случае ничуть не хуже обычных. С
-			ними можно делать все, что угодно. Просто нет необходимости создавать пакет. И Java-соглашения не нарушены.
+			ними можно делать все, что угодно. Просто нет необходимости создавать пакет. И соглашения Java не нарушены.
 			
 		<p>
-			Но запускать такие тесты нужно особым образом. А именно: ссылаться на внутренние классы. Например, так 
-			(обратите внимание на знак доллара - он как раз появляется в имени скомпилированного внутреннего класса, 
-			а звездочка - самый обычный wildcard, который для Maven обозначает "любые символы"):
+			Но запускать такие тесты нужно особым образом. Нужно ссылаться на внутренние классы, не забывать про
+			<strong>$</strong> и использовать <strong>*</strong>, чтобы ничего не потерялось:
 <pre>
 mvn clean test '-Dtest=com.github.flaz14.junit3.CustomerServiceTest$*'
 </pre>
 	
 		<p>
-			Проверим, не потерялось ли чего:
+			Проверим:
 <pre>
 -------------------------------------------------------
  T E S T S
@@ -235,14 +235,16 @@ Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
 	
 		<p>
 			Не так уж плохо. Современная (и даже не очень современная) IDE переварит такие тесты. Да и в Maven можно настроить
-			правило для запуска тестов из внутренних классов. Но на <em>Clean Code</em> такой подход не претендует, но может 
+			правило для запуска тестов из внутренних классов. На <em>Clean Code</em> такой подход не претендует, но может 
 			вдохнуть жизнь в старый проект.
 		
 		<h2>Использование <code>@RunWith(Enclosed.class)</code></h2>
 		
 		<p>
-			Я не знаю, как работают т.н. runner'ы[1] в JUnit 4. Но использовать 
-			<code>org.junit.experimental.runners.Enclosed</code> несложно, что и показано в <a href="#listing-4">листинге 4</a>.
+			Я не знаю, как работают т.н. runner'ы <sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup> в 
+			JUnit 4. Но использовать 
+			<a href="http://junit.org/junit4/javadoc/4.12/org/junit/experimental/runners/Enclosed.html">Enclosed</a> 
+			несложно, что и показано в <a href="#listing-4">листинге 4</a>.
 		
 		<h4 id="listing-4">Листинг 4 - Использование специализированного runner'а JUnit 4</h4>
 <pre>
@@ -281,7 +283,7 @@ public class TrivialTest {
 </pre>		
 		
 		<p>
-			Запускаем (как видно из командной строки, нужно указать всего лишь класс - никаких wildcards и т.п.):
+			Запускаем (как видно из командной строки, нужно указать лишь класс - никаких wildcards и т.п.):
 <pre>
 mvn clean test '-Dtest=com.github.flaz14.junit4.enclosed.TrivialTest'
 </pre>
@@ -352,7 +354,7 @@ mvn clean test '-Dtest=com.github.flaz14.junit4.enclosed.OneMoreTimeEnclosedTest
 </pre>			
 		
 		<p>
-			И в результате получим:
+			И получаем:
 <pre>
 -------------------------------------------------------
  T E S T S
@@ -369,7 +371,7 @@ Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
 </pre>			
 		
 		<p>
-			Фантастика! Вложенные <code>Enclosed</code> работают (и не только они, тесты из классов <code>Foo</code>
+			Фантастика! Вложенные <code>Enclosed</code> работают (и не только вложенные, ведь тесты из классов <code>Foo</code>
 			и <code>Bar</code> тоже запустились)!
 			
 		<p>
@@ -380,7 +382,7 @@ SpringJUnit4ClassRunner</a>
 			помогает "поднять" контекст. Я сделал 
 <a href=
 "https://github.com/flaz14/flaz14.github.io/tree/master/inner-classes-and-junit/code/inner-classes-and-junit/src/test/java/com/github/flaz14/spring">
-			маленькую конфигурацию в духе Spring</a>. А в <a href="#listing-6">листинге 6</a> проиллюстрировано настоящее безумие c 
+			маленькую конфигурацию в духе Spring</a>. А в <a href="#listing-6">листинге 6</a> проиллюстрировал настоящее безумие c 
 			внутренними классами.
 		
 		<h4 id="listing-6">
@@ -458,30 +460,23 @@ mvn clean test '-Dtest=com.github.flaz14.junit4.enclosed.ComplicatedTest'
 </pre>
 
 		<p>
-			И получаем:
+			И получаем (опустим некоторые, особенно длинные, информационные сообщения Spring):
 <pre>
 -------------------------------------------------------
  T E S T S
 -------------------------------------------------------
 Running com.github.flaz14.junit4.enclosed.ComplicatedTest
 Mar 08, 2017 7:34:50 PM org.springframework.test.context.support.DefaultTestContextBootstrapper getDefaultTestExecutionListenerClassNames
-INFO: Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]
 Mar 08, 2017 7:34:50 PM org.springframework.test.context.support.DefaultTestContextBootstrapper instantiateListeners
-INFO: Could not instantiate TestExecutionListener [org.springframework.test.context.web.ServletTestExecutionListener]. Specify custom listener classes or make the default listener classes (and their required dependencies) available. Offending class: [javax/servlet/ServletContext]
 Mar 08, 2017 7:34:50 PM org.springframework.test.context.support.DefaultTestContextBootstrapper instantiateListeners
-INFO: Could not instantiate TestExecutionListener [org.springframework.test.context.transaction.TransactionalTestExecutionListener]. Specify custom listener classes or make the default listener classes (and their required dependencies) available. Offending class: [org/springframework/transaction/TransactionDefinition]
 Mar 08, 2017 7:34:50 PM org.springframework.test.context.support.DefaultTestContextBootstrapper instantiateListeners
-INFO: Could not instantiate TestExecutionListener [org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]. Specify custom listener classes or make the default listener classes (and their required dependencies) available. Offending class: [org/springframework/transaction/interceptor/TransactionAttribute]
 Mar 08, 2017 7:34:50 PM org.springframework.test.context.support.DefaultTestContextBootstrapper getTestExecutionListeners
-INFO: Using TestExecutionListeners: [org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@190c9c3, org.springframework.test.context.support.DependencyInjectionTestExecutionListener@e6e9c3, org.springframework.test.context.support.DirtiesContextTestExecutionListener@56dfcb]
 I am parameterized test. And the parameters are: input=[1], expected=[1]
 I am parameterized test. And the parameters are: input=[2], expected=[2]
 Mar 08, 2017 7:34:51 PM org.springframework.context.support.GenericApplicationContext prepareRefresh
-INFO: Refreshing org.springframework.context.support.GenericApplicationContext@a3ffec: startup date [Wed Mar 08 19:34:51 MSK 2017]; root of context hierarchy
 I am unhappyPath() test for hello() method.
 Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.042 sec
 Mar 08, 2017 7:34:51 PM org.springframework.context.support.GenericApplicationContext doClose
-INFO: Closing org.springframework.context.support.GenericApplicationContext@a3ffec: startup date [Wed Mar 08 19:34:51 MSK 2017]; root of context hierarchy
 
 Results :
 
@@ -489,16 +484,16 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 </pre>
 
 		<p>
-			В вывод попали сообщения Spring. Но строки вроде <i>I am ...</i> говорят о том, что тесты отработали так, как
-			ожидалось.
+			Строки вроде <i>I am ...</i> говорят о том, что тесты отработали так, как ожидалось.
 			
 		<h2>Suite'ы тоже хороши</h2>
 		
 		<p>
-			В том 
-			посте на Stackoverflow есть еще <a href="http://stackoverflow.com/a/22546453">ответ</a>, согласно которому 
-			тесты во внутренних классах можно оживить с помощью Suite'ов, т.е. runner'а !!!тут будет на официальный джавадок!!!. Завернем 
-			из покруче и покажем в <a href="listing-7">листинге 7</a> (почти копипаст из <a href="#listing-6">листинга 6</a>).
+			В том посте на Stackoverflow есть еще <a href="http://stackoverflow.com/a/22546453">ответ</a>, согласно 
+			которому тесты во внутренних классах можно оживить с помощью 
+			<a href="http://junit.org/junit4/javadoc/4.12/org/junit/runners/Suite.SuiteClasses.html">Suite</a>. Завернем 
+			их покруче и покажем в <a href="listing-7">листинге 7</a>, на что они способны (почти копипаст из 
+			<a href="#listing-6">листинга 6</a>).
 <pre>
 package com.github.flaz14.junit4.suite;
 
@@ -576,24 +571,18 @@ mvn clean test '-Dtest=com.github.flaz14.junit4.suite.CustomerServiceTest'
 </pre>
 
 		<p>
-			И получаем результат, который не удивляет
+			И получаем результат, который уже не удивляет (опять-таки, длинные занудные сообщения опущены):
 <pre>
 -------------------------------------------------------
  T E S T S
 -------------------------------------------------------
 Running com.github.flaz14.junit4.suite.CustomerServiceTest
 Mar 08, 2017 7:44:27 PM org.springframework.test.context.support.DefaultTestContextBootstrapper getDefaultTestExecutionListenerClassNames
-INFO: Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]
 Mar 08, 2017 7:44:27 PM org.springframework.test.context.support.DefaultTestContextBootstrapper instantiateListeners
-INFO: Could not instantiate TestExecutionListener [org.springframework.test.context.web.ServletTestExecutionListener]. Specify custom listener classes or make the default listener classes (and their required dependencies) available. Offending class: [javax/servlet/ServletContext]
 Mar 08, 2017 7:44:27 PM org.springframework.test.context.support.DefaultTestContextBootstrapper instantiateListeners
-INFO: Could not instantiate TestExecutionListener [org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]. Specify custom listener classes or make the default listener classes (and their required dependencies) available. Offending class: [org/springframework/transaction/interceptor/TransactionAttribute]
 Mar 08, 2017 7:44:27 PM org.springframework.test.context.support.DefaultTestContextBootstrapper instantiateListeners
-INFO: Could not instantiate TestExecutionListener [org.springframework.test.context.transaction.TransactionalTestExecutionListener]. Specify custom listener classes or make the default listener classes (and their required dependencies) available. Offending class: [org/springframework/transaction/TransactionDefinition]
 Mar 08, 2017 7:44:27 PM org.springframework.test.context.support.DefaultTestContextBootstrapper getTestExecutionListeners
-INFO: Using TestExecutionListeners: [org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@61f5df, org.springframework.test.context.support.DependencyInjectionTestExecutionListener@1551a94, org.springframework.test.context.support.DirtiesContextTestExecutionListener@11be3c5]
 Mar 08, 2017 7:44:27 PM org.springframework.context.support.GenericApplicationContext prepareRefresh
-INFO: Refreshing org.springframework.context.support.GenericApplicationContext@acaea5: startup date [Wed Mar 08 19:44:27 MSK 2017]; root of context hierarchy
 I am unhappyPath() test for hello() method.
 I am parameterized test. And the parameters are: input=[1], expected=[1]
 I am parameterized test. And the parameters are: input=[2], expected=[2]
@@ -606,21 +595,24 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 	
 		<p>
 			Т.о. Suite'ы дают тот же результат, что и вложенные Enclosed. Единственное различие: тестовые классы нужно 
-			указывать явно как параметры аннотации SuiteClasses !!!здесь будет ссылка на официальный Джавадок JUnit!!!.
+			указывать явно как параметры аннотации 
+			<a href="http://junit.org/junit4/javadoc/4.12/org/junit/runners/Suite.SuiteClasses.html">SuiteClasses</a>.
 			Если забыть указать класс, то JUnit не будет запускать содержащиеся в нем тестовые методы. Но есть и преимущество:
-			в случае с Enclosed нужно писать аннотацию возле каждого внутреннего класса, а в случае с Suite имя тестового 
+			в случае с Enclosed нужно писать аннотацию возле каждого внутреннего класса, а в случае со Suite имя тестового 
 			класса нужно указать лишь в возле SuiteClasses.
 			
 		<h2>Further Reading</h2>
 		
 		<p>
-			Вряд ли в реальной жизни понадобятся несколько уровней вложенности в тестах. Одного уровня (тесты для одного и 
-			того же метода - во внутренний класс) вполне достаточно. Да и для поддержания вложенности более чем на один уровень
-			нужно приложить некоторые усилия (не забывать про аннотации с ссылки на классы). И не факт, что тот же 
-			runner Enclosed будет работать так же в будущих версих JUnit (имя пакета <code>org.junit.experimental.runners</code> 
-			красноречиво). Однако, есть одна библиотека: 
+			Вряд ли в реальной жизни понадобятся несколько уровней вложенности в тестах. Одного уровня (все сценарии, которые
+			проверяют один и тот же метод - во внутренний класс) вполне достаточно. Да и для поддержания вложенности 
+			более чем на один уровень
+			нужно приложить некоторые усилия (не забывать про аннотации и ссылки на классы). И еще: Enclosed - это экспериментальный
+			runner (имя пакета <code>org.junit.experimental.runners</code> красноречиво), и не факт, что он будет работать 
+			так же в будущих версих JUnit. Однако, есть одна библиотека: 
 			<a href="https://github.com/NitorCreations/CoreComponents/tree/master/junit-runners">JUnit Runners</a>. Она 
-			заметно упрощает организацию тестов. Про нее (и не только про нее) уже есть отличный пост: 
+			заметно упрощает организацию тестов. Про нее (и не только про нее) <em>Petri Kainulainen</em> уже написал
+			отличную статью: 
 			<a href="https://www.petrikainulainen.net/programming/testing/writing-clean-tests-small-is-beautiful/">
 				Writing Clean Tests – Small Is Beautiful</a>.
 			
@@ -633,7 +625,8 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 				<li id="footnote-1-bottom">
 					<p>
 						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
-						Не знаю, как перевести runner на русский. 
+						Я не знаю, как перевести <i>runner</i> на русский: в словаре куча значений, но ни одно из них не "звучит".
+						Так что везде в тексте употребляется слово <i>runner</i>.
 
 				<li id="footnote-2-bottom">
 					<p>
