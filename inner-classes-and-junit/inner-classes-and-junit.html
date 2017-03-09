@@ -53,7 +53,7 @@ public class CustomerService {
     public String goodbye() {
         return "Good bye! I am stupid CustomerService.";
     }
-}	
+}
 </pre>
 	
 		<h2>Примитивный подход</h2>
@@ -391,7 +391,7 @@ SpringJUnit4ClassRunner</a>
 <pre>
 package com.github.flaz14.junit4.enclosed;
 
-// Imports are omitted for brevity.
+// Imports are omitted for the sake of brevity.
 
 @RunWith(Enclosed.class)
 public class ComplicatedTest {
@@ -460,7 +460,7 @@ mvn clean test '-Dtest=com.github.flaz14.junit4.enclosed.ComplicatedTest'
 </pre>
 
 		<p>
-			И получаем (опустим некоторые, особенно длинные, информационные сообщения Spring):
+			И получаем (опустим некоторые очень длинные информационные сообщения Spring):
 <pre>
 -------------------------------------------------------
  T E S T S
@@ -497,7 +497,7 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 <pre>
 package com.github.flaz14.junit4.suite;
 
-// Imports are omitted for brevity.
+// Imports are omitted for the sake of brevity.
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -594,24 +594,25 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 </pre>
 	
 		<p>
-			Т.о. Suite'ы дают тот же результат, что и вложенные Enclosed. Единственное различие: тестовые классы нужно 
-			указывать явно как параметры аннотации 
+			Т.о. <code>Suite</code>'ы дают тот же результат, что и вложенные <code>Enclosed</code>. Единственный 
+			недостаток: тестовые классы нужно указывать явно как параметры аннотации 
 			<a href="http://junit.org/junit4/javadoc/4.12/org/junit/runners/Suite.SuiteClasses.html">SuiteClasses</a>.
 			Если забыть указать класс, то JUnit не будет запускать содержащиеся в нем тестовые методы. Но есть и преимущество:
-			в случае с Enclosed нужно писать аннотацию возле каждого внутреннего класса, а в случае со Suite имя тестового 
-			класса нужно указать лишь в возле SuiteClasses.
+			в случае с <code>Enclosed</code> нужно писать аннотацию возле каждого внутреннего класса, а в случае со 
+			<code>Suite</code> имя тестового класса нужно указать лишь в возле <code>SuiteClasses</code>.
 			
 		<h2>Further Reading</h2>
 		
 		<p>
-			Вряд ли в реальной жизни понадобятся несколько уровней вложенности в тестах. Одного уровня (все сценарии, которые
+			Вряд ли в реальной жизни вам понадобятся несколько уровней вложенности в тестах. Одного уровня (все сценарии, которые
 			проверяют один и тот же метод - во внутренний класс) вполне достаточно. Да и для поддержания вложенности 
 			более чем на один уровень
-			нужно приложить некоторые усилия (не забывать про аннотации и ссылки на классы). И еще: Enclosed - это экспериментальный
+			нужно приложить некоторые усилия (не забывать про аннотации и ссылки на классы). И еще: 
+			<code>Enclosed</code> - это экспериментальный
 			runner (имя пакета <code>org.junit.experimental.runners</code> красноречиво), и не факт, что он будет работать 
-			так же в будущих версих JUnit. Однако, есть одна библиотека: 
+			в будущих версих JUnit. Однако, есть библиотека 
 			<a href="https://github.com/NitorCreations/CoreComponents/tree/master/junit-runners">JUnit Runners</a>. Она 
-			заметно упрощает организацию тестов. Про нее (и не только про нее) <em>Petri Kainulainen</em> уже написал
+			заметно упрощает организацию тестов. Про нее (и не только про нее) <em>Petri Kainulainen</em> написал
 			отличную статью: 
 			<a href="https://www.petrikainulainen.net/programming/testing/writing-clean-tests-small-is-beautiful/">
 				Writing Clean Tests – Small Is Beautiful</a>.
@@ -627,20 +628,6 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
 						Я не знаю, как перевести <i>runner</i> на русский: в словаре куча значений, но ни одно из них не "звучит".
 						Так что везде в тексте употребляется слово <i>runner</i>.
-
-				<li id="footnote-2-bottom">
-					<p>
-						<a href="#footnote-2-top" title="Перейти к основному тексту">&uarr;</a> 
-						После описанных выше манипуляций нельзя будет изменить системное время из апплета на панели 
-						задач. Но это не проблема: запускаем <code>gksudo cinnamon-settings</code> и меняем что душе 
-						угодно (правда, тут надо быть осторожным, чтобы не испортить другие настройки).
-						
-				<li id="footnote-3-bottom">
-					<p>
-						<a href="#footnote-3-top" title="Перейти к основному тексту">&uarr;</a> 
-						Если в системе все-таки есть пользователь <strong>root</strong> (т.е. если он был добавлен 
-						вручную), нужно установить для него сложный (лучше - "невзламываемый", длиной около 50 случайных
-						символов) пароль.
 			</ol>
 			
 		<hr>
