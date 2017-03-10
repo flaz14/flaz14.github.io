@@ -430,7 +430,7 @@ public class ComplicatedTest {
     @RunWith(Parameterized.class)
     public static class Goodbye {
         @Parameters
-        public static Collection<Object[]> data() {
+        public static Collection&lt;Object[]&gt; data() {
             return unmodifiableCollection(asList(new Object[][]{
                     {1, "1"},
                     {2, "2"}
@@ -544,7 +544,7 @@ public class CustomerServiceTest {
         @RunWith(Parameterized.class)
         public static class Goodbye {
             @Parameters
-            public static Collection<Object[]> data() {
+            public static Collection&lt;Object[]&gt; data() {
                 return unmodifiableCollection(asList(new Object[][]{
                         {1, "1"},
                         {2, "2"}
