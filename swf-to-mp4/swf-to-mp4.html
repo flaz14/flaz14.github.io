@@ -1,0 +1,484 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Преобразование SWF в MP4 - это просто</title>
+	</head>
+	<body>
+		<h1>
+			<big>
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+		
+		<hr>
+		
+		<h1>
+			<a href="http://flaz14.github.io/swf-to-mp4/swf-to-mp4.html">
+				Преобразование SWF в MP4 - это просто
+			</a>
+		</h1>
+		
+		<h3>[2017, Апрель]</h3>
+		
+		<h3>
+<a href=
+"здесь будет ссылка на исходный код">
+Исходный код
+</a>
+|
+<a href=
+"здесь будет ссылка на каталог с видео">
+Примеры видео
+</a>
+
+		</h3>
+		
+		<h2>Немного теории</h2>
+			
+		<p>
+			Внутренние классы (inner classes), они же вложенные классы (nested classes), появились в Java версии 1.1 (не 
+			уверен насчет 1.1, но знакомые Java-эксперты говорят, что в Java 1.1.8 внутренние классы точно были). Как 
+			говорится в 
+			<a href="https://docs.oracle.com/javase/tutorial/java/javaOO/nested.html">
+				официальном туториале Oracle</a>,
+			внутренние классы:
+			<ul>
+				<li>
+					помогают разместить основной класс и его "помощник" в одном месте и избавляют от создания нового 
+					файла для вспомогательного класса;
+			
+				<li>
+					улучшают инкапсуляцию: вспомогательный класс можно сделать невидимым за пределами основного класса;
+				
+				<li>
+					придают коду дополнительную удобоваримость.
+			</ul>
+    
+		
+		<h2>О "песочнице"</h2>
+
+		<p>
+			Все примеры оформлены в виде 
+			<a href=
+			"https://github.com/flaz14/flaz14.github.io/tree/master/inner-classes-in-java-are-cool/code/inner-classes">
+			Maven-проекта</a>. Для каждого примера (следовательно, для каждого листинга) - свой класс. Каждое заметное 
+			улучшение представлено в виде нового класса.
+		
+		<h2>Группировка констант</h2>
+		
+		<p>
+			В своей рутинной работе я часто сталкиваюсь с примерно таким кодом (в основном в тестах):
+		
+		<h4 id="listing-1">
+			Листинг 1 - ConstantsPlainOldApproachTest - примитивный подход к константам в тестах
+		</h4>	
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class ConstantsPlainOldApproachTest {
+
+    private static final String CUSTOMER_ID = "12345";
+    private static final String INVALID_CUSTOMER_ID = "!!!";
+    private static final String NON_EXISTING_CUSTOMER_ID = "000";
+
+    @Test
+    public void someTest() throws Exception {
+        System.out.println(CUSTOMER_ID);
+        System.out.println(INVALID_CUSTOMER_ID);
+        System.out.println(NON_EXISTING_CUSTOMER_ID);
+    }
+}
+</pre>
+
+		<p>
+			Первое, что бросается в глаза и что хотелось бы улучшить - это имена констант. Так, в имени каждой константы 
+			повторяeтся <tt>CUSTOMER_ID</tt>. Само по себе дублирование чего бы то ни было в тестах - не так уж плохо. 
+			Тем более, что два слова - не пять.	Но чтобы использовать такие константы, приходиться много печатать. И 
+			функция автодополнения IDE не сильно помогает. Потому что первая константа начинается со слова 
+			<tt>CUSTOMER</tt>, вторая - со слова <tt>INVALID</tt>, а третья с совершенно другого слова.	
+			
+		<p>
+			Кроме того, каждая из констант - самостоятельное, не связанное с другими, поле класса. В зависимости от 
+			того, как исходный код отформатирован, логически связанные константы могут быть или собраны в одном месте, 
+			или разбросаны по всему файлу (или быть перемешанными с константами другого рода), что ухудшает читаемость 
+			кода. Да, можно задействовать formatter и разместить константы в алфавитном порядке, но откуда formatter'у 
+			знать, что все три константы имеют отношение к одной сущности? Чтобы учесть логическую связь придеться 
+			использовать очень нетривиальные средства форматирования исходного кода. 
+			
+		<p>
+			Призовем на помощь внутренний класс и получим <a href="#listing-2">листинг 2</a>!
+		
+		<h4 id="listing-2">
+			Листинг 2 - ConstantsInnerClassTest - константы, сгруппированные с помощью внутреннего класса
+		</h4>		
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class ConstantsInnerClassTest {
+
+    private static class CustomerId {
+        private static final String VALID = "12345";
+        private static final String INVALID = "!!!";
+        private static final String NON_EXISTING = "000";
+    }
+
+    @Test
+    public void someTest() throws Exception {
+        System.out.println(CustomerId.VALID);
+        System.out.println(CustomerId.INVALID);
+        System.out.println(CustomerId.NON_EXISTING);
+    }
+}
+</pre>	
+
+		<p>
+			Выглядит лучше. Прежде всего отметим, что все константы находятся внутри вспомогательного класса. Т.е. 
+			никакое, даже самое дикое, форматирование исходного текста не сможет разлучить их. Имя же вспомогательного 
+			класса говорит само за себя. Так что нет нужды дублировать слова <tt>CUSTOMER</tt> и <tt>ID</tt> в именах 
+			констант. И IDE нам поможет: не надо держать в голове все возможные вариации, достаточно набрать 
+			<tt>Cust</tt> - и IDE предложит дополнить до <tt>CustomerId</tt>. После набора точки IDE отобразит весь 
+			список - останется только выбрать. Тем не менее, внутренний класс из <a href="#listing-2">листинга 2</a> 
+			выглядит громоздким. И в самом деле: мы уменьшили длину имени каждой константы, но добавили строчку 
+			<tt>private static class CustomerId {</tt>. Так что не такое уж изящное получилось решение. Попробуем убрать
+			лишнее и покажем это в <a href="#listing-3">листинге 3</a>:
+		
+		<h4 id="listing-3">
+			Листинг 3 - ConstantsEnhancedInnerClassTest - улучшенный внутренний класс для группировки констант
+		</h4>
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class ConstantsEnhancedInnerClassTest {
+
+    private static class CustomerId {
+        static final String VALID = "12345";
+        static final String INVALID = "!!!";
+        static final String NON_EXISTING = "000";
+    }
+
+    @Test
+    public void someTest() throws Exception {
+        System.out.println(CustomerId.VALID);
+        System.out.println(CustomerId.INVALID);
+        System.out.println(CustomerId.NON_EXISTING);
+    }
+}
+</pre>
+		
+		<p>
+			Убирать модификатор <code>private</code> с <code>CustomerId</code> не будем. Модификатор <code>static</code>
+			тоже оставим. А вот модификатор	<code>private</code> с самих констант можно смело убрать. 
+			
+		<p>
+			Поле вложенного класса всегда доступно из класса, в который	он вложен (да-да, в 
+			<a href="#listing-2">листинге 2</a> константы приватные, и тем не менее, их можно прочитать в методе 
+			<code>someTest()</code>). Так что уровень доступа <strong>package-private</strong> сойдет: класс 
+			<code>CustomerId</code>	- приватный, и все, что в нем находится, невидимо для внешнего мира. 
+			Продемонстрируем это, разместив в том же пакете (<code>com.github.flaz14.grouping</code>) новый тест, 
+			приведенный	в <a href="#listing-4">листинге 4</a>.
+		
+		<h4 id="listing-4">
+			Листинг 4 - VisibilityOfInnerClassTest - приватный вложенный класс виден только в классе, в который он 
+			вложен
+		</h4>
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class VisibilityOfInnerClassTest {
+
+    @Test
+    public void packagePrivateFieldsOfPrivateInnerClass() throws Exception {
+          System.out.println(
+                  com.github.flaz14.grouping.ConstantsEnhancedInnerClassTest.CustomerId.VALID
+          );
+    }
+}
+</pre>
+		
+		<p>
+			Попробуем скомпилировать и получим ошибку:
+			<blockquote>
+				<p>
+					com.github.flaz14.grouping.ConstantsEnhancedInnerClassTest.CustomerId has private access in 
+					com.github.flaz14.grouping.ConstantsEnhancedInnerClassTest
+			</blockquote>
+			
+		<p>
+			То же самое будет и при любом другом модификоре поля, главное, чтобы сам вложенный класс был приватным.
+		
+		<p>
+			Т.о. образом привиденный в <a href="#listing-3">листинге 3</a> внутренний класс оптимально подходит для 
+			группировки констант <sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>.
+		
+		<h2>А почему не <code>enum</code>?</h2>
+		
+		<p>
+			Попробуем сгруппировать константы, но с помощью <code>enum</code>:
+		
+		<h4>
+			Листинг 5 - ConstantsEnumTest - константы, оформленные в виде <code>enum</code>
+		</h4>
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class ConstantsEnumTest {
+
+    private enum CustomerId {
+        VALID("12345"),
+        INVALID("!!!"),
+        NON_EXISTING("000");
+
+        public final String id;
+
+        private CustomerId(String id) {
+            this.id = id;
+        }
+    }
+
+    @Test
+    public void someTest() throws Exception {
+        System.out.println(CustomerId.VALID.id);
+        System.out.println(CustomerId.INVALID.id);
+        System.out.println(CustomerId.NON_EXISTING.id);
+    }
+}
+</pre>
+		
+		<p>
+			Очевидно, что использование <code>enum</code> ведет к чрезмерному усложнению при той же функциональности. 
+			Да, <code>enum</code> вне конкуренции в случаях общедоступных классов, которые повторно используются во 
+			многих частях программы. Но если константы релевантны только в пределах одного класса, лучше поместить их во
+			внутренний класс.
+		
+		<h2>Не только константы, но и разнообразные фабрики</h2>
+		
+		<p>
+			В реальных приложения (особенно в устаревших корпоративных монстрах) часто приходиться использовать в тестах 
+			всякого рода DTO, Entity и прочий хлам.	Что ж, внутренние классы можно применить и тут. Вглянем на 
+			<a href="#listing-6">листинг 6</a>:
+		
+		<h4 id="listing-6">
+			Листинг 6 - DtoFactoryTest - использование внутренних классов для реализации Static Factory
+		</h4>
+<pre>
+package com.github.flaz14.factory;
+
+import org.junit.Test;
+
+public class DtoFactoryTest {
+
+    private static class Customer {
+        static CustomerDto withMandatoryFields() {
+            return new CustomerDto();
+        }
+
+        static class WithBankDetails {
+            static CustomerDto apparent() {
+                CustomerDto dto = new CustomerDto();
+                // set up some credit card number fully
+                // ...
+                return dto;
+            }
+
+            static CustomerDto obscured() {
+                CustomerDto dto = new CustomerDto();
+                // set up credit card number in the form of XXXX XXXX XXXX 1234
+                // ...
+                return dto;
+            }
+        }
+    }
+
+    @Test
+    public void test() throws Exception {
+        CustomerDto expected = Customer.WithBankDetails.obscured();
+        // ...
+    }
+}
+
+class CustomerDto {
+    // ...
+}
+</pre>
+		
+		<p>
+			Тут все понятно <sup id="footnote-2-top"><a href="#footnote-2-bottom">[2]</a></sup>. Можно привести еще 
+			много примеров: <em>Exception Factory</em>, <em>Logger Factory</em>, <em>Builder</em> и т.д.
+		
+		<h2>Не только статические, но и нестатические классы</h2>
+		 
+		<p>
+			Внутренние классы не обязательно должны быть статическими. Можно использовать и нестатические классы. С 
+			точки зрения читаемости кода лишь ключевое слово <code>new</code> будет мозолить глаза. Но это не страшно. 
+			Тем более, что нестатические внутренние классы имеют доступ к instance-полям объектов окружающего класса. 
+			Что	приносит неожиданные преимущества.
+			
+		<h4 id="listing-7">
+			Листинг 7 - NonStaticInnerClassTest - пример нестатического внутреннего класса
+		</h4>
+<pre>
+package com.github.flaz14;
+
+import org.junit.Test;
+
+public class NonStaticInnerClassTest {
+
+    @Test
+    public void test() throws Exception {
+        final ChatBot bot = new ChatBot(new XmppClient());
+        bot.startConversation();
+        bot.broadcast();
+    }
+}
+
+class ChatBot {
+    private final XmppClient xmppClient;
+
+    public ChatBot(XmppClient xmppClient) {
+        this.xmppClient = xmppClient;
+    }
+
+    public void startConversation() {
+        new Message("Hello!!!").sendImmediately();
+    }
+
+    public void broadcast() {
+        for (int i = 0; i < 100; i++) {
+            new Message("Spam...").sendAsynchronously();
+        }
+    }
+
+    private class Message {
+        private final String text;
+
+        public Message(String text) {
+            this.text = text;
+        }
+
+        public int sendImmediately() {
+            // ...
+            return 0;
+        }
+
+        public void sendAsynchronously() {
+            // ...
+        }
+    }
+}
+
+class XmppClient {
+    // ...
+}	
+</pre>
+
+		<p>
+			Пример, приведенный в <a href="#listing-7">листинге 7</a> - надуманный. Но он хорошо иллюстрирует, что в 
+			некоторых случаях ключевое слово <code>new</code> - не помеха, а тот почти невидимый штрих, который 
+			прекрасно дополняет картину. Нестатический внутренний класс можно было бы сделать обычным. Но тогда пришлось
+			бы передавать ему ссылку на <code>XmppClient</code> и затем хранить эту ссылку в поле класса. А вот 
+			внутренний класс избавляет нас от рутины.
+			
+		<h2>И напоследок...</h2>
+		
+		<p>
+			Сейчас уже вовсю используется Java 8 (и даже потихоньку внедряется в старые проекты). На подходе Java 9. А 
+			внутренние классы как были, так и остаются классными. Так что начинайте использовать их прямо сейчас. Удачи!
+		
+		<p>
+			__________
+			<ol>
+				<li id="footnote-1-bottom">
+					<p>
+						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
+						Для пущей константности можно было добавить к классу <code>CustomerId</code> модификтор 
+						<code>final</code>. Но это излишне: класс <code>CustomerId</code> спрятан от внешнего мира. И 
+						вряд ли	кому-то придет в голову написать еще один внутренний класс и в новом классе унаследовать 
+						<code>CustomerId</code>.
+
+				<li id="footnote-2-bottom">
+					<p>
+						<a href="#footnote-2-top" title="Перейти к основному тексту">&uarr;</a> 					
+						Почему в <a href="#listing-6">листинге 6</a> мы для использовали статические методы вместо того,
+						чтобы раз и навсегда создать объекты-константы? Потому что пример был о Static Factory :) Но не 
+						только поэтому. Часто DTO не являются неизменяемыми объектами. Поэтому в тестах возможна их 
+						(случайная) модификация. А вот при использовании factory-методов о такого рода ошибках можно 
+						забыть (вообще-то, неизменяемые объекты - отдельная тема, равно как и порядком надоевший 
+						модификатор <code>final</code> возле параметров методов и локальных переменных).
+			</ol>
+			
+		<hr>
+		
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+	</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+"Хороший" видео файл SWF
+
+http://samples.mplayerhq.hu/SWF/test.swf
+
+gnash --once simple.swf
+
+---------------------------------------------------
+
+
+gnash --once tricky.swf
+
+---------------------------------------------------
+
+
+http://askubuntu.com/questions/150923/swf-editor-decompiler
+
+---------------------------------------------------
+
+http://stackoverflow.com/questions/851337/how-to-know-the-dimension-of-swf-file-without-flash
+sudo apt-get install swftools
+swfdump original.swf
+
+swfdump --width tricky.swf 
+-X 647
+
+swfdump --height tricky.swf 
+-Y 482
+
+---------------------------------------------------
+
+https://launchpad.net/~mc3man/+archive/ubuntu/trusty-media
+
+---------------------------------------------------
+
+Element	SAMP
+Purpose	sample text or characters
+Description	This element encloses text that is intended to be used as a sample or example. This is similar to the KBD element, but the SAMP element could be text that is input from or output to some other process. 
+
+---------------------------------------------------
+
+
