@@ -3,6 +3,7 @@
 import sys
 import subprocess
 import re
+import time
 
 # explore SWF-file
 def explore_swf_file(filename):
@@ -15,37 +16,51 @@ def explore_swf_file(filename):
 	print(swf)
 	return swf
 	
-class FramebufferOnBackground:
-	def __init__(self, width, height):	
+class Screen:
+	def __init__(self, width, height, filename):
+		self.width = width
+		self.height = height
 		xvfb_command = [
 			'Xvfb',
-			'-nolisten', 'tcp'
 			':44',
-			'-screen', '44', '{}x{}x24'.format(width, height)
+			'-screen', '0', '{}x{}x24'.format(width, height)
 		]
-		#xvfb_run = [
-			#'Xvfb',
-			#'-nolisten', tcp,
-			#'--server-num', '44',
-			#'--server-args', '-screen 0 {}x{}x24'.format(width, height)
-		#]
-		#gnash = [
-			#'gnash',
-			#'--x-pos', '0',
-			#'--y-pos', '0',
-			#'--hide-menubar',
-			#'../video/tricky.swf'
-		#]
 		self.xvfb = subprocess.Popen(xvfb_command, stdout=sys.stdout)
+		time.sleep(10)
+		gnash_command = [
+			'gnash',
+			'--once',
+			'--x-pos', '0',
+			'--y-pos', '0',
+			'--fullscreen',
+			'--verbose',
+			filename
+		]
+		virtual_display = {'DISPLAY': ':44'}
+		self.gnash = subprocess.Popen(gnash_command, env = virtual_display, stdout=sys.stdout)
+		
+	def start_playing(self):
+		time.sleep(10)
+		virtual_display = {'DISPLAY': ':44'}
+		xdotool_command = [
+			'xdotool',
+			'mousemove', str(self.width - 1), str(1),
+			'click', str(1)
+		]
+		retcode = subprocess.check_call(xdotool_command)		
 	
 	def __del__(self):
+		self.gnash.kill()
 		self.xvfb.kill()
 	
-	
-swf = explore_swf_file('../video/tricky.swf')
-framebuffer = FramebufferOnBackground(swf['width'], swf['height'])
+input_file_name = '../video/tricky.swf'
+swf = explore_swf_file(input_file_name)
+screen = Screen(swf['width'], swf['height'], input_file_name)
+
+screen.start_playing()
 input()
-del framebuffer
+
+del screen
 	
 
 
