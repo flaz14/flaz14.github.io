@@ -36,19 +36,43 @@ class Screen:
 			'--verbose',
 			filename
 		]
-		virtual_display = {'DISPLAY': ':44'}
-		self.gnash = subprocess.Popen(gnash_command, env = virtual_display, stdout=sys.stdout)
+		#virtual_display = {'DISPLAY': ':44'}
+		#self.gnash = subprocess.Popen(gnash_command, env = virtual_display, stdout=sys.stdout)
+		self.gnash = subprocess.Popen(gnash_command, stdout=sys.stdout)
 		
 	def start_playing(self):
 		time.sleep(10)
-		virtual_display = {'DISPLAY': ':44'}
+		#virtual_display = {'DISPLAY': ':44'}
 		xdotool_command = [
 			'xdotool',
-			'mousemove', str(self.width - 1), str(1),
+			'mousemove', str(self.width / 2), str(self.height / 2),
 			'click', str(1)
 		]
-		retcode = subprocess.check_call(xdotool_command)		
+		retcode = subprocess.check_call(xdotool_command)
+		
+	def start_capture(self, rate, output_file_name):
+		time.sleep(5)
+		ffmpeg_command = [
+			'ffmpeg',
+			'-f', 'x11grab',
+			'-video_size', '{}x{}'.format(self.width, self.height),
+			#'-i', '127.0.0.1:44',
+			'-i', ':44',
+			'-codec:v', 'libx264',
+			'-r', str(rate),
+			output_file_name
+		]
+		self.ffmpeg = subprocess.Popen(ffmpeg_command, stdout=sys.stdout)
 	
+	#def wait_until_finished(self):
+		#time.sleep(10)
+		#self.gnash.wait()
+		#ffmpeg_on_quite = self.ffmpeg.communicate(bytes(ord('q')))
+	#	print('--------------------------------------------')
+	#	print(ffmpeg_on_quite.stdout.read())
+	#	print(ffmpeg_on_quite.stderr.read())
+	#	print('--------------------------------------------')
+		
 	def __del__(self):
 		self.gnash.kill()
 		self.xvfb.kill()
@@ -56,13 +80,12 @@ class Screen:
 input_file_name = '../video/tricky.swf'
 swf = explore_swf_file(input_file_name)
 screen = Screen(swf['width'], swf['height'], input_file_name)
-
+#screen.start_capture(swf['rate'], '/tmp/super.mp4')
 screen.start_playing()
+#screen.wait_until_finished()
+
 input()
 
 del screen
 	
 
-
-#xvfb-run --listen-tcp --server-num 44 --auth-file /tmp/xvfb.auth -s "-ac -screen 0 1920x1080x24" java -jar selenium.jar
-#--server-args "-ac -screen 0 1920x1080x24" java -jar selenium.jar
