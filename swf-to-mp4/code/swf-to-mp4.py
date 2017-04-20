@@ -5,6 +5,7 @@ import subprocess
 import re
 import time
 
+
 # explore SWF-file
 def explore_swf_file(filename):
 	raw_info = subprocess.check_output(['swfdump', '--width', '--height', '--rate', filename])
@@ -65,12 +66,12 @@ class Screen:
 			'-r', str(self.swf['rate']),
 			output_file_name
 		]
-		self.ffmpeg = subprocess.Popen(ffmpeg_command, stdout=sys.stdout)
+		self.ffmpeg = subprocess.Popen(ffmpeg_command, stdout=sys.stdout, stdin=subprocess.PIPE)
 	
 	def wait_until_finished(self):
 		time.sleep(10)
 		#self.gnash.wait()
-		ffmpeg_on_quite = self.ffmpeg.communicate(input = 'q')
+		ffmpeg_on_quite = self.ffmpeg.communicate(b'q')
 	#	print('--------------------------------------------')
 	#	print(ffmpeg_on_quite.stdout.read())
 	#	print(ffmpeg_on_quite.stderr.read())
