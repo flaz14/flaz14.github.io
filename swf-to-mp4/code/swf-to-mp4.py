@@ -5,6 +5,7 @@ import subprocess
 import re
 import time
 
+# TODO use explicit decimal (integer numbers) format were size should be specified
 
 # explore SWF-file
 def explore_swf_file(filename):
@@ -36,7 +37,7 @@ class Screen:
 			'--y-pos', '0',
 			'--width', str(self.swf['width']),
 			'--height', str(self.swf['height']),
-			#'--fullscreen',
+			#'--fullscreen', # TODO write a comment about why '--fullscreen' switch is not used
 			'--hide-menubar',
 			'--verbose',
 			filename
@@ -69,17 +70,14 @@ class Screen:
 		self.ffmpeg = subprocess.Popen(ffmpeg_command, stdout=sys.stdout, stdin=subprocess.PIPE)
 	
 	def wait_until_finished(self):
-		time.sleep(10)
-		#self.gnash.wait()
-		ffmpeg_on_quite = self.ffmpeg.communicate(b'q')
-	#	print('--------------------------------------------')
-	#	print(ffmpeg_on_quite.stdout.read())
-	#	print(ffmpeg_on_quite.stderr.read())
-	#	print('--------------------------------------------')
+		self.gnash.wait()
+		ffmpeg_on_quite = self.ffmpeg.communicate(b'q') # TODO clarify used encoding
+		self.ffmpeg.wait()
 		
 	def __del__(self):
-		self.gnash.kill()
 		self.xvfb.kill()
+		self.xvfb.wait() # There is no need to wait really. But waiting allows to not pollute terminal with Xvfb output
+		# after command line prompt (because process doesn't end immediately after KILL signal is received)
 	
 input_file_name = '../video/tricky.swf'
 swf = explore_swf_file(input_file_name)
@@ -87,9 +85,4 @@ screen = Screen(swf, input_file_name)
 screen.start_capture('/tmp/super.mp4')
 screen.start_playing()
 screen.wait_until_finished()
-
-input()
-
 del screen
-	
-
