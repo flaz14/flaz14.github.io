@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
+# -*- coding: utf-8 -*-
+
 import sys
 import subprocess
 import re
 import time
+import argparse
 
 # TODO use explicit decimal (integer numbers) format were size should be specified
 
@@ -79,10 +82,23 @@ class Screen:
 		self.xvfb.wait() # There is no need to wait really. But waiting allows to not pollute terminal with Xvfb output
 		# after command line prompt (because process doesn't end immediately after KILL signal is received)
 	
-input_file_name = '../video/tricky.swf'
-swf = explore_swf_file(input_file_name)
-screen = Screen(swf, input_file_name)
-screen.start_capture('/tmp/super.mp4')
-screen.start_playing()
-screen.wait_until_finished()
-del screen
+def main():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('if', type = str, help = 'input file name')
+	parser.add_argument('of', type = str, help = 'output file name')
+	args = parser.parse_args()
+	print(vars(args))
+	exit(0)
+	
+	
+	
+	input_file_name = '../video/tricky.swf'
+	swf = explore_swf_file(input_file_name)
+	screen = Screen(swf, input_file_name)
+	screen.start_capture('/tmp/super.mp4')
+	screen.start_playing()
+	screen.wait_until_finished()
+	del screen
+
+if __name__ == '__main__':
+	main()
