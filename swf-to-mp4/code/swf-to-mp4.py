@@ -7,6 +7,7 @@ import subprocess
 import re
 import time
 import argparse
+import os
 
 # TODO use explicit decimal (integer numbers) format were size should be specified
 
@@ -82,20 +83,63 @@ class Screen:
 		self.xvfb.wait() # There is no need to wait really. But waiting allows to not pollute terminal with Xvfb output
 		# after command line prompt (because process doesn't end immediately after KILL signal is received)
 	
+import textwrap as _textwrap
+class MultilineFormatter(argparse.HelpFormatter):
+    def _fill_text(self, text, width, indent):
+        text = self._whitespace_matcher.sub(' ', text).strip()
+        paragraphs = text.split('|n ')
+        multiline_text = ''
+        for paragraph in paragraphs:
+            formatted_paragraph = _textwrap.fill(paragraph, width, initial_indent=indent, subsequent_indent=indent) + '\n\n'
+            multiline_text = multiline_text + formatted_paragraph
+        return multiline_text	
+	
 def main():
-	parser = argparse.ArgumentParser()
-	parser.add_argument('if', type = str, help = 'input file name')
-	parser.add_argument('of', type = str, help = 'output file name')
-	args = parser.parse_args()
-	print(vars(args))
-	exit(0)
+	parser = argparse.ArgumentParser(
+		description = """
+			This script helps to convert SWF video file into MP4 with aid of some dirty methods. However, there are a 
+			lot of limitations. So the script is usefull in very particular cases. Something can go wrong. So please
+			be ready to press Ctrl + C.
+		""",
+		formatter_class = MultilineFormatter
+	)
+	parser.add_argument('-i', '--input-file', type = str, help = 'input file name')
+	parser.add_argument('-o', '--output-file', type = str, help = 'output file name')
+
+	args = vars(parser.parse_args())
+	input_file_name = args['input_file']
+	output_file_name = args['output_file']
 	
+	# TODO verify that input_file_name and output_file_name don't point to the same file
 	
+	if not os.path.exists(input_file_name):
+		print('Input file [{}] does not exist!'.format(input_file_name))
+		exit(1)
+		
+	if not os.path.isfile(input_file_name):
+		print("Input file [{}] is not a regular file! Probably, you've specified a path to directory...".format(input_file_name))
+		exit(1)
+		
+	if not os.access(input_file_name, os.R_OK):
+		print('Input file [{}] can not be read. Please check out permissions on the file.'.format(input_file_name))
+		exit(1)
 	
-	input_file_name = '../video/tricky.swf'
+	if os.path.exists(output_file_name):
+		print('Output file [{}] already exists! Please delete it manually and run the script again'.format(output_file_name))
+		exit(2)
+		
+	if not os.path.isfile(input_file_name):
+		print("Output file [{}] is not a regular file! Probably, you've specified a path to directory...".format(input_file_name))
+		exit(2)
+		
+	if not os.access(os.path.dirname(output_file_name), os.W_OK):
+		print('Output file [{}] is not available for writing! Please check out permissions on the file and/or corresponding directory'.
+			format(output_file_name))
+		exit(2)
+	
 	swf = explore_swf_file(input_file_name)
 	screen = Screen(swf, input_file_name)
-	screen.start_capture('/tmp/super.mp4')
+	screen.start_capture(output_file_name)
 	screen.start_playing()
 	screen.wait_until_finished()
 	del screen
