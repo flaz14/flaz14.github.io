@@ -10,9 +10,10 @@ import argparse
 import os
 import termcolor
 
+ # TODO write a remark about used encoding
+DEFAULT_ENCODING = 'utf-8'
 
 # TODO use explicit decimal (integer numbers) format were size should be specified
-
 def explore_swf_file(filename):
 	swfdump_command = ['swfdump', '--width', '--height', '--rate', filename]
 	raw_info = subprocess.check_output(
@@ -20,7 +21,7 @@ def explore_swf_file(filename):
 		stdin = subprocess.DEVNULL, 
 		stderr = sys.stdout
 	)
-	decoded_info = str(raw_info, "utf-8") # TODO write a remark about used encoding
+	decoded_info = str(raw_info, DEFAULT_ENCODING)
 	parsed_info = (
 		re.compile("-X (?P<width>\d+) -Y (?P<height>\d+) -r (?P<rate>\d+\.\d+)", re.S).
 		search(decoded_info).
@@ -108,7 +109,7 @@ class Screen:
 	
 	def wait_until_finished(self):
 		self.gnash.wait()
-		ffmpeg_on_quite = self.ffmpeg.communicate(b'q') # TODO clarify used encoding
+		ffmpeg_on_quite = self.ffmpeg.communicate(bytes('q', DEFAULT_ENCODING))
 		self.ffmpeg.wait()
 		
 	def __del__(self):
@@ -224,8 +225,8 @@ def main():
 	screen = Screen(swf, args.input_file_name)
 	screen.start_capture(args.output_file_name)
 	screen.start_playing()
-	screen.wait_until_finished()
-	del screen
+	screen.wait_until_finished() # TODO rename to wait_until_playing_finished()
+	del screen # TODO probably there is no need to keep this line because the object will be deleted automatically
 
 if __name__ == '__main__':
 	main()
