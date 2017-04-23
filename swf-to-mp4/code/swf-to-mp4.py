@@ -111,7 +111,16 @@ class CmdArgs:
 		exit(1)
 	
 	def input_and_output_files_should_not_be_same(self):
-		# TODO explain why we cannot use os.path.samefile() here
+		'''
+		Perhaps, the better way to check that two file names point to the same instance is `os.path.samefile()`. But we 
+		don't use it because the file should exist before the function is called. So we just compare normalized absolute
+		paths.
+		
+		Yes, it's not mandatory to do this check at all. Without the check you will get `Output file already exists` 
+		error (because `output_file_name` will point to the input file which already exists). But it will be better to 
+		spot the situation with the same file in advance for the sake of clean error message (obviously, using the same
+		source and destination is generally wrong).
+		'''
 		input_path = os.path.abspath(os.path.normpath(self.input_file_name))
 		output_path = os.path.abspath(os.path.normpath(self.output_file_name))
 		if input_path == output_path:
@@ -169,7 +178,7 @@ def main():
 	)
 	parser.add_argument('input_file', type = str, help = 'input file name')
 	parser.add_argument('output_file', type = str, help = 'output file name')
-
+	
 	args = (
 		CmdArgs(parser).
 		input_and_output_files_should_not_be_same().
