@@ -8,6 +8,8 @@ import re
 import time
 import argparse
 import os
+import termcolor
+
 
 # TODO use explicit decimal (integer numbers) format were size should be specified
 
@@ -92,7 +94,48 @@ class MultilineFormatter(argparse.HelpFormatter):
         for paragraph in paragraphs:
             formatted_paragraph = _textwrap.fill(paragraph, width, initial_indent=indent, subsequent_indent=indent) + '\n\n'
             multiline_text = multiline_text + formatted_paragraph
-        return multiline_text	
+        return multiline_text
+
+def exit_with_error(error_message):
+	print(termcolor.colored('ERROR', 'red', 'on_white'), error_message)
+	exit(1)
+        
+class CmdArgs:
+	def __init__(self, parser):
+		args = vars(parser.parse_args())
+		self.input_file_name = args['input_file']
+		self.output_file_name = args['output_file']
+	
+	def input_and_output_files_should_not_be_same(self):
+		# TODO explain why we cannot use os.path.samefile() here
+		if os.path.abspath(os.path.normpath(self.input_file_name)) == os.path.abspath(os.path.normpath(self.output_file_name)):
+			exit_with_error('Input and output files represent the same instance.')
+		return self
+			
+	def input_file_should_exist(self):
+		if not os.path.exists(self.input_file_name):
+			exit_with_error('Input file [{}] does not exist.'.format(self.input_file_name))
+		return self
+			
+	def input_file_should_be_regular(self):
+		if not os.path.isfile(self.input_file_name):
+			exit_with_error("Input file [{}] is not a regular file. Probably, you've specified a path to directory...".format(self.input_file_name))
+		return self
+	
+	def input_file_should_be_readable(self):
+		if not os.access(self.input_file_name, os.R_OK):
+			exit_with_error('Input file [{}] is not accessible for reading. Please check out permissions on the file.'.format(self.input_file_name))
+		return self
+		
+	def output_file_should_not_exist(self):
+		if os.path.exists(self.output_file_name):
+			exit_with_error('Output file [{}] already exists. Please delete it manually and run the script again.'.format(self.output_file_name))
+		return self
+		
+	def output_file_should_be_writeable(self):
+		if not os.access(os.path.dirname(self.output_file_name), os.W_OK):
+			exit_with_error('Output file [{}] is not accessible for writing. Please check out permissions on the file and/or corresponding directory'.format(self.output_file_name))
+		return self
 	
 def main():
 	parser = argparse.ArgumentParser(
@@ -106,46 +149,24 @@ def main():
 	parser.add_argument('-i', '--input-file', type = str, required = True, help = 'input file name')
 	parser.add_argument('-o', '--output-file', type = str, required = True, help = 'output file name')
 
-	args = vars(parser.parse_args())
-	input_file_name = args['input_file']
-	output_file_name = args['output_file']
-	
-	# TODO explain why we cannot use os.path.samefile() here
-	if os.path.abspath(os.path.normpath(input_file_name)) == os.path.abspath(os.path.normpath(output_file_name)):
-		print('Input and output files represent the same instance.')
-		exit(1)
-	
-	if not os.path.exists(input_file_name):
-		print('Input file [{}] does not exist.'.format(input_file_name))
-		exit(1)
-	
-	if os.path.exists(output_file_name):
-		print('Output file [{}] already exists. Please delete it manually and run the script again'.format(output_file_name))
-		exit(2)
+	cmd_args = (
+		CmdArgs(parser).
+		input_and_output_files_should_not_be_same().
+		input_file_should_exist().
+		input_file_should_be_readable().
+		input_file_should_be_regular().
+		output_file_should_not_exist().
+		output_file_should_be_writeable()
+	)
 
-	if not os.path.isfile(input_file_name):
-		print("Input file [{}] is not a regular file. Probably, you've specified a path to directory...".format(input_file_name))
-		exit(1)
-		
-	if not os.access(input_file_name, os.R_OK):
-		print('Input file [{}] can not be read. Please check out permissions on the file.'.format(input_file_name))
-		exit(1)
-		
-	if not os.path.isfile(input_file_name):
-		print("Output file [{}] is not a regular file. Probably, you've specified a path to directory...".format(input_file_name))
-		exit(2)
-		
-	if not os.access(os.path.dirname(output_file_name), os.W_OK):
-		print('Output file [{}] is not available for writing. Please check out permissions on the file and/or corresponding directory'.
-			format(output_file_name))
-		exit(2)
+
 	
-	swf = explore_swf_file(input_file_name)
-	screen = Screen(swf, input_file_name)
-	screen.start_capture(output_file_name)
-	screen.start_playing()
-	screen.wait_until_finished()
-	del screen
+#	swf = explore_swf_file(input_file_name)
+#	screen = Screen(swf, input_file_name)
+#	screen.start_capture(output_file_name)
+#	screen.start_playing()
+#	screen.wait_until_finished()
+#	del screen
 
 if __name__ == '__main__':
 	main()
