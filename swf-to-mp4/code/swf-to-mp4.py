@@ -142,6 +142,11 @@ class CmdArgs:
 		return self
 	
 def main():
+	# TODO handle output file extension gracefully
+	# [NULL @ 0xac587c0] Unable to find a suitable output format for '/tmp/shit'
+	# /tmp/shit: Invalid argument
+
+	
 	parser = argparse.ArgumentParser(
 		description = """
 			This script helps to convert SWF video file into MP4 with aid of some dirty methods. However, there are a 
@@ -153,7 +158,7 @@ def main():
 	parser.add_argument('-i', '--input-file', type = str, required = True, help = 'input file name')
 	parser.add_argument('-o', '--output-file', type = str, required = True, help = 'output file name')
 
-	cmd_args = (
+	args = (
 		CmdArgs(parser).
 		input_and_output_files_should_not_be_same().
 		input_file_should_exist().
@@ -163,12 +168,12 @@ def main():
 		output_file_should_be_writeable()
 	)
 	
-#	swf = explore_swf_file(input_file_name)
-#	screen = Screen(swf, input_file_name)
-#	screen.start_capture(output_file_name)
-#	screen.start_playing()
-#	screen.wait_until_finished()
-#	del screen
+	swf = explore_swf_file(args.input_file_name)
+	screen = Screen(swf, args.input_file_name)
+	screen.start_capture(args.output_file_name)
+	screen.start_playing()
+	screen.wait_until_finished()
+	del screen
 
 if __name__ == '__main__':
 	main()
