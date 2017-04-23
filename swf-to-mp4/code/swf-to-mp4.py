@@ -103,15 +103,14 @@ def main():
 		""",
 		formatter_class = MultilineFormatter
 	)
-	parser.add_argument('-i', '--input-file', type = str, help = 'input file name')
-	parser.add_argument('-o', '--output-file', type = str, help = 'output file name')
+	parser.add_argument('-i', '--input-file', type = str, required = True, help = 'input file name')
+	parser.add_argument('-o', '--output-file', type = str, required = True, help = 'output file name')
 
 	args = vars(parser.parse_args())
 	input_file_name = args['input_file']
 	output_file_name = args['output_file']
 	
 	# TODO verify that input_file_name and output_file_name don't point to the same file
-	
 	if not os.path.exists(input_file_name):
 		print('Input file [{}] does not exist.'.format(input_file_name))
 		exit(1)
