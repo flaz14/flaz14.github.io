@@ -110,20 +110,19 @@ def main():
 	input_file_name = args['input_file']
 	output_file_name = args['output_file']
 	
-	# TODO verify that input_file_name and output_file_name don't point to the same file
-	if not os.path.exists(input_file_name):
-		print('Input file [{}] does not exist.'.format(input_file_name))
-		exit(1)
-
 	# TODO explain why we cannot use os.path.samefile() here
 	if os.path.abspath(os.path.normpath(input_file_name)) == os.path.abspath(os.path.normpath(output_file_name)):
 		print('Input and output files represent the same instance.')
 		exit(1)
-		
+	
+	if not os.path.exists(input_file_name):
+		print('Input file [{}] does not exist.'.format(input_file_name))
+		exit(1)
+	
 	if os.path.exists(output_file_name):
 		print('Output file [{}] already exists. Please delete it manually and run the script again'.format(output_file_name))
 		exit(2)
-		
+
 	if not os.path.isfile(input_file_name):
 		print("Input file [{}] is not a regular file. Probably, you've specified a path to directory...".format(input_file_name))
 		exit(1)
