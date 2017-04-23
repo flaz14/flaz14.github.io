@@ -150,7 +150,7 @@ class CmdArgs:
 	def output_file_should_be_writeable(self):
 		if not os.access(os.path.dirname(self.output_file_name), os.W_OK):
 			self.exit(
-				'''Output file [{}] is not accessible for writing. Please check out permissions on the file and/or 
+				'''Output file [{}] is not accessible for writing. Please check permissions on the file and/or 
 				corresponding directory'''.format(self.output_file_name)
 			)
 		return self
@@ -167,8 +167,8 @@ def main():
 			be ready to press Ctrl + C.''',
 		formatter_class = MultilineFormatter
 	)
-	parser.add_argument('-i', '--input-file', type = str, required = True, help = 'input file name')
-	parser.add_argument('-o', '--output-file', type = str, required = True, help = 'output file name')
+	parser.add_argument('input_file', type = str, help = 'input file name')
+	parser.add_argument('output_file', type = str, help = 'output file name')
 
 	args = (
 		CmdArgs(parser).
