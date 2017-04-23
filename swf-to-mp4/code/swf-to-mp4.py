@@ -95,46 +95,50 @@ class MultilineFormatter(argparse.HelpFormatter):
             formatted_paragraph = _textwrap.fill(paragraph, width, initial_indent=indent, subsequent_indent=indent) + '\n\n'
             multiline_text = multiline_text + formatted_paragraph
         return multiline_text
-
-def exit_with_error(error_message):
-	print(termcolor.colored('ERROR', 'red', 'on_white'), error_message)
-	exit(1)
         
 class CmdArgs:
 	def __init__(self, parser):
 		args = vars(parser.parse_args())
 		self.input_file_name = args['input_file']
 		self.output_file_name = args['output_file']
+		self.formatter = parser._get_formatter()
+		
+	def exit(self, error_message):
+		error_marker = termcolor.colored('ERROR:', 'red', 'on_white')
+		raw_text = error_marker + '\n|n\n' + error_message
+		formatted_text = self.formatter._format_text(raw_text)
+		print(formatted_text)
+		exit(1)
 	
 	def input_and_output_files_should_not_be_same(self):
 		# TODO explain why we cannot use os.path.samefile() here
 		if os.path.abspath(os.path.normpath(self.input_file_name)) == os.path.abspath(os.path.normpath(self.output_file_name)):
-			exit_with_error('Input and output files represent the same instance.')
+			self.exit('Input and output files represent the same instance.')
 		return self
 			
 	def input_file_should_exist(self):
 		if not os.path.exists(self.input_file_name):
-			exit_with_error('Input file [{}] does not exist.'.format(self.input_file_name))
+			self.exit('Input file [{}] does not exist.'.format(self.input_file_name))
 		return self
 			
 	def input_file_should_be_regular(self):
 		if not os.path.isfile(self.input_file_name):
-			exit_with_error("Input file [{}] is not a regular file. Probably, you've specified a path to directory...".format(self.input_file_name))
+			self.exit("Input file [{}] is not a regular file. Probably, you've specified a path to directory...".format(self.input_file_name))
 		return self
 	
 	def input_file_should_be_readable(self):
 		if not os.access(self.input_file_name, os.R_OK):
-			exit_with_error('Input file [{}] is not accessible for reading. Please check out permissions on the file.'.format(self.input_file_name))
+			self.exit('Input file [{}] is not accessible for reading. Please check out permissions on the file.'.format(self.input_file_name))
 		return self
 		
 	def output_file_should_not_exist(self):
 		if os.path.exists(self.output_file_name):
-			exit_with_error('Output file [{}] already exists. Please delete it manually and run the script again.'.format(self.output_file_name))
+			self.exit('Output file [{}] already exists. Please delete it manually and run the script again.'.format(self.output_file_name))
 		return self
 		
 	def output_file_should_be_writeable(self):
 		if not os.access(os.path.dirname(self.output_file_name), os.W_OK):
-			exit_with_error('Output file [{}] is not accessible for writing. Please check out permissions on the file and/or corresponding directory'.format(self.output_file_name))
+			self.exit('Output file [{}] is not accessible for writing. Please check out permissions on the file and/or corresponding directory'.format(self.output_file_name))
 		return self
 	
 def main():
@@ -158,8 +162,6 @@ def main():
 		output_file_should_not_exist().
 		output_file_should_be_writeable()
 	)
-
-
 	
 #	swf = explore_swf_file(input_file_name)
 #	screen = Screen(swf, input_file_name)
