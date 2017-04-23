@@ -13,15 +13,24 @@ import termcolor
 
 # TODO use explicit decimal (integer numbers) format were size should be specified
 
-# explore SWF-file
 def explore_swf_file(filename):
-	raw_info = subprocess.check_output(['swfdump', '--width', '--height', '--rate', filename])
-	print(raw_info)
-	pretty_info = str(raw_info, "utf-8") # TODO write a remark about used encoding
-	parsed_info = re.compile("-X (?P<width>\d+) -Y (?P<height>\d+) -r (?P<rate>\d+\.\d+)", re.S).search(pretty_info).groupdict()
-	print(parsed_info)
-	swf = {'width': int(parsed_info['width']), 'height': int(parsed_info['height']), 'rate' : int(float(parsed_info['rate']))}
-	print(swf)
+	swfdump_command = ['swfdump', '--width', '--height', '--rate', filename]
+	raw_info = subprocess.check_output(
+		swfdump_command, 
+		stdin = subprocess.DEVNULL, 
+		stderr = sys.stdout
+	)
+	decoded_info = str(raw_info, "utf-8") # TODO write a remark about used encoding
+	parsed_info = (
+		re.compile("-X (?P<width>\d+) -Y (?P<height>\d+) -r (?P<rate>\d+\.\d+)", re.S).
+		search(decoded_info).
+		groupdict()
+	)
+	swf = {
+		'width': int(parsed_info['width']), 
+		'height': int(parsed_info['height']), 
+		'rate' : int(float(parsed_info['rate']))
+	}
 	return swf
 	
 class Screen:
@@ -34,7 +43,12 @@ class Screen:
 			'-pixdepths', '3', '27',
 			'-fbdir', '/tmp'
 		]
-		self.xvfb = subprocess.Popen(xvfb_command, stdout=sys.stdout)
+		self.xvfb = subprocess.Popen(
+			xvfb_command, 
+			stdin = subprocess.DEVNULL, 
+			stdout = sys.stdout, 
+			stderr = sys.stdout
+		)
 		time.sleep(10)
 		gnash_command = [
 			'gnash',
@@ -49,7 +63,13 @@ class Screen:
 			filename
 		]
 		virtual_display = {'DISPLAY': ':44'}
-		self.gnash = subprocess.Popen(gnash_command, env = virtual_display, stdout=sys.stdout)
+		self.gnash = subprocess.Popen(
+			gnash_command, 
+			env = virtual_display, 
+			stdin = subprocess.DEVNULL,
+			stdout = sys.stdout,
+			stderr = sys.stdout
+		)
 		
 	def start_playing(self):
 		time.sleep(10)
@@ -60,7 +80,13 @@ class Screen:
 			'mousemove', str(self.swf['width'] - 20), str(self.swf['height'] - 20),
 			'click', str(1)
 		]
-		subprocess.check_call(xdotool_command, env = virtual_display, stdout = sys.stdout)
+		subprocess.check_call(
+			xdotool_command, 
+			env = virtual_display, 
+			stdin = subprocess.DEVNULL,
+			stdout = sys.stdout,
+			stderr = sys.stdout
+		)
 		
 	def start_capture(self, output_file_name):
 		time.sleep(10)
@@ -73,7 +99,12 @@ class Screen:
 			'-r', str(self.swf['rate']),
 			output_file_name
 		]
-		self.ffmpeg = subprocess.Popen(ffmpeg_command, stdout=sys.stdout, stdin=subprocess.PIPE)
+		self.ffmpeg = subprocess.Popen(
+			ffmpeg_command, 
+			stdin=subprocess.PIPE,
+			stdout=sys.stdout, 
+			stderr = sys.stdout
+		)
 	
 	def wait_until_finished(self):
 		self.gnash.wait()
