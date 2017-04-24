@@ -10,7 +10,7 @@ import argparse
 import os
 import termcolor
 
- # TODO write a remark about used encoding
+# We assume that all third-party programs can consume content from STDIN in certain encoding.
 DEFAULT_ENCODING = 'utf-8'
 
 # TODO use explicit decimal (integer numbers) format were size should be specified
