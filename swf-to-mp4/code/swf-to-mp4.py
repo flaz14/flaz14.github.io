@@ -10,12 +10,17 @@ import argparse
 import os
 import termcolor
 
-# We assume that all third-party programs can consume content from STDIN in certain encoding.
+# We assume that all third-party programs will consume input and produce output in certain encoding.
 DEFAULT_ENCODING = 'utf-8'
 
-# TODO use explicit decimal (integer numbers) format were size should be specified
 def explore_swf_file(filename):
-	swfdump_command = ['swfdump', '--width', '--height', '--rate', filename]
+	swfdump_command = [
+		'swfdump', 
+		'--width', 
+		'--height', 
+		'--rate', 
+		filename
+	]
 	raw_info = subprocess.check_output(
 		swfdump_command, 
 		stdin = subprocess.DEVNULL, 
@@ -23,7 +28,7 @@ def explore_swf_file(filename):
 	)
 	decoded_info = str(raw_info, DEFAULT_ENCODING)
 	parsed_info = (
-		re.compile("-X (?P<width>\d+) -Y (?P<height>\d+) -r (?P<rate>\d+\.\d+)", re.S).
+		re.compile('-X (?P<width>\d+) -Y (?P<height>\d+) -r (?P<rate>\d+\.\d+)', re.S).
 		search(decoded_info).
 		groupdict()
 	)
@@ -41,8 +46,8 @@ class Screen:
 			'Xvfb',
 			':44',
 			'-screen', '0', '{}x{}x24'.format(self.swf['width'], self.swf['height']),
-			'-pixdepths', '3', '27',
-			'-fbdir', '/tmp'
+			'-pixdepths', '3', '27', # TODO probably remove this parameter
+			'-fbdir', '/tmp' # TODO probably remove this parameter
 		]
 		self.xvfb = subprocess.Popen(
 			xvfb_command, 
@@ -50,7 +55,7 @@ class Screen:
 			stdout = sys.stdout, 
 			stderr = sys.stdout
 		)
-		time.sleep(10)
+		time.sleep(10) # TODO use more smart delay or comment why stupid delay is used
 		gnash_command = [
 			'gnash',
 			'--once',
@@ -73,7 +78,7 @@ class Screen:
 		)
 		
 	def start_playing(self):
-		time.sleep(10)
+		time.sleep(10) # TODO use more smart delay or comment why stupid delay is used
 		virtual_display = {'DISPLAY': ':44'}
 		xdotool_command = [
 			'xdotool',
@@ -107,9 +112,10 @@ class Screen:
 			stderr = sys.stdout
 		)
 	
-	def wait_until_finished(self):
+	def wait_until_playing_is_finished(self):
 		self.gnash.wait()
-		ffmpeg_on_quite = self.ffmpeg.communicate(bytes('q', DEFAULT_ENCODING))
+		ffmpeg_quite_keystroke = bytes('q', DEFAULT_ENCODING)
+		self.ffmpeg.communicate(ffmpeg_quite_keystroke)
 		self.ffmpeg.wait()
 		
 	def __del__(self):
@@ -225,7 +231,7 @@ def main():
 	screen = Screen(swf, args.input_file_name)
 	screen.start_capture(args.output_file_name)
 	screen.start_playing()
-	screen.wait_until_finished() # TODO rename to wait_until_playing_finished()
+	screen.wait_until_playing_is_finished() # TODO rename to wait_until_playing_finished()
 	del screen # TODO probably there is no need to keep this line because the object will be deleted automatically
 
 if __name__ == '__main__':
