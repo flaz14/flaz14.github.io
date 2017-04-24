@@ -119,10 +119,13 @@ class Screen:
 		self.ffmpeg.wait()
 		
 	def __del__(self):
+		'''
+		There is no need to wait for the process after it's killed. But waiting helps to keep output of the script 
+		accurate. Without the pause user's terminal will be polluted by Xvfb messages (the messages will be printed 
+		below command line prompt).
+		'''
 		self.xvfb.kill()
-		# TODO improve the comment below
-		self.xvfb.wait() # There is no need to wait really. But waiting allows to not pollute terminal with Xvfb output
-		# after command line prompt (because process doesn't end immediately after KILL signal is received)
+		self.xvfb.wait()
 	
 import textwrap as _textwrap
 class MultilineFormatter(argparse.HelpFormatter):
