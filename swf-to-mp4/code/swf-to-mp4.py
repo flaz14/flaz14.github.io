@@ -45,9 +45,9 @@ class Screen:
 		xvfb_command = [
 			'Xvfb',
 			':44',
-			'-screen', '0', '{}x{}x24'.format(self.swf['width'], self.swf['height']),
-			'-pixdepths', '3', '27', # TODO probably remove this parameter
-			'-fbdir', '/tmp' # TODO probably remove this parameter
+			'-screen', '0', '{}x{}x24'.format(self.swf['width'], self.swf['height'])
+			#'-pixdepths', '3', '27', # TODO probably remove this parameter
+			#'-fbdir', '/tmp' # TODO probably remove this parameter
 		]
 		self.xvfb = subprocess.Popen(
 			xvfb_command, 
