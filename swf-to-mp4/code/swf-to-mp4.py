@@ -13,6 +13,10 @@ import termcolor
 # We assume that all third-party programs will consume input and produce output in certain encoding.
 DEFAULT_ENCODING = 'utf-8'
 
+# Perhaps, it will be better do not hardcode the number of virtual server. But looking up for free number is complicated
+# task (in popular tools finding free server number is done via a kind of nmap-scanning).
+SERVER_NUMBER = ':44'
+
 def explore_swf_file(filename):
 	swfdump_command = [
 		'swfdump', 
@@ -44,7 +48,7 @@ class Screen:
 		self.swf = swf
 		xvfb_command = [
 			'Xvfb',
-			':44',
+			SERVER_NUMBER,
 			'-screen', '0', '{}x{}x24'.format(self.swf['width'], self.swf['height'])
 		]
 		self.xvfb = subprocess.Popen(
@@ -66,10 +70,9 @@ class Screen:
 			'--verbose',
 			filename
 		]
-		virtual_display = {'DISPLAY': ':44'} # TODO refactor into named constant
 		self.gnash = subprocess.Popen(
 			gnash_command, 
-			env = virtual_display, 
+			env = {'DISPLAY': SERVER_NUMBER},
 			stdin = subprocess.DEVNULL,
 			stdout = sys.stdout,
 			stderr = sys.stdout
@@ -77,7 +80,6 @@ class Screen:
 		
 	def start_playing(self):
 		time.sleep(10) # TODO use more smart delay or comment why stupid delay is used
-		virtual_display = {'DISPLAY': ':44'} # TODO refactor into named constant
 		xdotool_command = [
 			'xdotool',
 			'mousemove', '0', '0',
@@ -86,7 +88,7 @@ class Screen:
 		]
 		subprocess.check_call(
 			xdotool_command, 
-			env = virtual_display, 
+			env = {'DISPLAY': SERVER_NUMBER}, 
 			stdin = subprocess.DEVNULL,
 			stdout = sys.stdout,
 			stderr = sys.stdout
@@ -98,7 +100,7 @@ class Screen:
 			'ffmpeg',
 			'-f', 'x11grab',
 			'-video_size', '{}x{}'.format(self.swf['width'], self.swf['height']),
-			'-i', '127.0.0.1:44', # TODO pick display number from named constant
+			'-i', '127.0.0.1' + SERVER_NUMBER, 
 			'-codec:v', 'libx264',
 			'-r', str(self.swf['rate']),
 			output_file_name
@@ -118,6 +120,7 @@ class Screen:
 		
 	def __del__(self):
 		self.xvfb.kill()
+		# TODO improve the comment below
 		self.xvfb.wait() # There is no need to wait really. But waiting allows to not pollute terminal with Xvfb output
 		# after command line prompt (because process doesn't end immediately after KILL signal is received)
 	
