@@ -68,7 +68,7 @@ class Screen:
 			'--verbose',
 			filename
 		]
-		virtual_display = {'DISPLAY': ':44'}
+		virtual_display = {'DISPLAY': ':44'} # TODO refactor into named constant
 		self.gnash = subprocess.Popen(
 			gnash_command, 
 			env = virtual_display, 
@@ -79,7 +79,7 @@ class Screen:
 		
 	def start_playing(self):
 		time.sleep(10) # TODO use more smart delay or comment why stupid delay is used
-		virtual_display = {'DISPLAY': ':44'}
+		virtual_display = {'DISPLAY': ':44'} # TODO refactor into named constant
 		xdotool_command = [
 			'xdotool',
 			'mousemove', '0', '0',
@@ -100,7 +100,7 @@ class Screen:
 			'ffmpeg',
 			'-f', 'x11grab',
 			'-video_size', '{}x{}'.format(self.swf['width'], self.swf['height']),
-			'-i', '127.0.0.1:44',
+			'-i', '127.0.0.1:44', # TODO pick display number from named constant
 			'-codec:v', 'libx264',
 			'-r', str(self.swf['rate']),
 			output_file_name
@@ -211,7 +211,7 @@ def main():
 		description = '''
 			This script helps to convert SWF video file into MP4 with aid of some dirty methods. However, there are a 
 			lot of limitations. So the script is usefull in very particular cases. Something can go wrong. So please
-			be ready to press Ctrl + C.''',
+			be ready to press Ctrl + C. And be ready to kill Xvfb, Gnash manually when something will go wrong.''',
 		formatter_class = MultilineFormatter
 	)
 	parser.add_argument('input_file', type = str, help = 'input file name')
@@ -231,8 +231,7 @@ def main():
 	screen = Screen(swf, args.input_file_name)
 	screen.start_capture(args.output_file_name)
 	screen.start_playing()
-	screen.wait_until_playing_is_finished() # TODO rename to wait_until_playing_finished()
-	del screen # TODO probably there is no need to keep this line because the object will be deleted automatically
+	screen.wait_until_playing_is_finished()
 
 if __name__ == '__main__':
 	main()
