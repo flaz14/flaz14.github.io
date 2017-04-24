@@ -103,6 +103,7 @@ class Screen:
 			'-i', '127.0.0.1' + SERVER_NUMBER, 
 			'-codec:v', 'libx264',
 			'-r', str(self.swf['rate']),
+			'-f', 'mp4',
 			output_file_name
 		]
 		self.ffmpeg = subprocess.Popen(
@@ -122,7 +123,7 @@ class Screen:
 		'''
 		There is no need to wait for the process after it's killed. But waiting helps to keep output of the script 
 		accurate. Without the pause user's terminal will be polluted by Xvfb messages (the messages will be printed 
-		below command line prompt).
+		below a command line prompt).
 		'''
 		self.xvfb.kill()
 		self.xvfb.wait()
@@ -207,10 +208,6 @@ class CmdArgs:
 		return self
 	
 def main():
-	# TODO handle output file extension gracefully
-	# [NULL @ 0xac587c0] Unable to find a suitable output format for '/tmp/shit'
-	# /tmp/shit: Invalid argument
-
 	parser = argparse.ArgumentParser(
 		description = '''
 			This script helps to convert SWF video file into MP4 with aid of some dirty methods. However, there are a 
