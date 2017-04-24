@@ -208,6 +208,7 @@ class CmdArgs:
 		return self
 	
 def main():
+	# TODO improve description and info about parameters
 	parser = argparse.ArgumentParser(
 		description = '''
 			This script helps to convert SWF video file into MP4 with aid of some dirty methods. However, there are a 
@@ -215,8 +216,18 @@ def main():
 			be ready to press Ctrl + C. And be ready to kill Xvfb, Gnash manually when something will go wrong.''',
 		formatter_class = MultilineFormatter
 	)
-	parser.add_argument('input_file', type = str, help = 'input file name')
-	parser.add_argument('output_file', type = str, help = 'output file name')
+	parser.add_argument(
+		'input_file', 
+		type = str, 
+		help = '''input file name'''
+	)
+	parser.add_argument(
+		'output_file', 
+		type = str, 
+		help = '''
+			Output file name; file extension doesn't matter: you can specify any extension (perhaps, the better choice is
+			.mp4) but output file will have MP4 format anyway.'''
+	)
 	
 	args = (
 		CmdArgs(parser).
