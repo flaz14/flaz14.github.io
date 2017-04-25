@@ -8,9 +8,12 @@ import re
 import time
 import argparse
 import os
+import textwrap
 import termcolor
 
-'''We assume that all third-party programs will consume input and produce output in certain encoding.'''
+'''
+We assume that all third-party programs will consume input and produce output in certain encoding.
+'''
 DEFAULT_ENCODING = 'utf-8'
 
 '''
@@ -130,14 +133,18 @@ class Screen:
 		self.xvfb.kill()
 		self.xvfb.wait()
 	
-import textwrap as _textwrap
 class MultilineFormatter(argparse.HelpFormatter):
     def _fill_text(self, text, width, indent):
         text = self._whitespace_matcher.sub(' ', text).strip()
         paragraphs = text.split('|n ')
         multiline_text = ''
         for paragraph in paragraphs:
-            formatted_paragraph = _textwrap.fill(paragraph, width, initial_indent=indent, subsequent_indent=indent) + '\n\n'
+            formatted_paragraph = textwrap.fill(
+				paragraph, 
+				width, 
+				initial_indent=indent, 
+				subsequent_indent=indent
+			) + '\n\n'
             multiline_text = multiline_text + formatted_paragraph
         return multiline_text
         
@@ -215,7 +222,9 @@ def main():
 		description = '''
 			This script helps to convert SWF video file into MP4 with aid of some dirty methods. However, there are a 
 			lot of limitations. So the script is usefull in very particular cases. Something can go wrong. So please
-			be ready to press Ctrl + C. And be ready to kill Xvfb, Gnash manually when something will go wrong.''',
+			be ready to press Ctrl + C. 
+			|n
+			And be ready to kill Xvfb, Gnash manually when something will go wrong.''',
 		formatter_class = MultilineFormatter
 	)
 	parser.add_argument(
