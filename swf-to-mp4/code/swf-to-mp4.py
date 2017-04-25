@@ -62,7 +62,6 @@ class Screen:
 			stdout = sys.stdout, 
 			stderr = sys.stdout
 		)
-		time.sleep(10) # TODO use more smart delay or comment why stupid delay is used
 		gnash_command = [
 			'gnash',
 			'--once',
@@ -75,6 +74,7 @@ class Screen:
 			'--verbose',
 			filename
 		]
+		self.sleep_safely()
 		self.gnash = subprocess.Popen(
 			gnash_command, 
 			env = {'DISPLAY': SERVER_NUMBER},
@@ -84,13 +84,13 @@ class Screen:
 		)
 		
 	def start_playing(self):
-		time.sleep(10) # TODO use more smart delay or comment why stupid delay is used
 		xdotool_command = [
 			'xdotool',
 			'mousemove', '0', '0',
 			'mousemove', str(self.swf['width'] - 20), str(self.swf['height'] - 20),
 			'click', str(1)
 		]
+		self.sleep_safely()
 		subprocess.check_call(
 			xdotool_command, 
 			env = {'DISPLAY': SERVER_NUMBER}, 
@@ -100,7 +100,6 @@ class Screen:
 		)
 		
 	def start_capture(self, output_file_name):
-		time.sleep(10)
 		ffmpeg_command = [
 			'ffmpeg',
 			'-f', 'x11grab',
@@ -111,6 +110,7 @@ class Screen:
 			'-f', 'mp4',
 			output_file_name
 		]
+		self.sleep_safely()
 		self.ffmpeg = subprocess.Popen(
 			ffmpeg_command, 
 			stdin=subprocess.PIPE,
@@ -123,7 +123,17 @@ class Screen:
 		ffmpeg_quite_keystroke = bytes('q', DEFAULT_ENCODING)
 		self.ffmpeg.communicate(ffmpeg_quite_keystroke)
 		self.ffmpeg.wait()
-		
+	
+	def sleep_safely(self):
+		'''
+		We need this nasty delay. Generally, it's not easy to know whether a program is alive or it's really ready to 
+		work. For example, `Xvfb` starts quickly (e.g. you can see corresponding PID). But it's not ready to work 
+		immediately (e.g. some initializations can be still in progress). Yes, it's possible to 'ping' a virtual 
+		display. But this approach is not applicable for other applications (like `Gnash`). So it will be better to 
+		simply wait for several seconds (just for consistency accross different third-party applications).
+		'''
+		time.sleep(10)
+	
 	def __del__(self):
 		'''
 		There is no need to wait for the process after it's killed. But waiting helps to keep output of the script 
@@ -217,7 +227,6 @@ class CmdArgs:
 		return self
 	
 def main():
-	# TODO improve description and info about parameters
 	parser = argparse.ArgumentParser(
 		description = '''
 			This script helps to convert SWF video file into MP4 with aid of some dirty methods (e.g. playing on virtual
@@ -236,8 +245,7 @@ def main():
 			exist. Additional useful verifications are performed. For instance, if you haven't access to the file the 
 			script will stop with corresponding message at the very beginning. But be sure that you really specify SWF 
 			file. If you speficy a file of other type (for example, text) the result of execution will be unpredictable 
-			(please look at `BUG`s paragraphs for more details). 
-			'''
+			(please look at `BUG`s paragraphs for more details).'''
 	)
 	parser.add_argument(
 		'output_file', 
@@ -246,8 +254,7 @@ def main():
 			name of the output file, e.g. where resultant video will be stored. The file should not exist. If it exists
 			already you have to delete it manually and run the script again (or just use another name). File extension 
 			doesn't matter: you can specify any extension. While `.mp4` is the best choice the video will be written as 
-			`ISO Media, MPEG v4 system, version 1` (in terminology of `file` shell utility) anyway.
-			'''
+			`ISO Media, MPEG v4 system, version 1` (in terminology of `file` shell utility) anyway.'''
 	)
 	
 	args = (
