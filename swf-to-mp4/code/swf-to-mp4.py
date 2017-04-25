@@ -76,7 +76,7 @@ class Screen:
 			'--width', str(self.swf['width']),
 			'--height', str(self.swf['height']),
 			#'--fullscreen', This parameter is not used because it leads to mysterious video disproportion. You can find
-			#                more details in the text of primarty article (the link resides at the top of the script).
+			#                more details in the text of primarty article (the link is put at the top of the script).
 			'--hide-menubar',
 			'--verbose',
 			filename
@@ -143,9 +143,9 @@ class Screen:
 	
 	def __del__(self):
 		'''
-		There is no need to wait for the process after it's killed. But waiting helps to keep output of the script 
-		accurate. Without the pause user's terminal will be polluted by Xvfb messages (the messages will be printed 
-		below a command line prompt).
+		There is no need to wait for the process after it's killed. But waiting helps to keep output of the script neat.
+		Without the pause user's terminal will be polluted by `Xvfb` messages (the messages will be printed below a 
+		command line prompt).
 		'''
 		self.xvfb.kill()
 		self.xvfb.wait()
@@ -172,8 +172,8 @@ class MultilineFormatter(argparse.HelpFormatter):
 
 class CmdArgs:
 	'''
-	We obtain the formatter from the instance of `argparse.ArgumentParser`. So we can format error message in the same
-	way as `argparse` does this (text wrapping, paragraphs, etc).
+	We obtain the formatter from the instance of `argparse.ArgumentParser`. So we can format error messages in the same
+	manner as `argparse` does this (text wrapping, breaking down into paragraphs, etc).
 	'''
 	def __init__(self, parser):
 		args = vars(parser.parse_args())
@@ -190,14 +190,14 @@ class CmdArgs:
 	
 	def input_and_output_files_should_not_be_same(self):
 		'''
-		Perhaps, the better way to check that two file names point to the same instance is `os.path.samefile()`. But we 
-		don't use it because the file should exist before the function is called. So we just compare normalized absolute
+		Perhaps, the best way to check that two file names point to the same file is `os.path.samefile()`. But we don't 
+		use that because the file should exist before the function is called. So we just compare normalized absolute
 		paths.
 		
-		Yes, it's not mandatory to do this check at all. Without the check you will get `Output file already exists` 
+		Yes, it's not mandatory to do this check at all. Without the check you will get "Output file already exists"
 		error (because `output_file_name` will point to the input file which already exists). But it will be better to 
 		spot the situation with the same file in advance for the sake of clean error message (obviously, using the same
-		source and destination is generally wrong).
+		source and destination is wrong).
 		'''
 		input_path = os.path.abspath(os.path.normpath(self.input_file_name))
 		output_path = os.path.abspath(os.path.normpath(self.output_file_name))
@@ -237,8 +237,8 @@ class CmdArgs:
 	def output_file_should_be_writeable(self):
 		if not os.access(os.path.dirname(self.output_file_name), os.W_OK):
 			self.exit(
-				'''Output file [{}] is not accessible for writing. Please check permissions on the file and/or 
-				corresponding directory'''.format(self.output_file_name)
+				'''Output file [{}] is not accessible for writing. Please check permissions on the corresponding 
+				directory'''.format(self.output_file_name)
 			)
 		return self
 	
