@@ -10,11 +10,13 @@ import argparse
 import os
 import termcolor
 
-# We assume that all third-party programs will consume input and produce output in certain encoding.
+'''We assume that all third-party programs will consume input and produce output in certain encoding.'''
 DEFAULT_ENCODING = 'utf-8'
 
-# Perhaps, it will be better do not hardcode the number of virtual server. But looking up for free number is complicated
-# task (in popular tools finding free server number is done via a kind of nmap-scanning).
+'''
+Perhaps, it will be better do not hardcode the number of virtual server. But looking up for free number is 
+complicated task (in popular tools finding free server number is done via a kind of nmap-scanning).
+'''
 SERVER_NUMBER = ':44'
 
 def explore_swf_file(filename):
