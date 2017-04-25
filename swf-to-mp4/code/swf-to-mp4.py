@@ -12,7 +12,8 @@ import textwrap
 import termcolor
 
 '''
-We assume that all third-party programs will consume input and produce output in certain encoding.
+We assume that all third-party programs will consume input and produce output in certain encoding. utf-8 is pretty 
+enough.
 '''
 DEFAULT_ENCODING = 'utf-8'
 
@@ -144,26 +145,25 @@ class Screen:
 		self.xvfb.wait()
 	
 class MultilineFormatter(argparse.HelpFormatter):
-	# TODO make it class-level documentation comment
-	#'''
-	#This snippet is nearly copied and pasted from the answer on 
-	#"Python argparse: How to insert newline in the help text?" question 
-	#(http://stackoverflow.com/questions/3853722/python-argparse-how-to-insert-newline-in-the-help-text).
-	#'''
-    def _fill_text(self, text, width, indent):
-        text = self._whitespace_matcher.sub(' ', text).strip()
-        paragraphs = text.split('|n ')
-        multiline_text = ''
-        for paragraph in paragraphs:
-            formatted_paragraph = textwrap.fill(
+	'''
+	This snippet is nearly copied and pasted from the answer on 
+	"Python argparse: How to insert newline in the help text?" question 
+	(http://stackoverflow.com/questions/3853722/python-argparse-how-to-insert-newline-in-the-help-text).
+	'''
+	def _fill_text(self, text, width, indent):
+		text = self._whitespace_matcher.sub(' ', text).strip()
+		paragraphs = text.split('|n ')
+		multiline_text = ''
+		for paragraph in paragraphs:
+			formatted_paragraph = textwrap.fill(
 				paragraph, 
 				width, 
 				initial_indent=indent, 
 				subsequent_indent=indent
 			) + '\n\n'
-            multiline_text = multiline_text + formatted_paragraph
-        return multiline_text
-        
+			multiline_text = multiline_text + formatted_paragraph
+		return multiline_text
+
 class CmdArgs:
 	'''
 	We obtain the formatter from the instance of `argparse.ArgumentParser`. So we can format error message in the same
@@ -255,14 +255,14 @@ def main():
 			exist. Additional useful verifications are performed. For instance, if you haven't access to the file the 
 			script will stop with corresponding message at the very beginning. But be sure that you really specify SWF 
 			file. If you speficy a file of other type (for example, text) the result of execution will be unpredictable 
-			(please look at `BUG`s paragraphs for more details).'''
+			(please look at BUGs paragraphs for more details).'''
 	)
 	parser.add_argument(
 		'output_file', 
 		type = str, 
 		help = '''
-			name of the output file, e.g. where resultant video will be stored. The file should not exist. If it exists
-			already you have to delete it manually and run the script again (or just use another name). File extension 
+			name of the output file, e.g. where resultant video will be stored. The file should not exist. If it already
+			exists you have to delete it manually and run the script again (or just use another name). File extension 
 			doesn't matter: you can specify any extension. While `.mp4` is the best choice the video will be written as 
 			`ISO Media, MPEG v4 system, version 1` (in terminology of `file` shell utility) anyway.'''
 	)
