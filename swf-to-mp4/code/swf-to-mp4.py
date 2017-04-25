@@ -144,6 +144,12 @@ class Screen:
 		self.xvfb.wait()
 	
 class MultilineFormatter(argparse.HelpFormatter):
+	# TODO make it class-level documentation comment
+	#'''
+	#This snippet is nearly copied and pasted from the answer on 
+	#"Python argparse: How to insert newline in the help text?" question 
+	#(http://stackoverflow.com/questions/3853722/python-argparse-how-to-insert-newline-in-the-help-text).
+	#'''
     def _fill_text(self, text, width, indent):
         text = self._whitespace_matcher.sub(' ', text).strip()
         paragraphs = text.split('|n ')
@@ -159,6 +165,10 @@ class MultilineFormatter(argparse.HelpFormatter):
         return multiline_text
         
 class CmdArgs:
+	'''
+	We obtain the formatter from the instance of `argparse.ArgumentParser`. So we can format error message in the same
+	way as `argparse` does this (text wrapping, paragraphs, etc).
+	'''
 	def __init__(self, parser):
 		args = vars(parser.parse_args())
 		self.input_file_name = args['input_file']
