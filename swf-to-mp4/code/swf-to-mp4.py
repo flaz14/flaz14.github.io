@@ -220,24 +220,34 @@ def main():
 	# TODO improve description and info about parameters
 	parser = argparse.ArgumentParser(
 		description = '''
-			This script helps to convert SWF video file into MP4 with aid of some dirty methods. However, there are a 
-			lot of limitations. So the script is usefull in very particular cases. Something can go wrong. So please
-			be ready to press Ctrl + C. 
+			This script helps to convert SWF video file into MP4 with aid of some dirty methods (e.g. playing on virtual
+			video screen and capturing it). And there are several limitations and caveats. So the script is usefull in 
+			very particular cases.
 			|n
-			And be ready to kill Xvfb, Gnash manually when something will go wrong.''',
+			BUG1: When something goes wrong the script can freeze and don't respond. So please be ready to terminate the
+			script via `Ctrl + C` and then kill `Xvfb`, `Gnash`, `ffmpeg` manually.''',
 		formatter_class = MultilineFormatter
 	)
 	parser.add_argument(
 		'input_file', 
 		type = str, 
-		help = '''input file name'''
+		help = '''
+			name of the input file to be processed. It can be absolute or relative path to the file. The file should 
+			exist. Additional useful verifications are performed. For instance, if you haven't access to the file the 
+			script will stop with corresponding message at the very beginning. But be sure that you really specify SWF 
+			file. If you speficy a file of other type (for example, text) the result of execution will be unpredictable 
+			(please look at `BUG`s paragraphs for more details). 
+			'''
 	)
 	parser.add_argument(
 		'output_file', 
 		type = str, 
 		help = '''
-			Output file name; file extension doesn't matter: you can specify any extension (perhaps, the better choice is
-			.mp4) but output file will have MP4 format anyway.'''
+			name of the output file, e.g. where resultant video will be stored. The file should not exist. If it exists
+			already you have to delete it manually and run the script again (or just use another name). File extension 
+			doesn't matter: you can specify any extension. While `.mp4` is the best choice the video will be written as 
+			`ISO Media, MPEG v4 system, version 1` (in terminology of `file` shell utility) anyway.
+			'''
 	)
 	
 	args = (
