@@ -12,6 +12,11 @@ import textwrap
 import termcolor
 
 '''
+This script is a demo for "Преобразование SWF в MP4 - это просто" (http://flaz14.github.io/swf-to-mp4/swf-to-mp4.html) 
+article.
+'''
+
+'''
 We assume that all third-party programs will consume input and produce output in certain encoding. utf-8 is pretty 
 enough.
 '''
@@ -70,7 +75,8 @@ class Screen:
 			'--y-pos', '0',
 			'--width', str(self.swf['width']),
 			'--height', str(self.swf['height']),
-			#'--fullscreen', # TODO write a comment about why '--fullscreen' switch is not used
+			#'--fullscreen', This parameter is not used because it leads to mysterious video disproportion. You can find
+			#                more details in the text of primarty article (the link resides at the top of the script).
 			'--hide-menubar',
 			'--verbose',
 			filename
