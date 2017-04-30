@@ -12,8 +12,11 @@ import textwrap
 import termcolor
 
 '''
-This script is a demo for "Преобразование SWF в MP4 - это просто" (http://flaz14.github.io/swf-to-mp4/swf-to-mp4.html) 
+This script is a demo for "Преобразование SWF в MP4 - это просто!" (http://flaz14.github.io/swf-to-mp4/swf-to-mp4.html) 
 article.
+
+You need some extra Python modules and several third-party programs installed in order to use this script. Please look 
+at the article for more details. Or just search for `_comand` phrase in the source code below.
 '''
 
 '''
