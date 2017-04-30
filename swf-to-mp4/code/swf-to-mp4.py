@@ -23,10 +23,10 @@ enough.
 DEFAULT_ENCODING = 'utf-8'
 
 '''
-Perhaps, it will be better do not hardcode the number of virtual server. But looking up for free number is 
+Perhaps, it will be better do not hardcode the number of virtual X server. But looking up for free number is 
 complicated task (in popular tools finding free server number is done via a kind of nmap-scanning).
 '''
-SERVER_NUMBER = ':44'
+VIRTUAL_SERVER_NUMBER = ':44'
 
 def explore_swf_file(filename):
 	swfdump_command = [
@@ -59,7 +59,7 @@ class Screen:
 		self.swf = swf
 		xvfb_command = [
 			'Xvfb',
-			SERVER_NUMBER,
+			VIRTUAL_SERVER_NUMBER,
 			'-screen', '0', '{}x{}x24'.format(self.swf['width'], self.swf['height'])
 		]
 		self.xvfb = subprocess.Popen(
@@ -76,7 +76,7 @@ class Screen:
 			'--width', str(self.swf['width']),
 			'--height', str(self.swf['height']),
 			#'--fullscreen', This parameter is not used because it leads to mysterious video disproportion. You can find
-			#                more details in the text of primarty article (the link is put at the top of the script).
+			#                more details in the text of primary article (the link is at the top of the script).
 			'--hide-menubar',
 			'--verbose',
 			filename
@@ -84,7 +84,7 @@ class Screen:
 		self.sleep_safely()
 		self.gnash = subprocess.Popen(
 			gnash_command, 
-			env = {'DISPLAY': SERVER_NUMBER},
+			env = {'DISPLAY': VIRTUAL_SERVER_NUMBER},
 			stdin = subprocess.DEVNULL,
 			stdout = sys.stdout,
 			stderr = sys.stdout
@@ -101,7 +101,7 @@ class Screen:
 		self.sleep_safely()
 		subprocess.check_call(
 			xdotool_command, 
-			env = {'DISPLAY': SERVER_NUMBER}, 
+			env = {'DISPLAY': VIRTUAL_SERVER_NUMBER}, 
 			stdin = subprocess.DEVNULL,
 			stdout = sys.stdout,
 			stderr = sys.stdout
@@ -110,7 +110,7 @@ class Screen:
 	def hide_mouse_pointer(self):
 		unclutter_command = [
 			'unclutter',
-			'-display', SERVER_NUMBER,
+			'-display', VIRTUAL_SERVER_NUMBER,
 			'-idle', '0'
 		]
 		self.unclutter = subprocess.Popen(
@@ -125,7 +125,7 @@ class Screen:
 			'ffmpeg',
 			'-f', 'x11grab',
 			'-video_size', '{}x{}'.format(self.swf['width'], self.swf['height']),
-			'-i', '127.0.0.1' + SERVER_NUMBER, 
+			'-i', '127.0.0.1' + VIRTUAL_SERVER_NUMBER, 
 			'-codec:v', 'libx264',
 			'-r', str(self.swf['rate']),
 			'-f', 'mp4',
@@ -212,7 +212,7 @@ class CmdArgs:
 		Yes, it's not mandatory to do this check at all. Without the check you will get "Output file already exists"
 		error (because `output_file_name` will point to the input file which already exists). But it will be better to 
 		spot the situation with the same file in advance for the sake of clean error message (obviously, using the same
-		source and destination is wrong).
+		input and output files is wrong).
 		'''
 		input_path = os.path.abspath(os.path.normpath(self.input_file_name))
 		output_path = os.path.abspath(os.path.normpath(self.output_file_name))
