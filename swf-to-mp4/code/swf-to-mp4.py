@@ -91,6 +91,7 @@ class Screen:
 		)
 		
 	def start_playing(self):
+		self.hide_mouse_pointer()
 		xdotool_command = [
 			'xdotool',
 			'mousemove', '0', '0',
@@ -101,6 +102,19 @@ class Screen:
 		subprocess.check_call(
 			xdotool_command, 
 			env = {'DISPLAY': SERVER_NUMBER}, 
+			stdin = subprocess.DEVNULL,
+			stdout = sys.stdout,
+			stderr = sys.stdout
+		)
+		
+	def hide_mouse_pointer(self):
+		unclutter_command = [
+			'unclutter',
+			'-display', SERVER_NUMBER,
+			'-idle', '0'
+		]
+		self.unclutter = subprocess.Popen(
+			unclutter_command,
 			stdin = subprocess.DEVNULL,
 			stdout = sys.stdout,
 			stderr = sys.stdout
@@ -120,8 +134,8 @@ class Screen:
 		self.sleep_safely()
 		self.ffmpeg = subprocess.Popen(
 			ffmpeg_command, 
-			stdin=subprocess.PIPE,
-			stdout=sys.stdout, 
+			stdin = subprocess.PIPE,
+			stdout = sys.stdout, 
 			stderr = sys.stdout
 		)
 	
@@ -147,6 +161,7 @@ class Screen:
 		Without the pause user's terminal will be polluted by `Xvfb` messages (the messages will be printed below a 
 		command line prompt).
 		'''
+		self.unclutter.kill()
 		self.xvfb.kill()
 		self.xvfb.wait()
 	

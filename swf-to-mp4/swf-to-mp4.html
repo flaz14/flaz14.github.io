@@ -174,7 +174,23 @@ gnash \
 		
 		
 		
-		
+		<p>
+			Есть небольшой нюанс с unclutter. В LinuxMint 17.1 Cinnamon (скорее всего, в Ubuntu тоже) после установки 
+			unclutter (sudo apt-get install unclutter) и последующего перезапуска X-сервера (например, после выключения
+			комьютера) курсор мыши постоянно пропадает с экрана после пятисекундного бездействия. Оказывается, запуск
+			unclutter настроен по умолчанию. Взглянем на соответствующий файл настроек <i>/etc/default/unclutter</i>:
+<pre>
+# /etc/default/unclutter - configuration file for unclutter
+
+# Set this option to 'true' if you want to start unclutter
+# automagically after X has been started for a user.
+# Otherwise, set it to 'false'.
+START_UNCLUTTER="true"
+...
+</pre>
+
+		<p>
+			С ним все ясно: просто меняем <code>true</code> на <code>false</code>.
 		
 		
 		
