@@ -2,4 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-print("Hello")
+ROOT = 'http://archive.ubuntu.com/ubuntu/dists/'
+
+class UbuntuSpider(scrapy.Spider):
+	name 

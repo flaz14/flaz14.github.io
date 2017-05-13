@@ -90,13 +90,11 @@
 					<p>
 						Если взглянуть на 
 <a href="https://github.com/flaz14/flaz14.github.io/blob/master/how-to-set-up-offline-software-repository/code/apt-get_update_sample.log">
-						вывод команды <samp>apt-get update</samp>
-</a>, 
+						вывод команды <samp>apt-get update</samp></a>, 
 						то можно увидеть серверы, с которых <strong>apt-get</strong> скачивает пакеты. Выделим
 						неповторяющиеся ссылки на серверы с помощью скрипта 
 <a href="https://github.com/flaz14/flaz14.github.io/blob/master/how-to-set-up-offline-software-repository/code/extract-domain-names.sh">
-						extract-domain-names.sh
-</a>:
+						extract-domain-names.sh</a>:
 <pre>
 $ ./extract-domain-names.sh
 archive.canonical.com
@@ -107,195 +105,95 @@ security.ubuntu.com
 </pre>
 					<p>					
 						О создании репозитория ПО для Ubuntu рассказано в 
-						<a href="https://help.ubuntu.com/community/AptGet/Offline/Repository">документации</a>. Но 
-						придеться еще скачать ПО с <strong>linuxmint.com</strong> и <strong>canonical.com</strong>. 
-						Кроме того, придеться вручную проверять контрольные суммы и грамотно обрабатывать коллизии.
+						<a href="https://help.ubuntu.com/community/AptGet/Offline/Repository">документации</a>. Много 
+						полезного сказано в руководстве по файлу <i>/etc/apt/sources.list</i> 
+						(<code>man 5 sources.list</code>). Но придеться еще скачать ПО с <strong>linuxmint.com</strong> 
+						и <strong>canonical.com</strong>. Кроме того, придеться вручную проверить контрольные суммы.
 			</ol>
 			
 		<p>
-			Вполне возможно, что для каждого из вышеперечисленых подходов уже есть готовые скрипты и даже программы, 
-			которые делают все сами. Но мы сделаем вид, что ничего подобного нет. Изобретем велосипед!
-
-		<h2>Приступим!</h2>
-
-		<p>
-			Перво-наперво, узнаем кодовое имя релиза. Например, так:
+			Прежде чем начать попробуем поискать в системе упомянутые в последнем пункте адреса. Например, так:
 <pre>
-$ cat /etc/*release
-DISTRIB_ID=LinuxMint
-DISTRIB_RELEASE=17.1
-DISTRIB_CODENAME=rebecca
-DISTRIB_DESCRIPTION="Linux Mint 17.1 Rebecca"
-NAME="Ubuntu"
-VERSION="14.04.5 LTS, Trusty Tahr"
-ID=ubuntu
-ID_LIKE=debian
-PRETTY_NAME="Ubuntu 14.04.5 LTS"
-VERSION_ID="14.04"
-...
+$ grep -i -R 'archive.canonical.com' /etc 2>/dev/null > archive.canonical.com_search.txt
+</pre>
+		<p>
+			И получим:
+<pre>
+/etc/apt/sources.list.d/official-package-repositories.list:deb http://archive.canonical.com/ubuntu/ trusty partner
 </pre>
 
 		<p>
-			Т.о. кодовое имя релиза - <strong>Trusty Tahr</strong>, или просто <strong>Trusty</strong>.
-
-		<p>
-			Посмотрим на содержимое <a href="http://archive.ubuntu.com/ubuntu/dists/">архива ПО Ubuntu</a> с "высоты 
-			птичьего полета" и увидим картину, изображенную на <a href="#illustration-1-1">рисунке 1.1.</a>
-
-		<h4 id="illustration-1-1">Рисунок 1.1 - общий вид архива ПО Ubuntu Trusty Tahr</h4>
-		<p>
-			<img src="illustrations/overall-folder-structure.png" width="320px"
-			alt='здесь изображен самый первый "уровень вложенности" архива Ubuntu (в виде скриншота странички, открытой 
-			в браузере Mozilla Firefox)'>
-
-		<p>
-			Имена обведенных рамкой каталогов уже расшифрованы в 
-			<a href="http://help.ubuntu.ru/wiki/%D1%80%D0%B5%D0%BF%D0%BE%D0%B7%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%B9">
-				документации по Ubuntu</a>. Приведем здесь выдержку, сделанную методом copy-and-paste:
-			<dl>
-				<dt>trusty
-				<dd>пакеты на момент выхода релиза
-					
-				<dt>trusty-security
-				<dd>пакеты критических обновлений безопасности
-					
-				<dt>trusty-updates
-				<dd>пакеты обновления системы (т.е. более поздние версии ПО, вышедшие уже после релиза)
-					
-				<dt>trusty-backports
-				<dd>бэкпорты более новых версий некоторого ПО, которое доступно только в нестабильных версиях Ubuntu
-					
-				<dt>trusty-proposed
-				<dd>пакеты, соответсвующие ПО, в котором исправлены ошибки (bug fix), но еще не прошедшие тестирование
-			</dl>
-
-		<p>
-			В принципе, пакеты из <dfn>trusty-backports</dfn> и <dfn>trusty-proposed</dfn> нам не понадобятся (они не 
-			используются при обновлении посредством <strong>apt-get</strong>). Но их мы тоже скачаем, на всякий случай.
-
-		<p>
-			Теперь заглянем внутрь 
-			<a href="http://archive.ubuntu.com/ubuntu/dists/trusty/">
-				каталога, содержащего пакеты на момент выхода релиза
-			</a> (см. <a href="#illustration-1-2">рисунок 1.2</a>):
-	
-		<h4 id="illustration-1-2">Рисунок 1.2 - ПО на момент выхода релиза</h4>
-		<p>
-			<img src="illustrations/folder-structure-of-release.png" width="480px"
-			alt='здесь изображен второй "уровень вложенности" архива Ubuntu (опять-таки, скриншот странички)'>
-
-		<p>
-			Попробуем разобраться:
+			Сведем результаты в таблицу:
 			
-			<ol>
-				<li>
-					<p>
-						<strong>Contents-amd64.gz</strong> и <strong>Contents-i386.gz</strong> - это списки файлов, из 
-						которых состоят двоичные пакеты (в распакованном виде) для архитектур <i>AMD64</i> и <i>x86</i> 
-						соответственно. Выглядят эти списки следующим образом:
-<pre>
-...
-FILE                                                    LOCATION
-bin/afio                                                    multiverse/utils/afio
-bin/ash                                                     universe/shells/ash
-bin/autopartition                                           admin/ubiquity
-bin/autopartition-crypto                                    admin/ubiquity
-bin/autopartition-loop                                      admin/ubiquity
-bin/autopartition-lvm                                       admin/ubiquity
-bin/bash                                                    shells/bash
-bin/bash-static                                             universe/shells/bash-static
-bin/block-attr                                              admin/ubiquity
-bin/blockdev-keygen                                         admin/ubiquity
-bin/blockdev-wipe                                           admin/ubiquity
-...
-</pre>
-
-					<p>
-						Т.е. все файлы перечислены в алфавитном порядке. В целом, это очень полезный список, т.к. имея 
-						его	под рукой, несложно с помощью <samp>grep</samp> определить, какой файл какому пакету 
-						принадлежит (о чем собственно и сказано в комментарии в начале файла). Так что однозначно 
-						скачаем эти списки.
-
-				<li>		
-					Файл <strong>Release</strong> поинтереснее. Он содержит контрольные суммы для архивов ПО. Вот 
-					фрагмент файла:
-<pre>
-...
-MD5Sum:
- ead1cbf42ed119c50bf3aab28b5b6351          8234934 main/binary-amd64/Packages
- 52d605b4217be64f461751f233dd9a8f               96 main/binary-amd64/Release
- 4c2ecc07c5b3859ee08bd41f788a5a79          1743009 main/binary-amd64/Packages.gz
- eb5ec6102dfe1dd632fda76e55a33f07          1350329 main/binary-amd64/Packages.bz2
- 2f6aba238097579bbb4fe92e5bfa0858          7558784 main/binary-arm64/Packages
- 5c1efe41ea46ec1a7505c8ed0e93a10d               96 main/binary-arm64/Release
-...
-</pre>
-
-					Очень полезный файл. Сверка не гарантирует на 100%, что скачанные архивы целые-невредимые, потому 
-					что сами контрольные суммы лежат в одном каталоге с архивами. К тому же, как и архивы, суммы могут 
-					быть скачаны только по протоколу HTTP! Хотя вряд ли произойдет "согласованное" искажение архивов и 
-					контрольных сумм, да и нехорошему "человеку посередине" будет не так уж просто устроить подмену и 
-					того, и другого одновременно, так что можно верить этим хэшам на 99%.
-
-				<li>
-					Файл <strong>Release.gpg</strong> содержит цифровую подпись - все понятно. Обязательно проверим.
+		<table>
+			<caption>
+				Таблица
+			</caption>
+			<thead>
+				<tr>
+					<th>Домен
+					<th>Найденный файл(ы)
+					<th>Найденная строка(ки)
+			<tr>
+				<td>archive.canonical.com				
+				<td>/etc/apt/sources.list.d/official-package-repositories.list
+				<td>deb http://archive.canonical.com/ubuntu/ trusty partner
+				
+			<tr>
+				<td>archive.ubuntu.com
+				<td>/etc/apt/sources.list.d/official-package-repositories.list
+				<td>
+					deb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse<br>
+					deb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse
+				
+			<tr>
+				<td>extra.linuxmint.com
+				<td>/etc/apt/sources.list.d/official-package-repositories.list
+				<td>deb http://extra.linuxmint.com rebecca main #id:linuxmint_extra
+			
+			<tr>
+				<td>packages.linuxmint.com
+				<td>
+					/etc/apt/sources.list.d/official-package-repositories.list<br>
+					/etc/apt/preferences.d/official-package-repositories.pref
+				<td>
+					deb http://packages.linuxmint.com rebecca main upstream import  #id:linuxmint_main<br>
+					Pin: origin packages.linuxmint.com
 					
-				<li>
-					<dfn>main</dfn>, <dfn>multiverse</dfn>, <dfn>restricted</dfn>, <dfn>restricted</dfn> - о них сказано
-					во все той же 
-<a href="http://help.ubuntu.ru/wiki/%D1%80%D0%B5%D0%BF%D0%BE%D0%B7%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%B9">
-	документации по Ubuntu
-</a>.
-					Скопипастим немножко:
-					<dl>
-						<dt>main
-						<dd>свободное ПО, официально поддерживаемое компанией Canonical
-							
-						<dt>restricted
-						<dd>проприетарное ПО (в основном - драйверы устройств), официально поддерживаемое компанией 
-							Canonical
-							
-						<dt>universe
-						<dd>свободное ПО, официально не поддерживаемое компанией Canonical (но поддерживаемое 
-							сообществом пользователей)
-							
-						<dt>multiverse
-						<dd>проприетарное ПО, не поддерживаемое компанией Canonical
-					</dl>
-					
-					Будем качать и официальное, и неофициальное...
-			</ol>
+			<tr>
+				<td>security.ubuntu.com
+				<td>
+					/etc/alternatives/aptitude
+					/etc/apt/sources.list.d/official-package-repositories.list
+				<td>
+					найдено совпадение в двоичном файле
+					deb http://security.ubuntu.com/ubuntu/ trusty-security main restricted universe multiverse
+		</table>
 		
 		<p>
-			На <a href="#illustration-1-2">рисунке 1.2</a> можно заметить, что последнее изменение содержимого произошло
-			в 2014 году, что соответствует фразе <q>на момент выхода релиза</q>.
+			Результаты не удивляют. Разве что <i>/etc/alternatives/aptitude</i> - двоичный файл, в котором обнаружилась строка
+			<code>security.ubuntu.com</code>. Как следуюет из руководства, aptitude - это высокоуровневый интерфейс для
+			менеджера пакетов. Посмотрим внимательно:		
+<pre>
+$ which aptitude
+/usr/bin/aptitude
+
+$ md5sum /usr/bin/aptitude
+c3deb93a73d5c8b1fbd010b116544a95  /usr/bin/aptitude
+
+$ md5sum /etc/alternatives/aptitude
+c3deb93a73d5c8b1fbd010b116544a95  /etc/alternatives/aptitude
+</pre>
+
+		<p>
+			Почему двоичный файл находится в <i>/etc</i>, где обычно хранятся файлы настроек, и почему в нем "зашита" 
+			определенная строка? Непонятно...
 		
 		<p>
-			Заглянем в каталог <a href="http://archive.ubuntu.com/ubuntu/dists/trusty/main/">main</a>. И увидим кучу 
-			папок, приведенную на <a href="#illustration-1-3">рисунке 1.3</a>:
-
-		<h4 id="illustration-1-3">Рисунок 1.3 - структура архива официально поддерживаемого ПО</h4>
-		<p>
-			<img src="illustrations/main-group-of-packages.png" width="480px"
-			alt='еще один скриншот открытой в браузере странички с листингом каталога - третий "уровень вложенности"'>
-
-		<p>
-			Тут более-менее все ясно: одни каталоги соответсвуют различным архитектурам, другие имеют отношение к 
-			интернационализации и локализации, исходным кодам и т.д. Зайдем в каталог 
-			<a href="http://archive.ubuntu.com/ubuntu/dists/trusty/main/binary-i386/">binary-i386</a>, к примеру, и 
-			увидим одни лишь файлы, как на <a href="#illustration-1-4">рисунке 1.4</a>:
-			
-		<h4 id="illustration-1-4">Рисунок 1.4 - "дно" архива ПО Ubuntu</h4>
-		<p>
-			<img src="illustrations/bottom-of-the-archive-sea.png" width="600px"
-			alt='последний "уровень вложенности" - в этом каталоге подкаталогов нет, есть только файлы'>
-			
-		<p>
-			Нужно скачать и <strong>Packages.bz2</strong>, и <strong>Packages.gz</strong>, и <strong>Release</strong>.
-			
-		<p>
-			О реализации подвижных деталей велосипеда речь идет в 
-			<a href="how-to-set-up-offline-software-repository-part-2.html">части 2</a>.
+			Что ж, попробуем для начала проделать работу с помощью менеджера пакетов (и стандартных интерфейсов к ним). 
+			Об этом подходе речь пойдет в части 2. А в части 3 попробуем скачивать из архива Ubuntu. Вполне возможно, 
+			что для каждого из вышеперечисленых подходов уже есть готовые скрипты и даже программы, 
+			которые делают все сами. Но мы сделаем вид, что ничего подобного нет. Изобретем парочку велосипедов!			
 
 		<hr>
 
