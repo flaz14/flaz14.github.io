@@ -22,13 +22,12 @@ test-hook: application hook
 	LD_PRELOAD=./libnemohook.so ./application
 
 install: hook
-	cp ./libnemohook.so ~/bin/libnemohook.so
-	chmod 500 ~/bin/libnemohook.so
-	cp ./nemo ~/bin/nemo
-	chmod 500 ~/bin/nemo
+	install --mode=500 ./libnemohook.so ~/bin/libnemohook.so
+	install --mode=500 ./nemo           ~/bin/nemo
+	install --mode=500 ./firefox        ~/bin/firefox
 
 uninstall:
-	rm -f -- ~/bin/nemo ~/bin/libnemohook.so
+	rm --force -- ~/bin/firefox ~/bin/nemo ~/bin/libnemohook.so
 
 clean:
-	rm -f -- application libnemohook.so
+	rm --force -- application libnemohook.so
