@@ -140,6 +140,20 @@ deb http://archive.canonical.com/ubuntu/ trusty partner
 			в правом верхнем углу окна уже просто потому, что в консоли мы увидим подробный лог). В выводе должны появиться
 			строчки вроде <em>... http://archive.ubuntu.com trusty/main Sources ...</em>.
 			
+			А в каталоге <i>/etc/apt/sources.list.d</i> появится новый файл <i>official-source-repositories.list</i>
+			следующего содержания:
+<pre>
+deb-src http://packages.linuxmint.com rebecca main upstream import 
+
+deb-src http://extra.linuxmint.com rebecca main
+
+deb-src http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse
+deb-src http://archive.ubuntu.com/ubuntu trusty-updates main restricted universe multiverse
+
+deb-src http://security.ubuntu.com/ubuntu/ trusty-security main restricted universe multiverse
+deb-src http://archive.canonical.com/ubuntu/ trusty partner
+</pre>			
+
 		<p>
 			Чтобы скачать исходный текст программы достаточно выполнить такую команду (для примера скачаем исходные тексты
 			редактора Vim):
@@ -170,8 +184,17 @@ vim_7.4.052.orig.tar.gz
 			3. Для каждой пары пакет-архитектура выполняем:	apt-get download имя_пакета:архитектура
 			4. Для каждого пакета из списка выполняем: apt-get source имя_пакета
 				
-			Насчет пункта 2
+		<p>
+			О том, как получить список всех доступных пакетов уже подробно рассказано в ответе на вопрос 
+<a href="https://askubuntu.com/questions/160897/how-do-i-search-for-available-packages-from-the-command-line">
+	How do I search for available packages from the command-line?</a>. 
+	
+		<p>
+			Остается только определиться, каким именно образом мы будем складывать скачанное добро. Лучше всего будет
+			разложить по папкам пакеты каждого вида.
+	
 			
+
 			
 
 
