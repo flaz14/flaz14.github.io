@@ -18,21 +18,21 @@
 		<h1>
 			<a href=
 "http://flaz14.github.io/how-to-set-up-offline-software-repository/how-to-set-up-offline-software-repository-part-1.html">
-				Как сделать off-line репозиторий ПО для LinuxMint 17.1. Часть 1
-			</a>
+				Как сделать off-line репозиторий ПО для LinuxMint 17.1. Часть 1</a>
 		</h1>
 		
 		<h3>[2016, Декабрь]</h3>
 
 		<h3>
-			<a href="how-to-set-up-offline-software-repository-part-2.html">
-				Часть 2
-			</a>
+			<a href="how-to-set-up-offline-software-repository-part-2.html">Часть 2</a>
+			|
+			<a href="how-to-set-up-offline-software-repository-part-3.html">Часть 3</a>
+			|
+			<a href="how-to-set-up-offline-software-repository-part-4.html">Часть 4</a>
 			|
 			<a href=
 				"https://github.com/flaz14/flaz14.github.io/tree/master/how-to-set-up-offline-software-repository/code">
-				Исходный код
-			</a>
+				Исходный код</a>
 		</h3>
 
 		<h2>What can I do?</h2>
@@ -49,23 +49,21 @@
 					</h4>
 						
 					<p>
-						Нам поможет опция <samp>--download-only</samp>. Т.о. все, что нужно сделать - пробежаться по 
-						списку доступных пакетов и для каждого из них выполнить 
-						<samp>sudo apt-get --download-only install ...</samp> 
+						В скачивании двоичных пакетов и исходных текстов программ нам помогут команды 
+						<strong>apt-get download</strong> и <strong>apt-get source</strong> соответственно. Их нужно
+						выполнить всех имеющихся в on-line репозиториях пакетов.
 						
 					<p>
 						Достоинства этого подхода: все получается естественным путем, автоматически проверяются 
-						контрольные суммы и т.д. Основной же недостаток состоит в том, что <strong>apt-get</strong> 
-						"видит" только пакеты, соответсвующие архитектуре системы, на которой он запущен. Т.е. если 
-						скачивание производится из 32-битного дистрибутива, то для скачивания будут доступны только 
-						пакеты для архитектуры <i>x86</i>. Кроме того, маленькие файлы россыпью скачиваются медленнее, 
-						чем большие скопом из-за накладных расходов на поиск и вычленение отдельных пакетов из их 
-						великого множества. 
+						контрольные суммы и т.д. Основной же недостаток состоит в том, что маленькие файлы россыпью 
+						скачиваются медленнее, чем большие скопом из-за накладных расходов на поиск и вычленение 
+						отдельных пакетов из их великого множества.
 						
 					<p>
-						Интересный вопрос - коллизии, которые могут возникнуть во время скачивания. Например, мы уже 
-						скачали пакет <b>А</b>, затем он обновился в репозитории, заодно обновился пакет <b>Б</b>, 
-						который нам еще предстоит скачать и который зависит от <b>А</b>. Затем мы скачали обновившийся в
+						Кроме того, во время скачивания (а оно, как говорилось выше, может занять довольно много 
+						времени) могут возникнуть коллизии. Например, мы уже скачали пакет <b>А</b>, затем он был 
+						обновлен в on-line репозитории, заодно был обновлен пакет <b>Б</b>, который нам еще предстоит 
+						скачать и который зависит от <b>А</b>. Через некоторое время мы скачали обновившийся в 
 						репозитории <b>Б</b>. Будут ли <b>А</b> и <b>Б</b> "стыковаться" друг с другом (ведь у нас на 
 						локальном диске находится устаревшая версия <b>А</b>)? С вероятностью 99% будут. Потому что 
 						мажорные версии пакетов выходят не так уж часто, и с сохранением обратной совместимости. Т.е. 
@@ -77,7 +75,7 @@
 					<p>
 						Как было бы классно скачать раздачу с архивами пакетов для всех возможных архитектур вместе с 
 						исходными кодами и т.д. Тем более, что в любом клиенте можно убрать галочки с ненужных файлов. 
-						Клиент проверит контрольные суммы. В любой момент закачку можно приостановить А самое главное - 
+						Клиент проверит контрольные суммы. В любой момент закачку можно приостановить. А самое главное - 
 						полное отсутствие коллизий. Потому что раздача - это файл(ы), запечатленный в некоторый момент 
 						времени. К сожалению, официально ни сообщество Ubuntu, ни сообщество LinuxMint торренты с 
 						архивами ПО не выкладывают (в отличие от образов установочных дисков). Толку же от неофициальных
@@ -92,7 +90,7 @@
 					<p>
 						Если взглянуть на 
 <a href="https://github.com/flaz14/flaz14.github.io/blob/master/how-to-set-up-offline-software-repository/code/apt-get_update_sample.log">
-						вывод команды <samp>apt-get update</samp></a>, 
+						вывод команды <code>apt-get update</code></a>, 
 						то можно увидеть серверы, с которых <strong>apt-get</strong> скачивает пакеты. Выделим
 						неповторяющиеся ссылки на серверы с помощью скрипта 
 <a href="https://github.com/flaz14/flaz14.github.io/blob/master/how-to-set-up-offline-software-repository/code/extract-domain-names.sh">
@@ -105,16 +103,16 @@ extra.linuxmint.com
 packages.linuxmint.com
 security.ubuntu.com
 </pre>
-					<p>					
+					<p>
 						О создании репозитория ПО для Ubuntu рассказано в 
 						<a href="https://help.ubuntu.com/community/AptGet/Offline/Repository">документации</a>. Много 
-						полезного сказано в руководстве по файлу <i>/etc/apt/sources.list</i> 
+						полезных сведений можно найти в руководстве по файлу <i>/etc/apt/sources.list</i> 
 						(<code>man 5 sources.list</code>). Но придеться еще скачать ПО с <strong>linuxmint.com</strong> 
 						и <strong>canonical.com</strong>. Кроме того, придеться вручную проверить контрольные суммы.
 			</ol>
 			
 		<p>
-			Прежде чем начать попробуем поискать в системе упомянутые в последнем пункте адреса. Например, так:
+			Прежде чем начать, попробуем поискать в системе упомянутые в последнем пункте адреса. Например, так:
 <pre>
 $ grep -i -R 'archive.canonical.com' /etc 2>/dev/null > archive.canonical.com_search.txt
 </pre>
@@ -125,11 +123,11 @@ $ grep -i -R 'archive.canonical.com' /etc 2>/dev/null > archive.canonical.com_se
 </pre>
 
 		<p>
-			Сведем результаты в таблицу:
+			Сведем результаты в <a href="#table-1">таблицу 1</a>:
 			
-		<table>
+		<table id="table-1">
 			<caption>
-				Таблица
+				<h4>Таблица 1 - Адреса официальных on-line репозиториев в LinuxMint 17.1</h4>
 			</caption>
 			<thead>
 				<tr>
@@ -137,7 +135,7 @@ $ grep -i -R 'archive.canonical.com' /etc 2>/dev/null > archive.canonical.com_se
 					<th>Найденный файл(ы)
 					<th>Найденная строка(ки)
 			<tr>
-				<td>archive.canonical.com				
+				<td>archive.canonical.com
 				<td>/etc/apt/sources.list.d/official-package-repositories.list
 				<td>deb http://archive.canonical.com/ubuntu/ trusty partner
 				
@@ -145,8 +143,10 @@ $ grep -i -R 'archive.canonical.com' /etc 2>/dev/null > archive.canonical.com_se
 				<td>archive.ubuntu.com
 				<td>/etc/apt/sources.list.d/official-package-repositories.list
 				<td>
-					deb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse<br>
-					deb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse
+					<ul>
+						<li>deb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse
+						<li>deb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse
+					</ul>
 				
 			<tr>
 				<td>extra.linuxmint.com
@@ -156,26 +156,34 @@ $ grep -i -R 'archive.canonical.com' /etc 2>/dev/null > archive.canonical.com_se
 			<tr>
 				<td>packages.linuxmint.com
 				<td>
-					/etc/apt/sources.list.d/official-package-repositories.list<br>
-					/etc/apt/preferences.d/official-package-repositories.pref
+					<ul>
+						<li>/etc/apt/sources.list.d/official-package-repositories.list
+						<li>/etc/apt/preferences.d/official-package-repositories.pref
+					</ul>
 				<td>
-					deb http://packages.linuxmint.com rebecca main upstream import  #id:linuxmint_main<br>
-					Pin: origin packages.linuxmint.com
+					<ul>
+						<li>deb http://packages.linuxmint.com rebecca main upstream import  #id:linuxmint_main
+						<li>Pin: origin packages.linuxmint.com
+					</ul>
 					
 			<tr>
 				<td>security.ubuntu.com
 				<td>
-					/etc/alternatives/aptitude
-					/etc/apt/sources.list.d/official-package-repositories.list
+					<ul>
+						<li>/etc/alternatives/aptitude
+						<li>/etc/apt/sources.list.d/official-package-repositories.list
+					</ul>
 				<td>
-					найдено совпадение в двоичном файле
-					deb http://security.ubuntu.com/ubuntu/ trusty-security main restricted universe multiverse
+					<ul>
+						<li>найдено совпадение в двоичном файле<br>
+						<li>deb http://security.ubuntu.com/ubuntu/ trusty-security main restricted universe multiverse
+					</ul>
 		</table>
 		
 		<p>
-			Результаты не удивляют. Разве что <i>/etc/alternatives/aptitude</i> - двоичный файл, в котором обнаружилась строка
-			<code>security.ubuntu.com</code>. Как следуюет из руководства, aptitude - это высокоуровневый интерфейс для
-			менеджера пакетов. Посмотрим внимательно:		
+			Результаты не удивляют. Разве что <i>/etc/alternatives/aptitude</i> (двоичный файл, в котором обнаружилась 
+			строка <tt>security.ubuntu.com</tt>). Как следуюет из руководства, <strong>aptitude</strong> - это 
+			высокоуровневый интерфейс для менеджера пакетов. Посмотрим внимательно:
 <pre>
 $ which aptitude
 /usr/bin/aptitude
@@ -186,16 +194,19 @@ c3deb93a73d5c8b1fbd010b116544a95  /usr/bin/aptitude
 $ md5sum /etc/alternatives/aptitude
 c3deb93a73d5c8b1fbd010b116544a95  /etc/alternatives/aptitude
 </pre>
-
 		<p>
 			Почему двоичный файл находится в <i>/etc</i>, где обычно хранятся файлы настроек, и почему в нем "зашита" 
 			определенная строка? Непонятно...
 		
 		<p>
-			Что ж, попробуем для начала проделать работу с помощью менеджера пакетов (и стандартных интерфейсов к ним). 
-			Об этом подходе речь пойдет в части 2. А в части 3 попробуем скачивать из архива Ubuntu. Вполне возможно, 
-			что для каждого из вышеперечисленых подходов уже есть готовые скрипты и даже программы, 
-			которые делают все сами. Но мы сделаем вид, что ничего подобного нет. Изобретем парочку велосипедов!			
+			Что ж, попробуем для начала проделать работу с помощью менеджера пакетов. Об этом подходе речь пойдет в 
+			<a href="how-to-set-up-offline-software-repository-part-2.html">части 2</a>. А в 
+			<a href="how-to-set-up-offline-software-repository-part-3.html">части 3</a> будет поведано об традиционном
+			подходе, т.е. по сути созданию обычного "зеркала" архива Ubuntu (LinuxMint, Canonical тоже). 
+
+		<p>
+			Навернякак для каждого из вышеперечисленых подходов уже есть готовые скрипты и даже программы. Но мы сделаем
+			вид, что ничего подобного нет. Изобретем же парочку велосипедов!			
 
 		<hr>
 
