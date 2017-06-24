@@ -30,7 +30,7 @@
 			Пожалуй, любая популярная операционная система поставляется с настройками "на все случаи жизни". 
 			Применительно к LinuxMint это хорошо: драйверы, кодеки и т.п. проприетарные компоненты есть в комплекте. Но
 			с точки зрения защиты информации и безопасной работы (чтобы не выстрелить себе в ногу) эти умолчания никуда
-			не годятся.
+			не годятся <sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>.
 			
 		<h2>Что происходит</h2>
 	
@@ -40,281 +40,109 @@
 			sudo и т.д. Конечная точка - это файл <i>.profile</i> в домашней директории. Именно он будет принят во внимание
 			(есть еще и .bashrc и им подобные - но они имеют силу только в командной строке, а для того, чтобы повлиять
 			на окружение программ с графическим интерфейсом - а такие программы не прикреплены к консоли - нужно править
-			именно <i>~/.profile</i>). Посмотрим, что же там уже имеется:
-			
+			именно <i>~/.profile</i>). Посмотрим, что там уже имеется:
 <pre>
 $ less ~/.profile
 
 </pre>
 		
-		
-		
 		<p>
-			Пусть мы используем 32-х битный дистрибутив. Посмотрим, действительно ли это так:
+			Неутешительно. Получается, что каждый файл, созданный данным пользователем, будет виден, т.е. доступен для чтения,
+			всем остальным пользователям. Причем не только реальным (т.е. другим людям, работающим за тем же компьютером),
+			но и фиктивным, таким как <em>nobody</em>. Ну и какой толк от такой защиты? Да, модифицировать файлы пользователя
+			нельзя, но их можно читать. Это особенно расстраивает в случае с профилями таких программа, как Firefox и 
+			Thunderbird, которые хранятся в домашнем каталоге пользователя. Хорошо, именим umask c 022 на 027. И перезагрузимся 
+			после изменения.
 <pre>
-$ dpkg --print-architecture
-i386
-</pre>		
 
-		<p>
-			Теперь глянем, для каких еще архитектур есть доступные пакеты:
-<pre>
-$ dpkg --print-foreign-architectures
-</pre>
-		<p>
-			И в ответ не получим ничего. Что ж, неудивительно: на 64-х битный дистрибутив можно установить 32-х битную
-			программу, но наоборот - нельзя. Придеться добавить архитектуру (практического смысла в этом нет, просто 
-			сделаем	это для демонстрации скачивания пакетов):
-<pre>
-$ sudo dpkg --add-architecture amd64
-$ dpkg --print-foreign-architectures
-amd64
-</pre>
-		<p>
-			C 64-х битными пакетами вроде бы разобрались. А как насчет архитектур ARM, PowerPC и т.д.? В принципе, пакеты
-			для этих архитектур есть в <a href="https://www.debian.org/releases/stable/">репозиториях Debian</a>, но не
-			в Ubuntu и не в LinuxMint. Так что ограничимся <strong>i386</strong> и <strong>amd64</strong>.
-		
-		<p>
-			Скачаем уже что-нибудь, например, текстовый редактор Vim для 64-х битного дистрибутива (не забыв
-			перед этим выполнить <code>sudo apt-get update</code>):
-<pre>
-$ apt-get download vim:amd64
-$ ls
-vim_2%3a7.4.052-1ubuntu3.1_amd64.deb
 </pre>
 
 		<p>
-			Для пущей уверенности можно зайти в свежескачанный <i>.deb</i>-файл с помощью 
-			<a href="https://midnight-commander.org/">Midnight Commander</a>'а и убедиться правильности архитектуры, что
-			и продемонстрировано на <a href="#illustration-1">рисунке 1</a>:
-			
-		<h4 id="illustration-1">Рисунок 1 - Примерное содержимое файла <i>INFO</i> внутри <i>.deb</i>-пакета</h4>
-		<p>
-			<img src="illustrations/vim-deb-contents.png" width="640px">
-
-		<p>
-			Чтобы скачать не только готовый двоичный пакет, но и исходные тексты придеться сначала добавить 
-			соответствующие	ссылки. Но не в файл <i>/etc/apt/sources.list</i>. В Ubuntu (а следовательно, и в LinuxMint)
-			для источников ПО есть каталог <i>/etc/apt/sources.list.d</i>. А уже в нем находятся файлы, которые содержат
-			ссылки определенной категории. Посмотрим, что уже есть:
+			Естественно, нужно будет изменить права на все файлы и каталоги, которые принадлежат пользователю. Т.е. нужно
+			убрать право на чтение для всех, кроме владельца и группы. В данном случае лучше воспользоваться абсолютным
+			режимом команды chown (и еще find - мы же защищаем все файлы, принадлежащие пользователю). Тут можно предупредить:
+			некоторые файлы, которые находятся в домашнем каталоге пользователя, реально принадлежат суперпользователю.
+			Что вовсе не удивительно: если вы запускаете программы с графическим интерфейсом с помощью su или sudo - так
+			и будет (для этих целей нужно использовать gksu и gksudo - или их KDE-собратьев kdesu и kdesudo - зависит 
+			от окружения рабочего стола) - Подробности см. на 
+			<a href="https://help.ubuntu.com/community/RootSudo#Graphical_sudo">Ubuntu Wiki</a>). Но некоторые неграфические
+			программы (например, Midnight Commander) грешат тем, что оставляют принадлежащие суперпользователю файлы
+			в домашнем каталоге обычного пользователя (например, тут будет подозрительный файл mc).
 <pre>
-$ ls -alh /etc/apt/sources.list.d/
-total 24K
-drwxr-xr-x 2 root root 4,0K Apr  2 11:23 .
-drwxr-xr-x 6 root root 4,0K Apr  2 11:23 ..
--rw-r--r-- 1 root root   78 May 24  2016 bro.list
--rw-r--r-- 1 root root   59 Nov 27  2014 getdeb.list
--rw-r--r-- 1 root root  140 Apr  2 11:23 mc3man-trusty-media-trusty.list
--rw-r--r-- 1 root root  529 Nov 27  2014 official-package-repositories.list
-</pre>
-
-		<p>
-			Откуда взялся файл <i>getdeb.list</i> я не знаю. Да и содержит этот файл единственную строчку, являющуюся 
-			комментарием. <i>bro.list</i> и <i>mc3man-trusty-media-trusty.list</i> соответствуют сторонним репозиториям.
-			А вот <i>official-package-repositories.list</i> - это список оригинальных репозиториев (по крайней 
-			мере, так следует из названия). Посмотрим на его содержимое:
-<pre>
-$ cat /etc/apt/sources.list.d/official-package-repositories.list 
-# Do not edit this file manually, use Software Sources instead.
-
-deb http://packages.linuxmint.com rebecca main upstream import  #id:linuxmint_main
-deb http://extra.linuxmint.com rebecca main #id:linuxmint_extra
-
-deb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse
-deb http://archive.ubuntu.com/ubuntu trusty-updates main restricted universe multiverse
-
-deb http://security.ubuntu.com/ubuntu/ trusty-security main restricted universe multiverse
-deb http://archive.canonical.com/ubuntu/ trusty partner
 </pre>			
-
-		<p>
-			Все вполне предсказуемо. Будет логичным предположение, что для подключения репозиториев с исходными текстами 
-			потребуется создать еще один файл внутри каталога <i>/etc/apt/sources.list.d/</i> и напихать в него ссылок.
-			Но угрожающий комментарий о нежелательности ручного редактирования файла наводит на мысль задействовать-таки
-			утилиту с графическим интерфейсом. Найти и запустить ее не так уж сложно: 
-			<code>gksudo software-sources</code>. Перед нами предстанет картинка, приведенная на 
-			<a href="#illustration-2">рисунке 2</a>:
-			
-		<h4 id="illustration-2">
-			Рисунок 2 - Управление источниками ПО посредством утилиты с графическим интерфейсом
-		</h4>
-		<p>
-			<img src="illustrations/software-sources.png" width="640px">
-			
-		<p>
-			Ставим флажок напротив <em>Enable source code repositories</em>, закрываем окно и на всякий случай делаем
-			в консоли <code>sudo apt-get update</code> (выполнить команду в терминале будет надежнее, чем кликнуть по 
-			кнопке <em>Update the cache</em> в правом верхнем углу окна уже просто потому, что в терминале мы увидим 
-			информационные сообщения, и не придеться лезь в файл журнала). В выводе должны появиться строчки вроде 
-			<em>... http://archive.ubuntu.com trusty/main Sources ...</em>.	А в каталоге <i>/etc/apt/sources.list.d</i> 
-			появится новый файл <i>official-source-repositories.list</i> следующего содержания:
-<pre>
-deb-src http://packages.linuxmint.com rebecca main upstream import 
-
-deb-src http://extra.linuxmint.com rebecca main
-
-deb-src http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse
-deb-src http://archive.ubuntu.com/ubuntu trusty-updates main restricted universe multiverse
-
-deb-src http://security.ubuntu.com/ubuntu/ trusty-security main restricted universe multiverse
-deb-src http://archive.canonical.com/ubuntu/ trusty partner
-</pre>			
-
-		<p>
-			Чтобы скачать исходный текст программы достаточно выполнить такую команду (для примера скачаем исходные 
-			тексты редактора Vim):			
-<pre>
-$ apt-get source vim
-</pre>
-
-		<p>
-			Посмотрим, что же реально скачалось:
-<pre>
-$ ls -1
-vim-7.4.052
-vim_7.4.052-1ubuntu3.1.debian.tar.gz
-vim_7.4.052-1ubuntu3.1.dsc
-vim_7.4.052.orig.tar.gz
-</pre>
-
-		<p>
-			Именно то, что надо. Подробно останавливаться на описании скачанного не будем (дополнительные сведения можно
-			почерпнуть в <code>man apt-get</code>). Очевидно, что указывать архитектуру при скачивании исходных текстов 
-			не требуется.
-			
-		<p>
-			В целом алгоритм создания собственного репозитория простой:
-			<ol>
-				<li>
-					Cоставляем список архитектур (в нашем случае их будет всего две: <strong>i386</strong> и 
-					<strong>amd64</strong>).
-				
-				<li>
-					Составляем список пакетов для скачивания.
-
-				<li>
-					Для каждого пакета из списка выполняем:
-					<ul>
-						<li><code>apt-get source &lt;имя_пакета&gt;</code>
-						<li><code>apt-get download &lt;имя_пакета&gt;:i386</code>
-						<li><code>apt-get download &lt;имя_пакета&gt;:amd64</code>
-					 </ul>
-			</ol>
-		<p>
-			О том, как получить список всех доступных пакетов уже подробно рассказано в ответе на вопрос 
-<a href="https://askubuntu.com/questions/160897/how-do-i-search-for-available-packages-from-the-command-line">
-	How do I search for available packages from the command-line?</a>. 
-	
-		<p>
-			Остается только определиться, каким именно образом мы будем складировать скачанное добро. 
-			
-		<p>
-			Можно поступить просто:	разложить скачанное в два каталога: один - для двоичных пакетов, другой - для 
-			исходных текстов.
-			
-		<p>
-			Можно разбить на категории. Узнать, к какой категории (впрочем, они довольно условны) относится тот или иной
-			пакет можно с помощью команды <strong>apt-cache</strong>. Например, 			
-<pre>
-$ apt-cache show vim
-Package: vim
-Priority: optional
-Section: editors
-...
-</pre>
-		<p>
-			Как видим, Vim относится к категории текстовых редакторов. В принципе, такое разбиение на группы нам вполне 
-			подходит. Но, поскольку мы создает собственный репозиторий, лучше будет сохранить информацию о том, откуда 
-			был скачан тот или иной пакет. Т.е. чтобы наш репозиторий повторял структуру официального репозитория Ubuntu
-			(LinuxMint и т.д.). Как же получить информацию о том, откуда реально будет скачиваться тот или иной пакет?
-			
-		<p>
-			Для начала попробуем воспользоваться командой <strong>apt-cache</strong>:
-<pre>
-$ apt-cache showpkg vim
-Package: vim
-Versions: 
-2:7.4.052-1ubuntu3.1 (/var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty-updates_main_binary-i386_Packages) 
-(/var/lib/apt/lists/security.ubuntu.com_ubuntu_dists_trusty-security_main_binary-i386_Packages) 
-(/var/lib/dpkg/status)
- Description Language: 
-                 File: /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty_main_binary-amd64_Packages
-                  MD5: 59e8b8f7757db8b53566d5d119872de8
- Description Language: en
-                 File: /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty_main_i18n_Translation-en
-                  MD5: 59e8b8f7757db8b53566d5d119872de8
-
-2:7.4.052-1ubuntu3 (/var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty_main_binary-i386_Packages)
- Description Language: 
-                 File: /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty_main_binary-amd64_Packages
-                  MD5: 59e8b8f7757db8b53566d5d119872de8
- Description Language: en
-                 File: /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty_main_i18n_Translation-en
-                  MD5: 59e8b8f7757db8b53566d5d119872de8
-...
-</pre>
-		<p>
-			Из строчек вроде 
-			<em>/var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty_main_binary-amd64_Packages</em>
-			можно вычленить имя каталога из оригинального репозитория. 
-			<em>archive.ubuntu.com_ubuntu_dists_trusty_main_binary-amd64_Packages</em> подоздрительно похоже на 
-			уже упоминавшуюся в <a href="how-to-set-up-offline-software-repository-part-1.html#table-1">части 1</a> 
-			строчку <em>archive.ubuntu.com/ubuntu trusty main</em>, только записанное в немного другом порядке и с 
-			символами 
-			подчеркивания вместо слеша. В принципе, такого рода строчек достаточно, чтобы восстановить структуру 
-			каталогов 
-			оринигального репозитория. 
-			
-			
-		<h2>Кажется, мы придумали кое-что получше</h2>
 		
 		<p>
-			А именно: использование команды <strong>apt-get</strong>
-			c опцией <code>--print-uris</code>. Т.о. можно узнать ссылку на оригинальный файл (сам же пакет при 
-			использовании
-			этого параметра загружен на будет, подробности см. в <code>man apt-get</code>). Например, узнаем, где  
-			в оригинальном репозитории расположен двоичный пакет редактора Vim:
 			
+			Уфф, сейчас все вроде бы хорошо. Но мы забыли одну маленькую деталь. После изменения umask в системе начнет 
+			твориться вакханалия. Новые установленные программы не будут запускаться, модули Python, установленные через
+			Pip, невозможно будет подключить с своему скрипту. И т.д. Вы спросите, откуда ноги растут. Ответ простой:
+			sudo. sudo - это же по-правильному. Проведем небольшой эксперимент. Создадим в /tmp простой скрипт 
+			с именем <i>test_umask.sh</i>
+			следующего содержания (и не забудем сделать его исполняемым):
 <pre>
-$ apt-get --print-uris download vim
-'http://archive.ubuntu.com/ubuntu/pool/main/v/vim/vim_7.4.052-1ubuntu3.1_i386.deb' ...
+#!/usr/bin/env bash
+
+echo "[$(umask)]"
+</pre>
+
+		<p>
+			И проверим:
+<pre>
+$ /tmp/test_umask.sh
+[0027]
 </pre>			
 		<p>
-			Т.о. последний подход лучше всех вышеперечисленных. Но, как всегда, при работе с параметром 
-			<code>--print-uris</code> есть несколько нюансов. 
+			Как и ожидалось, мы видим заданное нами значение. Попробуем запустить тот же скрипт от имени суперпользователя:
+<pre>
+$ sudo su
+# /tmp/test_umask.sh 
+[0022]
+</pre>
+		<p>
+			Как видим, у суперпользователя осталось правильное значение umask. Так и должно быть, ведь мы же не трогали
+			<i>.profile</i> суперпользователя. Посмотрим же, как ведет себя sudo:
+<pre>
+$ sudo /tmp/test_umask.sh
+[0022] - это у меня уже исправлено, на "чистой" системе будет umask пользователя.
+</pre>
+		<p>
+			Копнем глубже. Изменим umask на что-нибудь действительно безумное (все равно изменение коснется только
+			текущего виртуального терминала) и проверим sudo еще раз:
+
+
+
+		<p>
+			Вот оно что! sudo принимает во внимание umask запустившего команду пользователя. Т.о. становится очевидной 
+			причина появляющихся после изменения umask глюков. Например, исполняемые файл программ принадлежат root, но 
+			при этом доступны для чтения и выполнения всем остальным пользователям системы (иначе как бы они могли 
+			работать с программами). Наш же "безопасный" umask запрещает доступ другим пользователям, только root может
+			работать с программами.
 			
 		<p>
-			Во-первых, лучше всего ставить параметр перед действием 
-			в командной строке. Да,
-			команды 
-			<ul>
-				<li><code>apt-get --print-uris download vim</code>
-				<li><code>apt-get download --print-uris vim</code>
-				<li><code>apt-get download vim --print-uris</code>
-			</ul>
-			выдадут одинаковый результат. Но все же лучше будет
-			разместить <code>--print-uris</code> сразу после <code>apt-get</code>.
-		
-		<p>
-			Во-вторых, <code>apt-get --print-uris download ...</code> ничего не напечатает, если пакет уже загружен в 
-			текущий	каталог. Проверим это вживую (в начале каждой строки стоит ее порядковый номер для удобства):	
+			Для исправления ситуации лучше всего вообще "выкосить" sudo :) Или же поиграть с ключами командной строки, т.е.
+			добиться реального "сброса" значения umask, если программа выполняется через sudo. Но правильным является подход,
+			описанный в ответе на вопрос 
+			<a href="https://unix.stackexchange.com/questions/265497/set-sudo-umask-apart-from-the-user-calling-it">
+				Set sudo umask apart from the user calling it</a>. Остается только залезть в файл <i>/etc/sudoers</i>, 
+			и ???расскомментировать или добавить??? заветный umask и дело в шляпе ():
 <pre>
-1	$ apt-get --print-uris download vim
-'http://archive.ubuntu.com/ubuntu/pool/main/v/vim/vim_7.4.052-1ubuntu3.1_i386.deb' ...
-2	$ apt-get download vim
-Get:1 http://archive.ubuntu.com/ubuntu/ trusty-updates/main vim i386 2:7.4.052-1ubuntu3.1 [876 kB]
-Fetched 876 kB in 1s (498 kB/s)
-3	$ apt-get --print-uris download vim
-4	$ rm vim_2%3a7.4.052-1ubuntu3.1_i386.deb 
-5	$ apt-get --print-uris download vim
- 	'http://archive.ubuntu.com/ubuntu/pool/main/v/vim/vim_7.4.052-1ubuntu3.1_i386.deb' ...
+# Specify umask explicitly in order to make 'root' account
+# working as usual (for more details please look at topic:
+# [Set sudo umask apart from the user calling it]
+# (https://unix.stackexchange.com/questions/265497/set-sudo-umask-apart-from-the-user-calling-it).
+Defaults umask=0022
+Defaults umask_override
 </pre>			
+			
 		<p>
-			Как видим, команда №3 ничего не напечатала (к моменту ее выполнения пакет уже был скачан в текущий каталог). 
-			Но после
-			удаления файла пакета Vim из текущего каталога команда №5 напечатала ссылку как ни в чем не бывало 
-			<sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>.		
+			Проверим на всякий случай (для чистоты эксперимента закроем текущий эмулятор терминала и откроем новый):
+<pre>
+$ sudo /tmp/test_umask.sh
+</pre>
+
+			Теперь уж точно можно вздохнуть спокойно.
+
+
 
         <p>
 			__________
@@ -322,11 +150,8 @@ Fetched 876 kB in 1s (498 kB/s)
 				<li id="footnote-1-bottom">
 					<p>
 						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
-						Ссылки, которые выдает <code>apt-get --print-uris download ...</code> можно использовать напрямую,
-						т.е. можно использовать для скачивания не <strong>apt-get</strong>, а, например, <strong>wget</strong>.
-						Но лучше использовать все-таки <strong>apt-get</strong>. И не потому что это более элегантно (особенно
-						в случае скачивания исходных текстов - поди разберись, что там за три файла), а потому, что 
-						<strong>apt-get</strong> еще проверяет контрольные суммы и т.д.
+						Я не уверен, что это "косяк" LinuxMint. LinuxMint основан на Ubuntu, а Ubuntu - на Debian. Очень
+						вероятно, что все вышеназванные дистрибутивы имеют одинаковую проблему.
 			</ol>
 
 		<hr>
