@@ -1,0 +1,5 @@
+# Start X (and therefore Openbox session) right after login
+# This is just a workaround for correct functioning of Gnome network manager applet.
+if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
+    startx -- vt01
+fi
