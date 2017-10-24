@@ -244,9 +244,9 @@
       </action>
     </keybind>
     <!-- Toggle wireless shortcuts -->
-    <keybind key="W-A-F3">
+    <keybind key="W-F3">
       <action name="Execute">
-        <command>toogle-wifi.sh</command>
+        <command>wifi-toogle.sh</command>
       </action>
     </keybind> 
     <keybind key="W-A-b">
@@ -304,6 +304,7 @@
         <wrap>no</wrap>
       </action>
     </keybind>
+<!--
     <keybind key="W-F1">
       <action name="GoToDesktop">
         <to>1</to>
@@ -344,6 +345,7 @@
         <to>8</to>
       </action>
     </keybind>
+-->
     <keybind key="W-d">
       <action name="ToggleShowDesktop"/>
     </keybind>
