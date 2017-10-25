@@ -248,12 +248,7 @@
       <action name="Execute">
         <command>wifi-toogle.sh</command>
       </action>
-    </keybind> 
-    <keybind key="W-A-b">
-      <action name="Execute">
-        <command>toogle-bluetooth.sh</command>
-      </action>
-    </keybind>    
+    </keybind>  
     
     <!-- Keybindings for desktop switching -->
     <keybind key="C-A-Left">

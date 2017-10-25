@@ -23,7 +23,7 @@ nemo --no-default-window &
 pnmixer &
 
 
-#goldendict &
+goldendict &
 
 
 #skypeforlinux &
