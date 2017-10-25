@@ -1,8 +1,8 @@
-setxkbmap \
-    -layout "us,ru(winkeys)" \
-    -model "pc105" \
-    -option "grp:ctrl_shift_toggle,grp_led:scroll" \
-    &
+#setxkbmap \
+#    -layout "us,ru(winkeys)" \
+#    -model "pc105" \
+#    -option "grp:ctrl_shift_toggle,grp_led:scroll" \
+#    &
 
 
 disable-touchpad-tapping.sh &
