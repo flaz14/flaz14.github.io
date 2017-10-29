@@ -120,7 +120,7 @@
 
        use obconf if you want to change these without having to log out
        and back in -->
-    <number>8</number>
+    <number>4</number>
     <firstdesk>1</firstdesk>
     <names>
       <name>1</name>
@@ -248,8 +248,7 @@
       <action name="Execute">
         <command>wifi-toogle.sh</command>
       </action>
-    </keybind>  
-    
+    </keybind>
     <!-- Keybindings for desktop switching -->
     <keybind key="C-A-Left">
       <action name="GoToDesktop">
@@ -299,7 +298,7 @@
         <wrap>no</wrap>
       </action>
     </keybind>
-<!--
+    <!--
     <keybind key="W-F1">
       <action name="GoToDesktop">
         <to>1</to>

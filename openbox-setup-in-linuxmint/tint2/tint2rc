@@ -108,7 +108,7 @@ mouse_scroll_down = iconify
 
 # Battery
 battery = 1
-battery_low_status = 15
+battery_low_status = 7
 battery_low_cmd = notify-send "Battery is low."
 battery_hide = 0
 bat1_font = sans 8
