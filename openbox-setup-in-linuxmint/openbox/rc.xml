@@ -390,10 +390,10 @@
         <menu>client-menu</menu>
       </action>
     </keybind>
-    <!-- Take a screenshot of the current window with gnome-screenshot when Alt+Print are pressed -->
+    <!-- Take a screenshot interactively with gnome-screenshot when Alt+Print are pressed -->
     <keybind key="A-Print">
       <action name="Execute">
-        <command>gnome-screenshot -w</command>
+        <command>gnome-screenshot --interactive</command>
       </action>
     </keybind>
     <!-- Keybindings for window switching -->
