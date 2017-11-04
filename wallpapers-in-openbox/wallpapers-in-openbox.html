@@ -1,0 +1,557 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Обои в Openbox</title>
+	</head>
+	<body>
+		<h1>
+			<big>
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+		
+		<hr>
+		
+		<h1>
+			<a href="http://flaz14.github.io/wallpapers-in-openbo/wallpapers-in-openbo.html">
+				Обои в Openbox
+			</a>
+		</h1>
+		
+		<h3>[2017, Ноябрь]</h3>
+		
+		<h3>
+<a href=
+"">
+Исходный код
+</a>
+		</h3>
+		
+		<h2>Что не так</h2>
+			
+		<p>
+			Поставить обои на рабочий стол в среде Openbox - что может быть проще? Заходим на русскоязычную вики:
+			<a href="http://help.ubuntu.ru/wiki/openbox">Оконный менеджер Openbox</a>. Там все понятно написано в 
+			разделе <i>Фон рабочего стола</i>. Но на "живой" системе не все так просто. Так, при совместном 
+			использовании файлового менеджера Nemo и Openbox программа <strong>feh</strong> ведет себя немного 
+			неожиданно. Так, если свернуть все окна, то можно наблюдать черный рабочий стол !!!здесь будет скриншот!!!
+			А вот если запустить какое-либо приложение и развернуть его на весь экран, то фон рабочего стола принимает
+			должный вид. На рисунке N сквозь полупрозрачное окно <strong>gnome-terminal</strong> виден фоновый рисунок рабочего стола. 
+			Также он виден сквозь панель (в данном случае <strong>tint2</strong>). !!!здесь будет скриншот!!!
+			
+			!!!интересно, а что будет, если развернуть <strong>gnome-terminal</strong> на половину экрана???
+			
+		<h2>Откуда ноги растут</h2>
+		
+		<p>
+			Это уже обсуждалось на Reddit: !!!тут будет ссылка, не могу ее найти пока что!!!. И на форумах: 
+			<a href="https://crunchbang.org/forums/viewtopic.php?id=34142">How to integrate Nemo with OpenBox?</a> 
+			В сухом остатке получается вот что: Nemo, будучи запущенным с параметрами по умолчанию, самостоятельно управляет 
+			рабочим столом. А именно: отображает на рабочем столе значки, отображает фоновый рисунок и предоставляет контекстное
+			меню, т.е. меню по щелчку правой клавишей мыши. В последнем случае Nemo "подавляет" стандартное меню Openbox
+			Лично для меня это является не потерей, а преимуществом, потому что контекстное меню Nemo более дружелюбное.
+			Оно выглядит так же, как и контекстное меню в самом файловом менеджере. Правда, ярлыки на рабочем столе 
+			создавать посредством GUI не получится !!!это надо еще проверить!!! !!!еще надо проверить, как создавать 
+			ярлыки с помощью текстовых файлов вручную; скорее всего, это будет тема отдельной статьи!!! Если для чего-то 
+			и может понадобится меню Openbox, то для выхода из сессии и т.п. Но это просто сделать и из командной строки
+			в случае крайней необходимости.
+			
+		<p>
+			Решения предлагаются следующие:
+			<ol>
+				<li>
+					<code>gsettings set org.nemo.desktop draw-background false</code><br>
+					На вышеупомянутом форуме Crunchbang'а пишут, что эта команда не работает. И в моем случае (Nemo 2.4.5)
+					то же самое.
+				
+				<li>
+					<code>gsettings set org.nemo.desktop show-desktop-icons false</code>
+					!!!надо проверить, решает ли проблему обоев!!!. Значки исчезают с рабочего стола, все до единого. 
+					Этот способ не подходит.
+				
+				<li>
+					<code>здесь будет пример запуска Nemo с параметром командной строки</code>
+					На Reddit советуют отключить отрисовку рабочего стола. Но вместе с этим пропадут и значки. Но не годится.
+					
+				<li>
+					Воспользоваться вместо <strong>feh</strong> другой программой для установки обоев, например, 
+					???nitrogen. Я не пробовал использовать nitrogen. Что-то подсказывает мне, что толку не будет. Т.е 
+					возможны два варианта: либо обоина будет отрисовываться под окном Nemo (ее попросту не будет видно),
+					либо над ним (в этом случае не будут видны значки на рабочем столе).
+			</ol>
+			
+		<p>
+			Кажется, ничего тут не поделаешь. Но в посте на Reddit есть подсказка: 
+			
+			!!!здесь будет цитата с Reddit, в которой чувак говорит о dconf!!!
+			
+			Остается только найти это магическое место, откуда Nemo берет обоину!
+			
+		<h2>Куда копать</h2>
+			
+		<p>
+			Неа, с отладчиком связываться не будем: слишком трудно и занудно. Тем более, что исходный код Nemo открыт.
+			Так что скачиваем его:
+<pre>
+yura@athlonx2 ~/Temp $ git clone https://github.com/linuxmint/nemo.git	
+</pre>
+
+		<p>
+			Выбираем интересующую нас версию [1] !!!здесь будет сноска на замечание о важности указания версий используемого 
+			софта в статьях, блогах, форумах и т.д.; в моем случае это <b>2.4.5</b>
+<pre>
+yura@athlonx2 ~/Temp/nemo $ git reset --hard 2.4.5
+</pre>
+
+		<p>
+			А теперь поищем тот загадочное место. Пожалуй, самый простой способ - грепнуть по всем исходникам. В качестве
+			критерия поиска выберем что-нибудь не слишком строгое, но и не слишком растяжимое. Например, слово "wall" 
+			(что, как несложно догадаться, является сокращением от "wallpaper"):
+<pre>
+yura@athlonx2 ~/Temp/nemo $ grep -i -R 'wall' .
+</pre>
+
+		<p>
+			В результате получим:
+<pre>
+./po/ChangeLog:	* wa.po: Updated Walloon file
+./po/ChangeLog:	* wa.po: Added Walloon file
+./nemo.pot:msgid "Set as Wallpaper..."
+./nemo.pot:msgid "Set the selected image as your desktop wallpaper"
+./data/set-as-background.nemo_action.in:Name=Set as Wallpaper...
+./data/set-as-background.nemo_action.in:Comment=Set the selected image as your desktop wallpaper
+./data/action_i18n_strings.py:set-as-background_nemo_action_in_Name = _("Set as Wallpaper...")
+./data/action_i18n_strings.py:set-as-background_nemo_action_in_Tooltip = _("Set the selected image as your desktop wallpaper")
+./eel/ChangeLog:	Don't set -Wchar-subscripts as it's included in -Wall.
+./eel/ChangeLog:	* configure.in: Added Walloon (wa) to ALL_LINGUAS
+./configure.in:	-Wall \
+</pre>			
+			
+		<p>
+			Файл <i>./configure.in</i> отбросим сразу - он относится к процессу компиляции Nemo. <i>ChangeLog</i>и тоже
+			нерелевантны. i18n-файлы - файлы локализации, кроме текста там вряд-ли что-то найдется полезное. Так-что 
+			заглянем в <i>./data/set-as-background.nemo_action.in</i> (на самом деле, я туда по случайности первым делом и заглянул :) ):
+<pre>
+yura@athlonx2 ~/Temp/nemo $ less ./data/set-as-background.nemo_action.in
+</pre>
+
+		<p>
+			И увидим:
+<pre>
+[Nemo Action]
+
+Name=Set as Wallpaper...
+
+Comment=Set the selected image as your desktop wallpaper
+
+Exec=gsettings set org.cinnamon.desktop.background picture-uri "%U"
+
+Selection=s
+
+Mimetypes=image/*;
+
+Conditions=dbus org.Cinnamon;
+</pre>
+	
+		<p>
+			Выглядит многообещающе! Достаточно лишь скопипастить команду справа от <strong>Exec</strong> и пустить ее в дело 
+			(не забыв подставить путь к картинке, естественно). Например, так:
+<pre>
+gsettings set org.cinnamon.desktop.background picture-uri "/usr/share/backgrounds/linuxmint-maya/boat.jpg"
+</pre>
+
+		<p>
+			И... Не работает. Так и должно быть. Ведь мы указали путь к картинке. В то время как спецификатор 
+			<code>picture-uri</code> намекает на то, что указывать нужно URI (на самое деле, я до этого не догадался сам, 
+			а понял уже после того, как посмотрел значение с помощью команды
+			<code>yura@athlonx2 / $ gsettings get org.cinnamon.desktop.background picture-uri</code> на компьютере 
+			с реально работающим Cinnamon). В случае с файлом на локальном диске URI 
+			должен начинаться с <code>file://</code>:
+<pre>
+yura@athlonx2 / $ gsettings set org.cinnamon.desktop.background picture-uri "file:///usr/share/backgrounds/linuxmint-maya/boat.jpg"
+</pre>			
+		
+		<p>
+			!!!В Cinnamon такой команды достаточно для задания обоев. Но в "чистом" Openbox, возможно, придется отправлять сообщение 
+			(т.е. уведомление) Nemo о смене обоев по DBus. На это намекает секция <strong>Conditions</strong>!!!
+			
+			
+		!!!еще нужно написать, какой же это прекрасный способ смены обоев
+		
+		И в самом деле: 
+		* дополнительных программ (таких, как <strong>feh</strong> устанавливать и держать в памяти не надо)
+		* пропала обоина - значит заглючил работающий в фоне Nemo. Сидящему в данный момент за компом человеку сразу 
+		понятно, что что-то случилось, и нужно вмешаться. А вот если за обои отвечает отдельная программа, то тогда 
+		при внезапном сбое Nemo будет непонятно, то ли Nemo заглючил, то ли содержимое рабочего стола (а именно, каталог
+		<i>~/Desktop</i>) почистили.
+			
+		!!!еще надо написать об автоматической смене обоев, например, утром одни, днем другие, вечером третьи, а ночью звезды!!!	
+
+		<h4 id="listing-1">
+			Листинг 1 - ConstantsPlainOldApproachTest - примитивный подход к константам в тестах
+		</h4>	
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class ConstantsPlainOldApproachTest {
+
+    private static final String CUSTOMER_ID = "12345";
+    private static final String INVALID_CUSTOMER_ID = "!!!";
+    private static final String NON_EXISTING_CUSTOMER_ID = "000";
+
+    @Test
+    public void someTest() throws Exception {
+        System.out.println(CUSTOMER_ID);
+        System.out.println(INVALID_CUSTOMER_ID);
+        System.out.println(NON_EXISTING_CUSTOMER_ID);
+    }
+}
+</pre>
+
+		<p>
+			Первое, что бросается в глаза и что хотелось бы улучшить - это имена констант. Так, в имени каждой константы 
+			повторяeтся <tt>CUSTOMER_ID</tt>. Само по себе дублирование чего бы то ни было в тестах - не так уж плохо. 
+			Тем более, что два слова - не пять.	Но чтобы использовать такие константы, приходиться много печатать. И 
+			функция автодополнения IDE не сильно помогает. Потому что первая константа начинается со слова 
+			<tt>CUSTOMER</tt>, вторая - со слова <tt>INVALID</tt>, а третья с совершенно другого слова.	
+			
+		<p>
+			Кроме того, каждая из констант - самостоятельное, не связанное с другими, поле класса. В зависимости от 
+			того, как исходный код отформатирован, логически связанные константы могут быть или собраны в одном месте, 
+			или разбросаны по всему файлу (или быть перемешанными с константами другого рода), что ухудшает читаемость 
+			кода. Да, можно задействовать formatter и разместить константы в алфавитном порядке, но откуда formatter'у 
+			знать, что все три константы имеют отношение к одной сущности? Чтобы учесть логическую связь придеться 
+			использовать очень нетривиальные средства форматирования исходного кода. 
+			
+		<p>
+			Призовем на помощь внутренний класс и получим <a href="#listing-2">листинг 2</a>!
+		
+		<h4 id="listing-2">
+			Листинг 2 - ConstantsInnerClassTest - константы, сгруппированные с помощью внутреннего класса
+		</h4>		
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class ConstantsInnerClassTest {
+
+    private static class CustomerId {
+        private static final String VALID = "12345";
+        private static final String INVALID = "!!!";
+        private static final String NON_EXISTING = "000";
+    }
+
+    @Test
+    public void someTest() throws Exception {
+        System.out.println(CustomerId.VALID);
+        System.out.println(CustomerId.INVALID);
+        System.out.println(CustomerId.NON_EXISTING);
+    }
+}
+</pre>	
+
+		<p>
+			Выглядит лучше. Прежде всего отметим, что все константы находятся внутри вспомогательного класса. Т.е. 
+			никакое, даже самое дикое, форматирование исходного текста не сможет разлучить их. Имя же вспомогательного 
+			класса говорит само за себя. Так что нет нужды дублировать слова <tt>CUSTOMER</tt> и <tt>ID</tt> в именах 
+			констант. И IDE нам поможет: не надо держать в голове все возможные вариации, достаточно набрать 
+			<tt>Cust</tt> - и IDE предложит дополнить до <tt>CustomerId</tt>. После набора точки IDE отобразит весь 
+			список - останется только выбрать. Тем не менее, внутренний класс из <a href="#listing-2">листинга 2</a> 
+			выглядит громоздким. И в самом деле: мы уменьшили длину имени каждой константы, но добавили строчку 
+			<tt>private static class CustomerId {</tt>. Так что не такое уж изящное получилось решение. Попробуем убрать
+			лишнее и покажем это в <a href="#listing-3">листинге 3</a>:
+		
+		<h4 id="listing-3">
+			Листинг 3 - ConstantsEnhancedInnerClassTest - улучшенный внутренний класс для группировки констант
+		</h4>
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class ConstantsEnhancedInnerClassTest {
+
+    private static class CustomerId {
+        static final String VALID = "12345";
+        static final String INVALID = "!!!";
+        static final String NON_EXISTING = "000";
+    }
+
+    @Test
+    public void someTest() throws Exception {
+        System.out.println(CustomerId.VALID);
+        System.out.println(CustomerId.INVALID);
+        System.out.println(CustomerId.NON_EXISTING);
+    }
+}
+</pre>
+		
+		<p>
+			Убирать модификатор <code>private</code> с <code>CustomerId</code> не будем. Модификатор <code>static</code>
+			тоже оставим. А вот модификатор	<code>private</code> с самих констант можно смело убрать. 
+			
+		<p>
+			Поле вложенного класса всегда доступно из класса, в который	он вложен (да-да, в 
+			<a href="#listing-2">листинге 2</a> константы приватные, и тем не менее, их можно прочитать в методе 
+			<code>someTest()</code>). Так что уровень доступа <strong>package-private</strong> сойдет: класс 
+			<code>CustomerId</code>	- приватный, и все, что в нем находится, невидимо для внешнего мира. 
+			Продемонстрируем это, разместив в том же пакете (<code>com.github.flaz14.grouping</code>) новый тест, 
+			приведенный	в <a href="#listing-4">листинге 4</a>.
+		
+		<h4 id="listing-4">
+			Листинг 4 - VisibilityOfInnerClassTest - приватный вложенный класс виден только в классе, в который он 
+			вложен
+		</h4>
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class VisibilityOfInnerClassTest {
+
+    @Test
+    public void packagePrivateFieldsOfPrivateInnerClass() throws Exception {
+          System.out.println(
+                  com.github.flaz14.grouping.ConstantsEnhancedInnerClassTest.CustomerId.VALID
+          );
+    }
+}
+</pre>
+		
+		<p>
+			Попробуем скомпилировать и получим ошибку:
+			<blockquote>
+				<p>
+					com.github.flaz14.grouping.ConstantsEnhancedInnerClassTest.CustomerId has private access in 
+					com.github.flaz14.grouping.ConstantsEnhancedInnerClassTest
+			</blockquote>
+			
+		<p>
+			То же самое будет и при любом другом модификоре поля, главное, чтобы сам вложенный класс был приватным.
+		
+		<p>
+			Т.о. образом привиденный в <a href="#listing-3">листинге 3</a> внутренний класс оптимально подходит для 
+			группировки констант <sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>.
+		
+		<h2>А почему не <code>enum</code>?</h2>
+		
+		<p>
+			Попробуем сгруппировать константы, но с помощью <code>enum</code>:
+		
+		<h4>
+			Листинг 5 - ConstantsEnumTest - константы, оформленные в виде <code>enum</code>
+		</h4>
+<pre>
+package com.github.flaz14.grouping;
+
+import org.junit.Test;
+
+public class ConstantsEnumTest {
+
+    private enum CustomerId {
+        VALID("12345"),
+        INVALID("!!!"),
+        NON_EXISTING("000");
+
+        public final String id;
+
+        private CustomerId(String id) {
+            this.id = id;
+        }
+    }
+
+    @Test
+    public void someTest() throws Exception {
+        System.out.println(CustomerId.VALID.id);
+        System.out.println(CustomerId.INVALID.id);
+        System.out.println(CustomerId.NON_EXISTING.id);
+    }
+}
+</pre>
+		
+		<p>
+			Очевидно, что использование <code>enum</code> ведет к чрезмерному усложнению при той же функциональности. 
+			Да, <code>enum</code> вне конкуренции в случаях общедоступных классов, которые повторно используются во 
+			многих частях программы. Но если константы релевантны только в пределах одного класса, лучше поместить их во
+			внутренний класс.
+		
+		<h2>Почему не <code>interface</code>?</h2>
+		
+		<p>
+			Константы можно поместить во внутренний интерфейс. И не придеться писать <code>static final</code>. Но 
+			интерфейс, в котором нет методов, сбивает с толку. Лучше не использовать интерфейсы не по назначению. 
+			Несколько ключевых слов - не такой уж большой проигрыш, чтобы отказываться от статических внутренних 
+			классов.
+		
+		<h2>Не только константы, но и разнообразные фабрики</h2>
+		
+		<p>
+			В реальных приложения (особенно в устаревших корпоративных монстрах) часто приходиться использовать в тестах 
+			всякого рода DTO, Entity и прочий хлам.	Что ж, внутренние классы можно применить и тут. Вглянем на 
+			<a href="#listing-6">листинг 6</a>:
+		
+		<h4 id="listing-6">
+			Листинг 6 - DtoFactoryTest - использование внутренних классов для реализации Static Factory
+		</h4>
+<pre>
+package com.github.flaz14.factory;
+
+import org.junit.Test;
+
+public class DtoFactoryTest {
+
+    private static class Customer {
+        static CustomerDto withMandatoryFields() {
+            return new CustomerDto();
+        }
+
+        static class WithBankDetails {
+            static CustomerDto apparent() {
+                CustomerDto dto = new CustomerDto();
+                // set up some credit card number fully
+                // ...
+                return dto;
+            }
+
+            static CustomerDto obscured() {
+                CustomerDto dto = new CustomerDto();
+                // set up credit card number in the form of XXXX XXXX XXXX 1234
+                // ...
+                return dto;
+            }
+        }
+    }
+
+    @Test
+    public void test() throws Exception {
+        CustomerDto expected = Customer.WithBankDetails.obscured();
+        // ...
+    }
+}
+
+class CustomerDto {
+    // ...
+}
+</pre>
+		
+		<p>
+			Тут все понятно <sup id="footnote-2-top"><a href="#footnote-2-bottom">[2]</a></sup>. Можно привести еще 
+			много примеров: <em>Exception Factory</em>, <em>Logger Factory</em>, <em>Builder</em> и т.д.
+		
+		<h2>Не только статические, но и нестатические классы</h2>
+		 
+		<p>
+			Внутренние классы не обязательно должны быть статическими. Можно использовать и нестатические классы. С 
+			точки зрения читаемости кода лишь ключевое слово <code>new</code> будет мозолить глаза. Но это не страшно. 
+			Тем более, что нестатические внутренние классы имеют доступ к instance-полям объектов окружающего класса. 
+			Что	приносит неожиданные преимущества.
+			
+		<h4 id="listing-7">
+			Листинг 7 - NonStaticInnerClassTest - пример нестатического внутреннего класса
+		</h4>
+<pre>
+package com.github.flaz14;
+
+import org.junit.Test;
+
+public class NonStaticInnerClassTest {
+
+    @Test
+    public void test() throws Exception {
+        final ChatBot bot = new ChatBot(new XmppClient());
+        bot.startConversation();
+        bot.broadcast();
+    }
+}
+
+class ChatBot {
+    private final XmppClient xmppClient;
+
+    public ChatBot(XmppClient xmppClient) {
+        this.xmppClient = xmppClient;
+    }
+
+    public void startConversation() {
+        new Message("Hello!!!").sendImmediately();
+    }
+
+    public void broadcast() {
+        for (int i = 0; i < 100; i++) {
+            new Message("Spam...").sendAsynchronously();
+        }
+    }
+
+    private class Message {
+        private final String text;
+
+        public Message(String text) {
+            this.text = text;
+        }
+
+        public int sendImmediately() {
+            // ...
+            return 0;
+        }
+
+        public void sendAsynchronously() {
+            // ...
+        }
+    }
+}
+
+class XmppClient {
+    // ...
+}	
+</pre>
+
+		<p>
+			Пример, приведенный в <a href="#listing-7">листинге 7</a> - надуманный. Но он хорошо иллюстрирует, что в 
+			некоторых случаях ключевое слово <code>new</code> - не помеха, а тот почти невидимый штрих, который 
+			прекрасно дополняет картину. Нестатический внутренний класс можно было бы сделать обычным. Но тогда пришлось
+			бы передавать ему ссылку на <code>XmppClient</code> и затем хранить эту ссылку в поле класса. А вот 
+			внутренний класс избавляет нас от рутины.
+			
+		<h2>И напоследок...</h2>
+		
+		<p>
+			Сейчас уже вовсю используется Java 8 (и даже потихоньку внедряется в старые проекты). На подходе Java 9. А 
+			внутренние классы как были, так и остаются классными. Так что начинайте использовать их прямо сейчас. Удачи!
+		
+		<p>
+			__________
+			<ol>
+				<li id="footnote-1-bottom">
+					<p>
+						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
+						Для пущей константности можно было добавить к классу <code>CustomerId</code> модификтор 
+						<code>final</code>. Но это излишне: класс <code>CustomerId</code> спрятан от внешнего мира. И 
+						вряд ли	кому-то придет в голову написать еще один внутренний класс и в новом классе унаследовать 
+						<code>CustomerId</code>.
+
+				<li id="footnote-2-bottom">
+					<p>
+						<a href="#footnote-2-top" title="Перейти к основному тексту">&uarr;</a> 					
+						Почему в <a href="#listing-6">листинге 6</a> мы для использовали статические методы вместо того,
+						чтобы раз и навсегда создать объекты-константы? Потому что пример был о Static Factory :) Но не 
+						только поэтому. Часто DTO не являются неизменяемыми объектами. Поэтому в тестах возможна их 
+						(случайная) модификация. А вот при использовании factory-методов о такого рода ошибках можно 
+						забыть (вообще-то, неизменяемые объекты - отдельная тема, равно как и порядком надоевший 
+						модификатор <code>final</code> возле параметров методов и локальных переменных).
+			</ol>
+			
+		<hr>
+		
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+	</body>
+</html>
