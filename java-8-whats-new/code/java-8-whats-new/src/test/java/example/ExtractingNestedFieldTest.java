@@ -14,10 +14,7 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-/**
- *
- */
-public class ReferencesToMethodsAndConstructorsTest {
+public class ExtractingNestedFieldTest {
     @Test
     public void java7() throws Exception {
         List<String> extracted = CountriesExtractor.java7(Sample.Input.customers());
