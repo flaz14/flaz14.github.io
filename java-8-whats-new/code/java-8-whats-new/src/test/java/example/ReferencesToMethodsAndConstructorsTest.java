@@ -20,105 +20,113 @@ import static org.hamcrest.core.IsEqual.equalTo;
 public class ReferencesToMethodsAndConstructorsTest {
     @Test
     public void java7() throws Exception {
-        List<String> extracted = extractCountriesJava7(customers());
-        assertThat(extracted, equalTo(expectedCountries()));
+        List<String> extracted = CountriesExtractor.java7(Sample.Input.customers());
+        assertThat(extracted, equalTo(Sample.outputCountries()));
     }
 
     @Test
     public void java8Trivial() throws Exception {
-        List<String> extracted = extractCountriesJava8Trivial(customers());
-        assertThat(extracted, equalTo(expectedCountries()));
+        List<String> extracted = CountriesExtractor.Java8.trivial(Sample.Input.customers());
+        assertThat(extracted, equalTo(Sample.outputCountries()));
     }
 
     @Test
     public void java8Stream() throws Exception {
-        List<String> extracted = extractCountriesJava8Stream(customers());
-        assertThat(extracted, equalTo(expectedCountries()));
+        List<String> extracted = CountriesExtractor.Java8.stream(Sample.Input.customers());
+        assertThat(extracted, equalTo(Sample.outputCountries()));
     }
 
     @Test
     public void java8StreamWithCheckingForNull() throws Exception {
-        List<String> extracted = extractCountriesJava8StreamWithCheckingForNull(customersWithMalformedCustomer());
-        assertThat(extracted, equalTo(expectedCountries()));
+        List<String> extracted = CountriesExtractor.Java8.streamWithHandlingNullAddresses(Sample.Input.withMalformedCustomer());
+        assertThat(extracted, equalTo(Sample.outputCountries()));
     }
 
-    private List<String> extractCountriesJava7(final List<Customer> customers) {
-        final List<String> countries = new ArrayList<>();
-        for (final Customer customer : customers) {
-            String country = customer.address().country();
-            countries.add(country);
+    private static class Sample {
+        static class Input {
+            static List<Customer> customers() {
+                return asList(
+                        new Customer().
+                                firstName("John").
+                                lastName("Smith").
+                                address(new Address().
+                                        country("USA").
+                                        town("New York").
+                                        street("Brighton Beach").
+                                        buildingNumber("19")),
+                        new Customer().
+                                firstName("Ivan").
+                                lastName("Ivanov").
+                                address(new Address().
+                                        country("Russia").
+                                        town("Moscow").
+                                        street("Arbat").
+                                        buildingNumber("2")),
+                        new Customer().
+                                firstName("Samo").
+                                lastName("Law").
+                                address(new Address().
+                                        country("China").
+                                        town("Peking").
+                                        street("some street").
+                                        buildingNumber("some building number"))
+                );
+            }
+
+            private static List<Customer> withMalformedCustomer() {
+                final List<Customer> customers = new ArrayList<>();
+                customers.addAll(customers());
+
+                // This particular customer will have `address` field equal to `null`.
+                Customer malformedCustomer = new Customer();
+                customers.add(malformedCustomer);
+
+                return customers;
+            }
         }
-        return unmodifiableList(countries);
+
+        private static List<String> outputCountries() {
+            return asList("USA", "Russia", "China");
+        }
     }
 
-    private List<String> extractCountriesJava8Trivial(
-            final List<Customer> customers) {
-        final List<String> countries = new ArrayList<>();
-        customers.forEach(customer -> {
-            String country = customer.address().country();
-            countries.add(country);
-        });
-        return unmodifiableList(countries);
-    }
+    private static class CountriesExtractor {
+        static List<String> java7(final List<Customer> customers) {
+            final List<String> countries = new ArrayList<>();
+            for (final Customer customer : customers) {
+                String country = customer.address().country();
+                countries.add(country);
+            }
+            return unmodifiableList(countries);
+        }
 
-    private List<String> extractCountriesJava8Stream(
-            final List<Customer> customers) {
-        return customers.
-                stream().
-                map(customer -> customer.address().country()).
-                collect(collectingAndThen(toList(), Collections::unmodifiableList));
-    }
+        static class Java8 {
+            static List<String> trivial(
+                    final List<Customer> customers) {
+                final List<String> countries = new ArrayList<>();
+                customers.forEach(customer -> {
+                    String country = customer.address().country();
+                    countries.add(country);
+                });
+                return unmodifiableList(countries);
+            }
 
-    private List<String> extractCountriesJava8StreamWithCheckingForNull(final List<Customer> customers) {
-        return customers.
-                stream().
-                filter(customer -> nonNull(customer.address())).
-                map(customer -> customer.address().country()).
-                collect(collectingAndThen(toList(), Collections::unmodifiableList));
-    }
+            static List<String> stream(
+                    final List<Customer> customers) {
+                return customers.
+                        stream().
+                        map(customer -> customer.address().country()).
+                        collect(collectingAndThen(toList(), Collections::unmodifiableList));
+            }
 
-    private static List<Customer> customers() {
-        return asList(
-                new Customer().
-                        firstName("John").
-                        lastName("Smith").
-                        address(new Address().
-                                country("USA").
-                                town("New York").
-                                street("Brighton Beach").
-                                buildingNumber("19")),
-                new Customer().
-                        firstName("Ivan").
-                        lastName("Ivanov").
-                        address(new Address().
-                                country("Russia").
-                                town("Moscow").
-                                street("Arbat").
-                                buildingNumber("2")),
-                new Customer().
-                        firstName("Samo").
-                        lastName("Law").
-                        address(new Address().
-                                country("China").
-                                town("Peking").
-                                street("some street").
-                                buildingNumber("some building number"))
-        );
-    }
-
-    private static List<Customer> customersWithMalformedCustomer() {
-        final List<Customer> customers = new ArrayList<>();
-        customers.addAll(customers());
-
-        // This particular customer will have `address` field equal to `null`.
-        Customer malformedCustomer = new Customer();
-        customers.add(malformedCustomer);
-        
-        return customers;
-    }
-
-    private static List<String> expectedCountries() {
-        return asList("USA", "Russia", "China");
+            static List<String> streamWithHandlingNullAddresses(final List<Customer> customers) {
+                return customers.
+                        stream().
+                        filter(customer -> nonNull(customer.address())).
+                        map(customer -> customer.address().country()).
+                        collect(collectingAndThen(toList(), Collections::unmodifiableList));
+            }
+        }
     }
 }
 
