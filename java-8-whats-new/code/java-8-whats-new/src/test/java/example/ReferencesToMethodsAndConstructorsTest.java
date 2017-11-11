@@ -3,10 +3,10 @@ package example;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -45,7 +45,7 @@ public class ReferencesToMethodsAndConstructorsTest {
     private List<String> extractCountriesJava7(final List<Customer> customers) {
         final List<String> countries = new ArrayList<>();
         for (final Customer customer : customers) {
-            String country = customer.address.country;
+            String country = customer.address().country();
             countries.add(country);
         }
         return unmodifiableList(countries);
@@ -55,7 +55,7 @@ public class ReferencesToMethodsAndConstructorsTest {
             final List<Customer> customers) {
         final List<String> countries = new ArrayList<>();
         customers.forEach(customer -> {
-            String country = customer.address.country;
+            String country = customer.address().country();
             countries.add(country);
         });
         return unmodifiableList(countries);
@@ -65,84 +65,135 @@ public class ReferencesToMethodsAndConstructorsTest {
             final List<Customer> customers) {
         return customers.
                 stream().
-                map(customer -> customer.address.country).
+                map(customer -> customer.address().country()).
                 collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     private List<String> extractCountriesJava8StreamWithCheckingForNull(final List<Customer> customers) {
         return customers.
                 stream().
-                filter(customer -> nonNull(customer.address)).
-                map(customer -> customer.address.country).
+                filter(customer -> nonNull(customer.address())).
+                map(customer -> customer.address().country()).
                 collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     private static List<Customer> customers() {
-        final Address address1 = new Address();
-        address1.country = "USA";
-        address1.town = "New York";
-        address1.street = "Brighton Beach";
-        address1.buildingNumber = "19";
-
-        final Address address2 = new Address();
-        address2.country = "Russia";
-        address2.town = "Moscow";
-        address2.street = "Arbat";
-        address2.buildingNumber = "2";
-
-        final Address address3 = new Address();
-        address3.country = "China";
-        address3.town = "Peking";
-        address3.street = "N/A";
-        address3.buildingNumber = "N/A";
-
-        // All the fields will be equal to null by default.
-        final Address address4 = new Address();
-
-        final Customer customer1 = new Customer();
-        customer1.firstName = "John";
-        customer1.lastName = "Smith";
-        customer1.address = address1;
-
-        final Customer customer2 = new Customer();
-        customer2.firstName = "Ivan";
-        customer2.lastName = "Ivanov";
-        customer2.address = address2;
-
-        final Customer customer3 = new Customer();
-        customer3.firstName = "Samo";
-        customer3.lastName = "Law";
-        customer3.address = address3;
-
-        final Customer customer4 = new Customer();
-        customer4.address = address4;
-
-        return Arrays.asList(customer1, customer2, customer3, customer4);
+        return asList(
+                new Customer().
+                        firstName("John").
+                        lastName("Smith").
+                        address(new Address().
+                                country("USA").
+                                town("New York").
+                                street("Brighton Beach").
+                                buildingNumber("19")),
+                new Customer().
+                        firstName("Ivan").
+                        lastName("Ivanov").
+                        address(new Address().
+                                country("Russia").
+                                town("Moscow").
+                                street("Arbat").
+                                buildingNumber("2")),
+                new Customer().
+                        firstName("Samo").
+                        lastName("Law").
+                        address(new Address().
+                                country("China").
+                                town("Peking").
+                                street("some street").
+                                buildingNumber("some building number"))
+        );
     }
 
     private static List<Customer> customersWithMalformedCustomer() {
         final List<Customer> customers = new ArrayList<>();
-        customers().addAll(customers());
-        customers.add(new Customer()); // this particular customer with have address == null
+        customers.addAll(customers());
+
+        // This particular customer will have `address` field equal to `null`.
+        Customer malformedCustomer = new Customer();
+        customers.add(malformedCustomer);
+        
         return customers;
     }
 
-
     private static List<String> expectedCountries() {
-        return Arrays.asList("USA", "Russia", "China", null);
+        return asList("USA", "Russia", "China");
     }
-
 }
 
 class Customer {
-    String firstName;
-    String lastName;
-    Address address;
+    private String firstName;
+    private String lastName;
+    private Address address;
+
+    public Customer address(Address address) {
+        this.address = address;
+        return this;
+    }
+
+    public Address address() {
+        return this.address;
+    }
+
+    public Customer firstName(String firstName) {
+        this.firstName = firstName;
+        return this;
+    }
+
+    public String firstName() {
+        return this.firstName;
+    }
+
+    public Customer lastName(String lastName) {
+        this.lastName = lastName;
+        return this;
+    }
+
+    public String lastName() {
+        return lastName;
+    }
 }
 
 class Address {
-    String country;
-    String town;
-    String street;
-    String buildingNumber;
+    private String country;
+    private String town;
+    private String street;
+    private String buildingNumber;
+
+    public Address country(String country) {
+        this.country = country;
+        return this;
+    }
+
+    public String country() {
+        return this.country;
+    }
+
+    public Address town(String town) {
+        this.town = town;
+        return this;
+    }
+
+    public String town() {
+        return this.town;
+    }
+
+    public Address street(String street) {
+        this.street = street;
+        return this;
+    }
+
+    public String street() {
+        return this.street;
+    }
+
+    public Address buildingNumber(String buildingNumber) {
+        this.buildingNumber = buildingNumber;
+        return this;
+    }
+
+    public String buildingNumber() {
+        return this.buildingNumber;
+    }
 }
