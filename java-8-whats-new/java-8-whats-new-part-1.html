@@ -149,6 +149,27 @@ java.lang.IllegalStateException: This is workaround for demonstrating nasty Java
 Process finished with exit code 255
 </pre> 
 
+
+Надо не забыть написать про порядок выполнения операций. Т.е. проверка того, что поле address в объекте класса Customer
+не равно null (т.о. мы предотвращаем NullPointerException) с помощью фильтра не приведет к дополнительной итерации по 
+списку Customer'ов. Об этой особенности потоков Java 8 написал Бенжамин.
+
+
+The order of the result might be surprising. A naive approach would be to execute the operations horizontally one after another on all elements of the stream. But instead each element moves along the chain vertically. The first string "d2" passes filter then forEach, only then the second string "a2" is processed. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		<h4 id="illustration-1-1">
 				Рисунок 1.1 - пример отображения несмонтированного раздела на боковой панели Nemo
 		</h4>
