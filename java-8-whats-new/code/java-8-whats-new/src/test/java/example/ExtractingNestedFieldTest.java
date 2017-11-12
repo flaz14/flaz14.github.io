@@ -5,6 +5,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
@@ -172,6 +173,9 @@ class Address {
     }
 
     public String country() {
+        //if (Objects.equals(country, "USA")) {
+        //    throw new IllegalStateException("This is workaround for demonstrating nasty Java 8 stacktraces.");
+        //}
         return this.country;
     }
 
