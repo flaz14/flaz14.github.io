@@ -1,4 +1,4 @@
-package example;
+package stream;
 
 import org.junit.Test;
 
@@ -37,7 +37,9 @@ public class ExtractingNestedFieldTest {
 
     @Test
     public void java8StreamWithCheckingForNull() throws Exception {
-        Set<String> extracted = CountriesExtractor.Java8.streamWithHandlingNullAddresses(Sample.Input.withMalformedCustomer());
+        Set<String> extracted = CountriesExtractor.Java8.streamWithHandlingNullAddresses(
+                Sample.Input.withMalformedCustomer()
+        );
         assertThat(extracted, equalTo(Sample.outputCountries()));
     }
 
