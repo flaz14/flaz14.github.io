@@ -1,5 +1,7 @@
 package stream;
 
+import dto.Address;
+import dto.Customer;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -129,81 +131,3 @@ public class ExtractingNestedFieldTest {
     }
 }
 
-class Customer {
-    private String firstName;
-    private String lastName;
-    private Address address;
-
-    public Customer address(Address address) {
-        this.address = address;
-        return this;
-    }
-
-    public Address address() {
-        return this.address;
-    }
-
-    public Customer firstName(String firstName) {
-        this.firstName = firstName;
-        return this;
-    }
-
-    public String firstName() {
-        return this.firstName;
-    }
-
-    public Customer lastName(String lastName) {
-        this.lastName = lastName;
-        return this;
-    }
-
-    public String lastName() {
-        return lastName;
-    }
-}
-
-class Address {
-    private String country;
-    private String town;
-    private String street;
-    private String buildingNumber;
-
-    public Address country(String country) {
-        this.country = country;
-        return this;
-    }
-
-    public String country() {
-        //if (Objects.equals(country, "USA")) {
-        //    throw new IllegalStateException("This is workaround for demonstrating nasty Java 8 stacktraces.");
-        //}
-        return this.country;
-    }
-
-    public Address town(String town) {
-        this.town = town;
-        return this;
-    }
-
-    public String town() {
-        return this.town;
-    }
-
-    public Address street(String street) {
-        this.street = street;
-        return this;
-    }
-
-    public String street() {
-        return this.street;
-    }
-
-    public Address buildingNumber(String buildingNumber) {
-        this.buildingNumber = buildingNumber;
-        return this;
-    }
-
-    public String buildingNumber() {
-        return this.buildingNumber;
-    }
-}
