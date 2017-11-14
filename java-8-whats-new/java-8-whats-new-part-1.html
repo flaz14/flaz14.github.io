@@ -58,8 +58,8 @@
 			структуры, можно изобретать новые (или хотя бы упорядочивать существующие). Их можно пересылать, словно 
 			электронные письма, строить распределенные приложения, в которых между узлами передаются не данные, а код. 
 			Что-то подобное уже сделали: 
-			<a href="http://swarmframework.org/">The Swarm Framework</a> (про него я узнал 
-			<a href="artamonov.ru/2009/10/02/swarm-dpl/">в блоге Игоря Артамонова</a>; на главной странице сказано, что 
+			<a href="http://swarmframework.org/">The Swarm Framework</a> (про него я узнал в
+			<a href="artamonov.ru/2009/10/02/swarm-dpl/">блоге Игоря Артамонова</a>; на главной странице сказано, что 
 			сайт закрыт, но ссылки работают).
 		
 		<p>
@@ -89,7 +89,10 @@
 			Пожалуй, в каждом корпоративном приложении есть БД, в которой хранятся сведения о клиентах. А для внешнего
 			мира эти сведени доступные REST API. У нас есть для олицетворения клиента используется класс 
 			<strong>Customer</strong>. Данные о месте проживания клиента представлены в виде класса 
-			<strong>Address</strong>. Выглядит это примерно так:
+			<strong>Address</strong>. Выглядят они так (в <a href="#listing-1">листинге 1</a> для краткости приведены 
+			только поля):
+
+<h4 id="listing-1">Листинг 1 - Классы предметной области</h4>
 <pre>
 public class Customer {
     private String firstName;
@@ -111,13 +114,73 @@ public class Address {
 </pre>
 		
 		<p>
-			Пусть нам дан список клиентов. Наша задача состоит в том, чтобы собрать все улицы, на которых проживают 
-			клиенты, в другой список. Попробуем сделать это в стиле Java 7 и получим примерно такой код:
-<pre>
+			Пусть нам дан список клиентов. Наша задача состоит в том, чтобы собрать все страны, в которых проживают 
+			клиенты, в другой список. Попробуем сделать это в стиле Java 7 и получим код, приведенный в 
+			<a href="#listing-2">листинге 2</a>. Он содержит все необходимое: проверки на <code>null</code>, 
+			обертывание результата неизменяемым множеством, 
+			рационально расставленные модификаторы <code>final</code>.
 
+<h4 id="listing-2">Листинг 2 - Стиль Java 7</h4>
+<pre>
+public static Set<String> java7(final List<Customer> customers) {
+    final Set<String> countries = new HashSet<>();
+    for (final Customer customer : customers) {
+        if (customer != null) {
+            if (customer.address() != null) {
+                String country = customer.address().country();
+                countries.add(country);
+            }
+        }
+    }
+    return unmodifiableSet(countries);
+}
 </pre>
+
+		<p>
+			Что же мы видим? Привычный цикл <em>foreach</em> и два вложенных <em>if</em>, кроме всего прочего. Попробуем теперь 
+			сделать то же самое, но с применением Java 8. В <a href="#listing-3">листинге 3</a> можно видеть "наивный" 
+			способ. По сути, от Java 8
+			там ничего нет, только новый цикл <em>foreach</em>
+
+<h4 id="listing-3">Листинг 3 - "Наивный" стиль Java 8</h4>
+<pre>
+static Set<String> trivial(final List<Customer> customers) {
+    final Set<String> countries = new HashSet<>();
+    customers.forEach(customer -> {
+        if (customer != null) {
+            if (customer.address() != null) {
+                String country = customer.address().country();
+                countries.add(country);
+            }
+        }
+    });
+    return unmodifiableSet(countries);
+}
+</pre>
+
+		<p>
+			Настоящая Java 8 - это потоки, т.е. <strong>streams</strong>. Это не потоки выполнения. И не потоки ввода-вывода.
+			 Что-то среднее. Ибо название
+			"конвейер" им тоже не подходит - на конвейере разные операции на разными данными выполняются одновременно. 
+			В принципе, <strong>parallel streams</strong> - это уже конвейеры (мне так кажется, исходный код JDK я не 
+			смотрел, простите).
 			
-			
+<h4 id="listing-4">Листинг 3 - Настоящий стиль Java 8</h4>
+<pre>
+static Set<String> stream(final List<Customer> customers) {
+    return customers.
+            stream().
+            filter(Objects::nonNull).
+            filter(customer -> nonNull(customer.address())).
+            map(customer -> customer.address().country()).
+            collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+}
+</pre>
+
+		<h2>Что клёвого?</h2>
+		
+		
+	
 Java 7		
 <pre>
 /usr/local/soft/jdk1.8.0_111/bin/java -ea -Didea.launcher.port=7533 -Didea.launcher.bin.path=/usr/local/soft/idea-IC-139.1603.1/bin -Dfile.encoding=UTF-8 -classpath /usr/local/soft/idea-IC-139.1603.1/lib/idea_rt.jar:/usr/local/soft/idea-IC-139.1603.1/plugins/junit/lib/junit-rt.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/resources.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/plugin.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/charsets.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/rt.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/deploy.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/jfr.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/management-agent.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/javaws.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/jsse.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/jce.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/jfxswt.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/sunpkcs11.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/sunec.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/nashorn.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/dnsns.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/jaccess.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/jfxrt.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/cldrdata.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/zipfs.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/localedata.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/sunjce_provider.jar:/home/yura/Projects/flaz14.github.io/java-8-whats-new/code/java-8-whats-new/target/test-classes:/usr/local/soft/idea-IC-139.1603.1/lib/junit-4.11.jar:/usr/local/soft/idea-IC-139.1603.1/lib/hamcrest-core-1.3.jar:/usr/local/soft/idea-IC-139.1603.1/lib/hamcrest-library-1.3.jar:/home/yura/.m2/repository/junit/junit/4.12/junit-4.12.jar:/home/yura/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar com.intellij.rt.execution.application.AppMain com.intellij.rt.execution.junit.JUnitStarter -ideVersion5 example.ExtractingNestedFieldTest,java7
