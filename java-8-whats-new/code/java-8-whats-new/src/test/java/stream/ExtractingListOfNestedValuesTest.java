@@ -15,6 +15,7 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 
+
 public class ExtractingListOfNestedValuesTest {
     @Test
     public void java7() throws Exception {

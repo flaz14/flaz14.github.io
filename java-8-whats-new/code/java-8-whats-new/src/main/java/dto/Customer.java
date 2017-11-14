@@ -8,15 +8,6 @@ public class Customer {
     private Address address;
     private List<String> phoneNumbers;
 
-    public Customer address(Address address) {
-        this.address = address;
-        return this;
-    }
-
-    public Address address() {
-        return this.address;
-    }
-
     public Customer firstName(String firstName) {
         this.firstName = firstName;
         return this;
@@ -33,6 +24,15 @@ public class Customer {
 
     public String lastName() {
         return lastName;
+    }
+
+    public Customer address(Address address) {
+        this.address = address;
+        return this;
+    }
+
+    public Address address() {
+        return this.address;
     }
 
     public Customer phoneNumbers(List<String> phoneNumbers) {

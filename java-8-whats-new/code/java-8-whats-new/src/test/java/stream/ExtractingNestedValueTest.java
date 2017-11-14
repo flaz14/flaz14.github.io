@@ -18,6 +18,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 
+
 public class ExtractingNestedValueTest {
     @Test
     public void java7() throws Exception {
@@ -73,44 +74,43 @@ public class ExtractingNestedValueTest {
             return new HashSet<>(asList("USA", "Russia", "China"));
         }
     }
+}
 
-    private static class CountriesExtractor {
-        static Set<String> java7(final List<Customer> customers) {
-            final Set<String> countries = new HashSet<>();
+class CountriesExtractor {
+    public static Set<String> java7(final List<Customer> customers) {
+        final Set<String> countries = new HashSet<>();
         for (final Customer customer : customers) {
+            if (customer != null) {
+                if (customer.address() != null) {
+                    String country = customer.address().country();
+                    countries.add(country);
+                }
+            }
+        }
+        return unmodifiableSet(countries);
+    }
+
+    public static class Java8 {
+        static Set<String> trivial(final List<Customer> customers) {
+            final Set<String> countries = new HashSet<>();
+            customers.forEach(customer -> {
                 if (customer != null) {
                     if (customer.address() != null) {
                         String country = customer.address().country();
                         countries.add(country);
                     }
                 }
-            }
+            });
             return unmodifiableSet(countries);
         }
 
-        static class Java8 {
-            static Set<String> trivial(final List<Customer> customers) {
-                final Set<String> countries = new HashSet<>();
-                customers.forEach(customer -> {
-                    if (customer != null) {
-                        if (customer.address() != null) {
-                            String country = customer.address().country();
-                            countries.add(country);
-                        }
-                    }
-                });
-                return unmodifiableSet(countries);
-            }
-
-            static Set<String> stream(final List<Customer> customers) {
-                return customers.
-                        stream().
-                        filter(Objects::nonNull).
-                        filter(customer -> nonNull(customer.address())).
-                        map(customer -> customer.address().country()).
-                        collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
-            }
+        static Set<String> stream(final List<Customer> customers) {
+            return customers.
+                    stream().
+                    filter(Objects::nonNull).
+                    filter(customer -> nonNull(customer.address())).
+                    map(customer -> customer.address().country()).
+                    collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
         }
     }
 }
-
