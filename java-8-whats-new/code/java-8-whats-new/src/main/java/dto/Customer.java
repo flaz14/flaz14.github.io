@@ -1,9 +1,12 @@
 package dto;
 
+import java.util.List;
+
 public class Customer {
     private String firstName;
     private String lastName;
     private Address address;
+    private List<String> phoneNumbers;
 
     public Customer address(Address address) {
         this.address = address;
@@ -30,5 +33,14 @@ public class Customer {
 
     public String lastName() {
         return lastName;
+    }
+
+    public Customer phoneNumbers(List<String> phoneNumbers) {
+        this.phoneNumbers = phoneNumbers;
+        return this;
+    }
+
+    public List<String> phoneNumbers() {
+        return this.phoneNumbers;
     }
 }
