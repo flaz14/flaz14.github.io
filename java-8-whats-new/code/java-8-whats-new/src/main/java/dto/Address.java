@@ -1,7 +1,5 @@
 package dto;
 
-import java.util.Objects;
-
 public class Address {
     private String country;
     private String town;
@@ -14,9 +12,9 @@ public class Address {
     }
 
     public String country() {
-        if (Objects.equals(country, "USA")) {
-            throw new IllegalStateException("This is workaround for demonstrating nasty Java 8 stacktraces.");
-        }
+        //if (Objects.equals(country, "USA")) {
+        //    throw new IllegalStateException("This is workaround for demonstrating nasty Java 8 stacktraces.");
+        //}
         return this.country;
     }
 
