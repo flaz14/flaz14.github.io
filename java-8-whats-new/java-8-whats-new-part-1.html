@@ -283,16 +283,64 @@ java.lang.IllegalStateException: This is workaround for demonstrating nasty Java
 			придеться этот поток предварительно преобразовать в список. Хотя это уже неактуально: наверняка, в современных
 			версия библиотек, таких как <a href="https://logging.apache.org/log4j">Log4j</a>, можно логгировать потоки целиком.
 		
-			
+		<h2>Что нового?</h2>	
 		 
+		<p>
+			Ничего, кроме лямбда-выражений и ссылок на методы. Потоки можно реализовать и на Java 7. Но придеться повозиться
+			с типами. В случае с лямбда-выражениями компилятор сам определяет тип возвращаемого значение. А вот в Java 7
+			придеться указывать тип явно. Что-то в таком роде (я не проверял, это лишь предположение):
+<pre>
+new MyLambda implements Lambda {
+    @Override
+    public boolean filter(final Object input, final Class returnType) {
+        ...
+    }
+}
+</pre>
+		
+		<p>
+			Ссылки на методы - это реально новая фича. До нее в Java можно было использовать указатели на методы. Но 
+			работали они только во время выполнения, т.е. через механизм рефлексии. Имя требуемого метода надо было 
+			задавать как строку (т.е. как строковый литерал, константу, либо подставлять имя во время выполнения программы),
+			проверок типов не было, автодополнения в IDE - подавно.
+	
+		<p>
+			Потоки Java 8 выглядят магически. Но это не так. Чтобы в этом убедиться, не нужно смотреть исходники JDK.
+			Как пишет <i>Benjamin Winterberg</i> в своей статье:
+			
+			<cite>
+				An important characteristic of intermediate operations is laziness.
+			</cite>
+			
+			И еще:
+			
+			
+			<cite>
+				The order of the result might be surprising. A naive approach would be to execute the operations 
+				horizontally one after another on all elements of the stream. But instead each element moves along the chain
+				vertically. The first string "d2" passes filter then forEach, only then the second string "a2" is processed. 
+			</cite>
+		
+		<p>
+			Это не гениальный замысел разработчиков Java 8. Выполнение операций над элементами потока "горизонтально"
+			и в самом деле было бы неэффективно. Но почему же тогда потоки "ленивые"?
+			
+		<p>
+			Потому что в Java, после того как метод вернул значение или выполнился без возвращения значения 
+			(возвращаемый тип <code>void</code> или в методе возникло исклчение), в него нельзя вернуться. Когда методы
+			выполяются в цепочке, звенья ничего не делают, а только <em>запоминают</em> те операции, которые должны будут
+			выполниться. Скажем, метод <code>filter()</code> всего лишь сохраняет где-то в приватных полях потока 
+			ссылку на лямбда-выражение (по сути, на экземпляр анонимного класса) или ссылку на метод. Терминальный метод
+			(такой как <code>forEach()</code> и т.д.) просто вызывает записанные ранее действия для каждого из элементов
+			в потоке (как уже было сказано выше, не все элементы "доживают" до терминальной операции). 
+		
+		<p>
+			Так что потоки Java 8 в принципе не могут работать с коллекциями, количество элементов в которых неизвестно
+			заранее. Например, настоящий диапазон (в котором каждый следующий элемент последовательности вычисляется, а не 
+			хранится в памяти), как в Python !!!прочитать статью!!!
+
 		
 
-Надо не забыть написать про порядок выполнения операций. Т.е. проверка того, что поле address в объекте класса Customer
-не равно null (т.о. мы предотвращаем NullPointerException) с помощью фильтра не приведет к дополнительной итерации по 
-списку Customer'ов. Об этой особенности потоков Java 8 написал Бенжамин.
-
-
-The order of the result might be surprising. A naive approach would be to execute the operations horizontally one after another on all elements of the stream. But instead each element moves along the chain vertically. The first string "d2" passes filter then forEach, only then the second string "a2" is processed. 
 
 
 
