@@ -165,7 +165,7 @@ static Set<String> trivial(final List<Customer> customers) {
 			В принципе, <strong>parallel streams</strong> - это уже конвейеры (мне так кажется, исходный код JDK я не 
 			смотрел, простите).
 			
-<h4 id="listing-4">Листинг 3 - Настоящий стиль Java 8</h4>
+<h4 id="listing-4">Листинг 4 - Настоящий стиль Java 8</h4>
 <pre>
 static Set<String> stream(final List<Customer> customers) {
     return customers.
@@ -179,7 +179,117 @@ static Set<String> stream(final List<Customer> customers) {
 
 		<h2>Что клёвого?</h2>
 		
+		<p>
+			Код, написанный в стиле Java 8, намного проще читать. Никаких вложенных блоков, фигурных скобок и т.п. 
+			Вместо них - понятные имена методов, такие как <code>filter()</code>. 
+			
+			Переменных нет. Заботиться о предотвращении (случайного) изменения промежуточных результатов нужно заметно 
+			меньше (и добавлять модификатор <code>final</code> не нужно вообще).  
+			
+		<p>
+			Форматирование исходного кода заметно упрощается
+			(т.е. упрощаются настройки средств автоматического форматирования кода, таких как <strong>Eclipse Code Formatter</strong>):
+			вызовы соединяются в цепочку посредством точки, отступов нет (разве что внутри лямбда выражений; в любом случае, 
+			длинное лямбда-выражение лучше опредилить отдельно, т.е. сделать ее самым обычным методом, а в <code>filter</code>,
+			к примеру, передать ссылку на красиво названный метод). В цепочку вызовов можно легко добавлять новые звенья - на форматирование
+			существующего кода добавляемый никак не повлияет. Удалять код тоже проще - просто стираем строку, никакие фигурные
+			скобки от этого не пострадают. И еще автодополнение IDE работает всегда, на каждом этапе, и с гораздо большей
+			эффективностью (не нужно мозговать над именем очередного вспомогательного метода, предлагаемых идиом более чем
+			достаточно).
+			
+		<h2>Что хренового?</h2>
 		
+		<p>
+			Собственно, отсутствие переменных. Да, промежуточные результаты сохраняются во внуренних переменных (т.е. полях)
+			потоков. Но чтобы их посмотреть, надо точку останова <em>внутри</em> исходного кода JDK. Какие имена будут у этих 
+			переменных? Правильно, они будут называться так, как это реализовано в JDK. И для каждого экземпляра потока
+			будут <em>всегда</em> одинаковыми. Так что эффективность грепанья логов падает... Ну и фиг с ней. 
+			
+		<p>
+			Отладчик тоже не радует своим видом. Сравните сами:
+		<h4 id="illustration-1">
+				Рисунок 1 - Отладка кода на Java 7 и Java 8
+		</h4>
+		<p>
+			<img src="illustrations/" width="px"
+			alt="фффффффффффффффффффффффффффффффффффф">			
+
+			
+		<p>
+			Вторая проблема истекает из видимого преимущества цепочки вызовов. Например, потребовалось нам записать 
+			промежуточный результат в журнал. Как это сделать? Для этого есть метод 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#peek-java.util.function.Consumer-">
+				peek()
+			</a>. В документации сказано, что он служит целям отладки:
+			<cite>
+				This method exists mainly to support debugging, where you want to see the elements as they flow past a certain point in a pipeline: 
+			</cite>. Но и ежу понятно, что этот метод может использоваться и для других целей. В принципе, можно любой
+			метод использовать не по назначению. Но имя <strong>peek()</strong> слишком общее. Почему бы не назвать "отладочный"
+			метод <strong>debug()</strong> или <strong>trace</strong> или <strong>log</strong>? Непонятно...
+			
+		<p>
+			А еще прикол в том, что метод <strong>peek()</strong> возвращает поток. Т.е. чтобы просто записать в лог
+			промежуточный результат (т.е. записать его целиком: элементы разделить запятыми, по краям поставить скобки и т.д.)
+			придеться этот поток предварительно преобразовать в список. Хотя это уже неактуально: наверняка, в современных
+			версия библиотек, таких как Log4j, можно логгировать потоки целиком.
+		
+		
+		
+		
+		
+			<p>
+			И наконец, стэктрэйсы. Добавим в метод <code>country()</code> класса <strong>Address</strong> код для 
+			"искусственной" ошибки:
+<pre>
+if (Objects.equals(country, "USA")) {
+    throw new IllegalStateException("This is workaround for demonstrating nasty Java 8 stacktraces.");
+}	
+</pre>
+
+		<p>
+			Запустим тест и получим такой стэктрэйс:
+<pre>
+java.lang.IllegalStateException: This is workaround for demonstrating nasty Java 8 stacktraces.
+	at dto.Address.country(Address.java:18)
+	at stream.CountriesExtractor$Java8.lambda$stream$2(ExtractingNestedValueTest.java:112)
+	at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:193)
+	at java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:175)
+	at java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:175)
+	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
+	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:481)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:471)
+	at java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:708)
+	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:499)
+	at stream.CountriesExtractor$Java8.stream(ExtractingNestedValueTest.java:113)
+	at stream.ExtractingNestedValueTest.java8Stream(ExtractingNestedValueTest.java:37)
+</pre>
+
+		<p>
+			Коротко и ясно, не правда ли?
+			
+		<p>
+			А вот то же самое, только для кода в стиле Java 7:
+<pre>
+java.lang.IllegalStateException: This is workaround for demonstrating nasty Java 8 stacktraces.
+	at dto.Address.country(Address.java:18)
+	at stream.CountriesExtractor.java7(ExtractingNestedValueTest.java:85)
+	at stream.ExtractingNestedValueTest.java7(ExtractingNestedValueTest.java:25)
+</pre>			
+			
+		<p>
+			Второй вариант намного короче и понятнее.
+			
+		<p>
+			Об этом уже писал <i></i> Что еще тут можно сказать? Что не стоит увлекаться лямбда-выражениями. Лямбда-выражения безымянные. На них 
+			даже нельзя аспекты "повесить".
+			
+		 
+		 
+
+
+
+			
 	
 Java 7		
 <pre>
@@ -277,26 +387,12 @@ The order of the result might be surprising. A naive approach would be to execut
 
 
 
-TODO написать про то, что в фильтрах можно использовать не только лямбда-выражения, но и ссылки на методы. Но только в том случае,
-если требуется проверить сами объекты в потоке, а не какое-либо поле объектов.
-
-TODO написать про то, что потоки имеют важное преимущество по сравнению со старомодным кодом Java 7: не нужно заботится 
-о неизменяемости данных. Да, от криво реализованной самописной лямбда-функции никто не застрахован. Но потоки позволяют
-забыть про случайную порчу данных, не нужно ставить `final` перед именами переменных (собственно, и переменных-то нету).
 
 
 
 
 
 
-
-
-		<h4 id="illustration-1-1">
-				Рисунок 1.1 - пример отображения несмонтированного раздела на боковой панели Nemo
-		</h4>
-		<p>
-			<img src="illustrations/nemo-sidebar-with-unmounted-drive-visible.png" width="240px"
-			alt="здесь изображена фрагмент скриншота программы Nemo">
 
 		<p>
 			К сожалению, в Nemo нет возможности скрыть несмонтированные тома. Я облазил все настройки и ничего 
