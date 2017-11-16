@@ -278,6 +278,8 @@ java.lang.IllegalStateException: This is workaround for demonstrating nasty Java
 			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#peek-java.util.function.Consumer-">
 				peek()</a>. 
 			В документации сказано, что он служит целям отладки:
+			
+		<p>
 			<blockquote>
 				This method exists mainly to support debugging, where you want to see the elements as they flow past a certain point in a pipeline
 			</blockquote>
@@ -319,11 +321,15 @@ new MyLambda implements Lambda {
 		<p>
 			Потоки Java 8 выглядят магически. Но это не так. Чтобы в этом убедиться, не нужно смотреть исходники JDK.
 			Как пишет <i>Benjamin Winterberg</i> в своей статье:
+			
+		<p>
 			<blockquote>
 				An important characteristic of intermediate operations is laziness.
 			</blockquote>
 			
 			И еще:
+			
+		<p>
 			<blockquote>
 				The order of the result might be surprising. A naive approach would be to execute the operations 
 				horizontally one after another on all elements of the stream. But instead each element moves along the chain
