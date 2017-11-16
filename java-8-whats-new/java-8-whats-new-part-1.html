@@ -278,12 +278,12 @@ java.lang.IllegalStateException: This is workaround for demonstrating nasty Java
 			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#peek-java.util.function.Consumer-">
 				peek()</a>. 
 			В документации сказано, что он служит целям отладки:
-			
 			<blockquote>
 				<p>
 					This method exists mainly to support debugging, where you want to see the elements as they flow past a certain point in a pipeline
 			</blockquote>
-			
+		
+		<p>
 			Но ежу понятно, что этот метод может использоваться и для других целей. В принципе, можно 
 			любой API использовать не по назначению. Но имя <code>peek()</code> слишком общее. Почему бы не назвать 
 			"отладочный" метод <code>debug()</code> или <code>trace</code> или <code>log</code>? Непонятно...
@@ -321,15 +321,13 @@ new MyLambda implements Lambda {
 		<p>
 			Потоки Java 8 выглядят магически. Но это не так. Чтобы в этом убедиться, не нужно смотреть исходники JDK.
 			Как пишет <i>Benjamin Winterberg</i> в своей статье:
-			
-		<p>
 			<blockquote>
 				<p>
 					An important characteristic of intermediate operations is laziness.
 			</blockquote>
 			
+		<p>
 			И еще:
-			
 			<blockquote>
 				<p>
 					The order of the result might be surprising. A naive approach would be to execute the operations 
