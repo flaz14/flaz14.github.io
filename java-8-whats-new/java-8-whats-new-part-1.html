@@ -279,9 +279,9 @@ java.lang.IllegalStateException: This is workaround for demonstrating nasty Java
 				peek()</a>. 
 			В документации сказано, что он служит целям отладки:
 			
-		<p>
 			<blockquote>
-				This method exists mainly to support debugging, where you want to see the elements as they flow past a certain point in a pipeline
+				<p>
+					This method exists mainly to support debugging, where you want to see the elements as they flow past a certain point in a pipeline
 			</blockquote>
 			
 			Но ежу понятно, что этот метод может использоваться и для других целей. В принципе, можно 
@@ -324,16 +324,17 @@ new MyLambda implements Lambda {
 			
 		<p>
 			<blockquote>
-				An important characteristic of intermediate operations is laziness.
+				<p>
+					An important characteristic of intermediate operations is laziness.
 			</blockquote>
 			
 			И еще:
 			
-		<p>
 			<blockquote>
-				The order of the result might be surprising. A naive approach would be to execute the operations 
-				horizontally one after another on all elements of the stream. But instead each element moves along the chain
-				vertically. The first string "d2" passes filter then forEach, only then the second string "a2" is processed. 
+				<p>
+					The order of the result might be surprising. A naive approach would be to execute the operations 
+					horizontally one after another on all elements of the stream. But instead each element moves along the chain
+					vertically. The first string "d2" passes filter then forEach, only then the second string "a2" is processed. 
 			</blockquote>
 
 		<p>
