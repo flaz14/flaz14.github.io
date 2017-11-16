@@ -83,7 +83,9 @@ class CountriesExtractor {
             if (customer != null) {
                 if (customer.address() != null) {
                     String country = customer.address().country();
-                    countries.add(country);
+                    if (country != null) {
+                        countries.add(country);
+                    }
                 }
             }
         }
@@ -97,7 +99,9 @@ class CountriesExtractor {
                 if (customer != null) {
                     if (customer.address() != null) {
                         String country = customer.address().country();
-                        countries.add(country);
+                        if (country != null) {
+                            countries.add(country);
+                        }
                     }
                 }
             });
@@ -110,6 +114,7 @@ class CountriesExtractor {
                     filter(Objects::nonNull).
                     filter(customer -> nonNull(customer.address())).
                     map(customer -> customer.address().country()).
+                    filter(Objects::nonNull).
                     collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
         }
     }

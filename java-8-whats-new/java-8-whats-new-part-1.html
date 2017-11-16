@@ -28,7 +28,7 @@
 			|
 			<a href="java-8-whats-new/java-8-whats-new-part-3.html">Часть 3. Внутренние классы</a>
 			|
-			<a href="тут будет ссылка на исходный код Maven-проекта">
+			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/java-8-whats-new/code/java-8-whats-new">
 				Исходный код
 			</a>
 		</h3>
@@ -45,22 +45,22 @@
 		
 		<p>
 			К каждому примеру есть тест. Тесты нужны для того, чтобы убедиться, что разные подходы к решению одной и той 
-			же задачи выдают один и тот же результат. Кстати, код самих тестов написан в стиле Java 7. Это сделано 
+			же задачи выдают один и тот же результат. Код тестов написан в стиле Java 7. Это сделано 
 			намеренно, чтобы не отвлекать внимание от собственно примеров Java 8.
 		
 		<p>
 			Помешательство на внутренних классах видно невооруженным глазом. Не знаю, как вам, но мне такой способ 
 			структурирования программы очень по душе: 
 			<a href="http://flaz14.github.io/inner-classes-in-java-are-cool/inner-classes-in-java-are-cool.html">
-				Внутренние классы в Java - классные! 
-			</a>. Вообще, сегодня грань между кодом и данными постепенно стирается. Нет, это не отменяет концепции 
+				Внутренние классы в Java - классные!</a>. 
+			Вообще, сегодня грань между кодом и данными постепенно стирается. Нет, это не отменяет концепции 
 			дедушки <i>Никлауса Вирта</i> ("Алгоритмы + Структуры данных = Программы"). Наоборот: сплетая алгоритмы в 
 			структуры, можно изобретать новые (или хотя бы упорядочивать существующие). Их можно пересылать, словно 
 			электронные письма, строить распределенные приложения, в которых между узлами передаются не данные, а код. 
 			Что-то подобное уже сделали: 
 			<a href="http://swarmframework.org/">The Swarm Framework</a> (про него я узнал в
-			<a href="artamonov.ru/2009/10/02/swarm-dpl/">блоге Игоря Артамонова</a>; на главной странице сказано, что 
-			сайт закрыт, но посты никуда не исчезли, и ссылки работают).
+			<a href="http://artamonov.ru/2009/10/02/swarm-dpl/">блоге Игоря Артамонова</a>; на главной странице сказано, что 
+			сайт закрыт, но посты никуда не исчезли, и прямые ссылки работают).
 		
 		<p>
 			Также я использовал <code>static import</code>'ы везде, где только можно. Да, это нехорошо. Без IDE 
@@ -88,7 +88,7 @@
 		
 		<p>
 			Пожалуй, в каждом корпоративном приложении есть БД, в которой хранятся сведения о клиентах. Для внешнего
-			мира эти сведени доступны через REST API. У нас есть для олицетворения клиента используется класс 
+			мира эти данные доступны через REST API. У нас есть для олицетворения клиента используется класс 
 			<strong>Customer</strong>. Данные о месте проживания клиента представлены в виде класса 
 			<strong>Address</strong>. Выглядят они так (в <a href="#listing-1">листинге 1</a> для краткости приведены 
 			только поля):
@@ -99,7 +99,7 @@ public class Customer {
     private String firstName;
     private String lastName;
     private Address address;
-    private List<String> phoneNumbers;
+    private List&lt;String&gt; phoneNumbers;
     
     ...
 }
@@ -128,7 +128,9 @@ public static Set&lt;String&gt; java7(final List&lt;Customer&gt; customers) {
         if (customer != null) {
             if (customer.address() != null) {
                 String country = customer.address().country();
-                countries.add(country);
+                if (country != null) {
+                    countries.add(country);
+                }
             }
         }
     }
@@ -139,7 +141,7 @@ public static Set&lt;String&gt; java7(final List&lt;Customer&gt; customers) {
 		<p>
 			Что же мы видим? Привычный цикл <em>forEach</em> и два вложенных <em>if</em>, кроме всего прочего. Попробуем
 			теперь сделать то же самое, но с применением Java 8. В <a href="#listing-3">листинге 3</a> можно видеть 
-			"наивный" способ. По сути, от Java 8 там ничего нет, только новый цикл <em>forEach</em>
+			"наивный" способ. По сути, от Java 8 там ничего нет, только новый цикл <em>forEach</em>.
 
 <h4 id="listing-3">Листинг 3 - "Наивный" стиль Java 8</h4>
 <pre>
@@ -149,7 +151,9 @@ static Set&lt;String&gt; trivial(final List&lt;Customer&gt; customers) {
         if (customer != null) {
             if (customer.address() != null) {
                 String country = customer.address().country();
-                countries.add(country);
+                if (country != null) {
+                    countries.add(country);
+                }
             }
         }
     });
@@ -171,6 +175,7 @@ static Set&lt;String&gt; stream(final List&lt;Customer&gt; customers) {
             filter(Objects::nonNull).
             filter(customer -> nonNull(customer.address())).
             map(customer -> customer.address().country()).
+            filter(Objects::nonNull).
             collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
 }
 </pre>
