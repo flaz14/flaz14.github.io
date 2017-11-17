@@ -17,9 +17,9 @@ public class CalculatorJava8PureTest {
 
     @DataPoints
     public static final Calculator[] CALCULATORS = {
-            new UsualCalculator(),
-            new SmartCalculator(),
-            new StupidCalculator()
+            new UsualCalculator()::multiplyByTwo,
+            new SmartCalculator()::multiplyByTwo,
+            new StupidCalculator()::multiplyByTwo
     };
 
     @Theory

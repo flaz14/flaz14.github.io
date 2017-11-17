@@ -142,9 +142,80 @@ public class UsualCalculatorJava7Test extends CalculatorJava7TestSupport {
 			
 		<p>
 			Но как же круто будет избавиться от лишних классов и запихнуть все в один тест. С теориями 
-			!!!JUnit 4 здесь будет ссылка!!! это возможно.  	
+			!!!JUnit 4 здесь будет ссылка!!! это возможно. Получилось так:
+			
+<pre>
+@RunWith(Theories.class)
+public class CalculatorJava8NaiveTest {
+
+    @DataPoints
+    public static final Calculator[] CALCULATORS = {
+            new UsualCalculator(),
+            new SmartCalculator(),
+            new StupidCalculator()
+    };
+
+    @Theory
+    public void returnsZero_whenInputIsZero(final Calculator calculator) {
+        final int result = calculator.multiplyByTwo(0);
+        assertThat(result, is(0));
+    }
+
+    @Theory
+    public void returnsTwo_whenInputIsOne(final Calculator calculator) {
+        final int result = calculator.multiplyByTwo(1);
+        assertThat(result, is(2));
+    }
+}
+</pre>
+
+		<p>
+			Можно добавить Java 8. Ссылки на методы бесполезны в данном случае, но такой вариант тоже работает:
+<pre>
+@RunWith(Theories.class)
+public class CalculatorJava8NaiveTest {
+
+    @DataPoints
+    public static final Calculator[] CALCULATORS = {
+            new UsualCalculator(),
+            new SmartCalculator(),
+            new StupidCalculator()
+    };
+
+    @Theory
+    public void returnsZero_whenInputIsZero(final Calculator calculator) {
+        final int result = calculator.multiplyByTwo(0);
+        assertThat(result, is(0));
+    }
+
+    @Theory
+    public void returnsTwo_whenInputIsOne(final Calculator calculator) {
+        final int result = calculator.multiplyByTwo(1);
+        assertThat(result, is(2));
+    }
+}
+</pre>		
+	
+		<p>
+			Остается только добавить, что если что-то в теории пойдет не так, сообщение об ошибке будет мало полезным.
+			Добавим в реализацию <strong>SmartCalculator</strong> такой код:
+<pre>
+if (input == 1) {
+    throw new IllegalStateException(
+            "This exception is for demonstrating JUnit's magic error messages."
+    );
+}
+</pre>
+		
+		<p>
+			Запустим и получим:
+			<ul>
+				<li>
+				</li>
+			</ul>
 			
 			
+		
 		
 
 
