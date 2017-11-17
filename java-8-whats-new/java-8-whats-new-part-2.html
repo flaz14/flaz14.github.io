@@ -198,7 +198,8 @@ public class CalculatorJava8NaiveTest {
 	
 		<p>
 			Остается только добавить, что если что-то в теории пойдет не так, сообщение об ошибке будет мало полезным.
-			Добавим в реализацию <strong>SmartCalculator</strong> такой код:
+			В стэктрэйса мы увидим только индекс параметра теории (т.е. индекс элемента в массиве). А конкретное его 
+			значение - нет. Чтобы продемонстрировать это добавим в реализацию <strong>SmartCalculator</strong> такой код:
 <pre>
 if (input == 1) {
     throw new IllegalStateException(
@@ -211,351 +212,66 @@ if (input == 1) {
 			Запустим и получим:
 			<ul>
 				<li>
-				</li>
+					<p>Для способа с теориями:
+<pre>
+org.junit.experimental.theories.internal.ParameterizedAssertionError: returnsTwo_whenInputIsOne(CALCULATORS[1])
+	at org.junit.experimental.theories.Theories$TheoryAnchor.reportParameterizedError(Theories.java:192)
+	at org.junit.experimental.theories.Theories$TheoryAnchor$1$1.evaluate(Theories.java:146)
+	at org.junit.experimental.theories.Theories$TheoryAnchor.runWithCompleteAssignment(Theories.java:127)
+	at org.junit.experimental.theories.Theories$TheoryAnchor.runWithAssignment(Theories.java:111)
+	at org.junit.experimental.theories.Theories$TheoryAnchor.runWithIncompleteAssignment(Theories.java:120)
+	at org.junit.experimental.theories.Theories$TheoryAnchor.runWithAssignment(Theories.java:109)
+	at org.junit.experimental.theories.Theories$TheoryAnchor.evaluate(Theories.java:96)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:271)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:70)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:50)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:238)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:63)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:236)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:53)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:229)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:309)
+	at org.junit.runners.Suite.runChild(Suite.java:127)
+	at org.junit.runners.Suite.runChild(Suite.java:26)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:238)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:63)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:236)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:53)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:229)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:309)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:160)
+	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:74)
+	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:211)
+	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:67)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:134)
+Caused by: java.lang.IllegalStateException: This exception is for demonstrating JUnit's magic error messages.
+	at calc.SmartCalculator.multiplyByTwo(SmartCalculator.java:7)
+	at test.calc.java8.CalculatorJava8PureTest.returnsTwo_whenInputIsOne(CalculatorJava8PureTest.java:33)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:47)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:44)
+	at org.junit.experimental.theories.Theories$TheoryAnchor$2.evaluate(Theories.java:175)
+	at org.junit.experimental.theories.Theories$TheoryAnchor$1$1.evaluate(Theories.java:141)
+	... 31 more
+</pre>
+
 			</ul>
-			
-			
-		
-		
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-----------------------------------------
-		<h2>Начало</h2>
-
-		<p>
-			В этой ламерской статье мы сосредоточимся на практическом применении Java 8 в энтэрпрайзных приложениях. 
-			Спасибо <i>Benjamin Winterberg</i>'у за офигенный туториал: 
-			<a href="http://winterbe.com/posts/2014/07/31/java8-stream-tutorial-examples/">Java 8 Stream Tutorial</a>.
-			Неудивительно, что его сайт находится на самой вершине выдачи Гугла.
-			
-		<h2>Замечания к исходному коду</h2>
-		
-		<p>
-			К каждому примеру есть тест. Тесты нужны для того, чтобы убедиться, что разные подходы к решению одной и той 
-			же задачи выдают один и тот же результат. Код тестов написан в стиле Java 7. Это сделано намеренно, чтобы не
-			отвлекать внимание от собственно примеров Java 8.
-		
-		<p>
-			Помешательство на внутренних классах видно невооруженным глазом. Не знаю, как вам, но мне такой способ 
-			структурирования программы очень по душе: 
-			<a href="http://flaz14.github.io/inner-classes-in-java-are-cool/inner-classes-in-java-are-cool.html">
-				Внутренние классы в Java - классные!</a>. 
-			Вообще, сегодня грань между кодом и данными постепенно стирается. Нет, это не отменяет концепции дедушки 
-			<i>Никлауса Вирта</i> ("Алгоритмы + Структуры данных = Программы"). Наоборот: сплетая алгоритмы в структуры,
-			можно изобретать новые (или хотя бы упорядочивать существующие). Их можно пересылать, словно электронные 
-			письма, строить распределенные приложения, в которых между узлами передаются не данные, а код. Что-то 
-			подобное уже сделали: 
-			<a href="http://swarmframework.org/">The Swarm Framework</a> (про него я узнал в
-			<a href="http://artamonov.ru/2009/10/02/swarm-dpl/">блоге Игоря Артамонова</a>; на главной странице сказано,
-			что cайт закрыт, но посты никуда не исчезли, и прямые ссылки работают).
-		
-		<p>
-			Также я использовал <code>static import</code>'ы везде, где только можно. Да, это нехорошо. Без IDE 
-			непонятно, что и откуда импортируется. Но именно короткие имена статически импортированных методов позволяют
-			вкусить всю красоту кода на Java 8.
-		
-		<p>
-			Реализация классов предметной области (называйте их как хотите: <i>Entity</i>, <i>DTO</i> и т.д.) - 
-			отдельная тема. Сейчас модно закладывать неизменяемость в такого рода классы. Т.е. методы, которые меняют 
-			состояние объекта, возвращают при каждом вызове новый объект. У меня немного не так. Я не пытался сделать 
-			объекты неизменяемыми. Я только избавился от традиционных getter'ов и setter'ов. По-моему, перегруженные 
-			методы, имена которых точь-в-точь повторяют имена соответствующих полей, намного круче. Они нагляднее. И 
-			помогают избежать лишней писанины, а именно: пижонские setter'ы справляются с созданием новых объектов не 
-			хуже, чем это делают builder'ы (т.е. могут инициализировать поля цепочкой, ключая вложенные). А может, и 
-			лучше: вместо немного сбивающих с толку фабричных методов вроде <code>aCustomer()</code> мы видим самые 
-			настоящие и прямолинейные конструкторы.
-		
-		<p>
-			И еще: в тестах вместо заранее заготовленных наборов тестовых данных везде используются статические 
-			вспомогательные методы, которые при каждом вызове возвращают новый набор данных, т.е. новый объект, 
-			содержащий одни и те же данные. Зачем это нужно? Чтобы тесты (случайно) не модифицировали тестовые данные и 
-			не влияли таким образом друг на друга.
-
-		<h2>К делу!</h2>
-		
-		<p>
-			Пожалуй, в каждом корпоративном приложении есть БД, в которой хранятся сведения о клиентах. Для внешнего
-			мира эти данные доступны через REST API. У нас есть для олицетворения клиента используется класс 
-			<strong>Customer</strong>. Данные о месте проживания клиента представлены в виде класса 
-			<strong>Address</strong>. Выглядят они так (в <a href="#listing-1">листинге 1</a> для краткости приведены 
-			только поля):
-
-<h4 id="listing-1">Листинг 1 - Классы предметной области</h4>
-<pre>
-public class Customer {
-    private String firstName;
-    private String lastName;
-    private Address address;
-    private List&lt;String&gt; phoneNumbers;
-    
-    ...
-}
-
-public class Address {
-    private String country;
-    private String town;
-    private String street;
-    private String buildingNumber;
-    
-    ...
-}   
-</pre>
-
-		<p>
-			Пусть нам дан список клиентов. Наша задача состоит в том, чтобы собрать все страны, в которых проживают 
-			клиенты, в некоторое множество. Попробуем сделать это в стиле Java 7 и получим код, приведенный в 
-			<a href="#listing-2">листинге 2</a>. Он содержит все необходимое: проверки на <code>null</code>, обертывание
-			результата неизменяемым множеством, рационально расставленные модификаторы <code>final</code>.
-
-<h4 id="listing-2">Листинг 2 - Стиль Java 7</h4>
-<pre>
-public static Set&lt;String&gt; java7(final List&lt;Customer&gt; customers) {
-    final Set&lt;String&gt; countries = new HashSet&lt;&gt;();
-    for (final Customer customer : customers) {
-        if (customer != null) {
-            if (customer.address() != null) {
-                String country = customer.address().country();
-                if (country != null) {
-                    countries.add(country);
-                }
-            }
-        }
-    }
-    return unmodifiableSet(countries);
-}
-</pre>
-
-		<p>
-			Что мы видим? Привычный цикл <em>forEach</em> и два вложенных <em>if</em>, кроме всего прочего. Попробуем
-			теперь сделать то же самое, но с применением Java 8. В <a href="#listing-3">листинге 3</a> можно лицезреть 
-			"наивный" способ. По сути, от Java 8 там ничего нет, только новый цикл <em>forEach</em>.
-
-<h4 id="listing-3">Листинг 3 - "Наивный" стиль Java 8</h4>
-<pre>
-static Set&lt;String&gt; trivial(final List&lt;Customer&gt; customers) {
-    final Set&lt;String&gt; countries = new HashSet&lt;&gt;();
-    customers.forEach(customer -> {
-        if (customer != null) {
-            if (customer.address() != null) {
-                String country = customer.address().country();
-                if (country != null) {
-                    countries.add(country);
-                }
-            }
-        }
-    });
-    return unmodifiableSet(countries);
-}
-</pre>
-
-		<p>
-			Настоящая Java 8 - это потоки, т.е. <strong>streams</strong>. Это не потоки выполнения. И не потоки 
-			ввода-вывода. Что-то среднее. Ибо название "конвейер" им тоже не подходит: на конвейере разные операции над
-			разными данными выполняются одновременно (хотя <strong>parallel streams</strong> уже имеют право называться
-			конвейерами, мне так кажется; исходный код JDK я не смотрел, простите).
-
-<h4 id="listing-4">Листинг 4 - Настоящий стиль Java 8</h4>
-<pre>
-static Set&lt;String&gt; stream(final List&lt;Customer&gt; customers) {
-    return customers.
-            stream().
-            filter(Objects::nonNull).
-            filter(customer -> nonNull(customer.address())).
-            map(customer -> customer.address().country()).
-            filter(Objects::nonNull).
-            collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
-}
-</pre>
-
-		<h2>Что клёвого?</h2>
-		
-		<p>
-			Код, написанный в стиле Java 8, намного проще читать. Никаких вложенных блоков, фигурных скобок и т.п. 
-			Вместо них - понятные имена методов, такие как <code>filter()</code>. Переменных нет вообще. Заботиться о 
-			предотвращении (случайного) изменения промежуточных результатов не нужно (равно как и добавлять модификатор 
-			<code>final</code>).  
-		
-		<p>
-			Форматирование исходного кода заметно упрощается (т.е. упрощаются правила для средств автоматического 
-			форматирования, таких как <strong>Eclipse Code Formatter</strong>). Вызовы соединяются в цепочку посредством
-			точек, отступов нет (разве что внутри лямбда выражений; в любом случае, длинное лямбда-выражение лучше 
-			определить отдельно, т.е. сделать его самым обычным методом, а в <code>filter()</code>, к примеру, передать 
-			ссылку на красиво названный метод). В цепочку вызовов можно легко добавлять новые звенья - на форматирование
-			существующего кода добавляемый никак не повлияет. Удалять код тоже просто: стираем строку, никакие фигурные 
-			скобки не сдвинутся. И еще: автодополнение IDE работает всегда, на каждом этапе, и с гораздо большей 
-			эффективностью. И не нужно мозговать над именем очередного вспомогательного метода, предлагаемых потоками 
-			идиом более чем достаточно.
-		
-		<h2>Что хренового?</h2>
-		
-		<h3>Стэктрэйсы</h3>
-		
-		<p>
-			Об этом уже писал <i>Tal Weiss</i> в статье 
-			<a href="http://blog.takipi.com/the-dark-side-of-lambda-expressions-in-java-8/">
-				The Dark Side Of Lambda Expressions in Java 8</a>. От себя могу добавить, что увлекаться 
-			лямбда-выражениями не стоит еще и потому, что они безымянные. На них нельзя "повесить" аспекты. В принципе, 
-			это возможно, т.е. можно нагородить костылей. Ведь на самом деле лямбда-функции - это синтетические методы, 
-			которые имеют во время выполнения имена вроде <i>*lambda$*</i>.
-		
-		<p>
-			С потоками ситуация еще хуже. Добавим в метод <code>country()</code> класса <strong>Address</strong> код
-			"искусственной" ошибки:
-<pre>
-if (Objects.equals(country, "USA")) {
-    throw new IllegalStateException("This is workaround for demonstrating nasty Java 8 stacktraces.");
-}	
-</pre>
-
-		<p>
-			Запустим тест и получим такой стэктрэйс:
-<pre>
-java.lang.IllegalStateException: This is workaround for demonstrating nasty Java 8 stacktraces.
-	at dto.Address.country(Address.java:18)
-	at stream.CountriesExtractor$Java8.lambda$stream$2(ExtractingNestedValueTest.java:112)
-	at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:193)
-	at java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:175)
-	at java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:175)
-	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
-	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:481)
-	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:471)
-	at java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:708)
-	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-	at java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:499)
-	at stream.CountriesExtractor$Java8.stream(ExtractingNestedValueTest.java:113)
-	at stream.ExtractingNestedValueTest.java8Stream(ExtractingNestedValueTest.java:37)
-</pre>
-
-		<p>
-			Теперь запустим тот же тест для реализации на Java 7 и увидим, что в старой версии языка все коротко и ясно:
-<pre>
-java.lang.IllegalStateException: This is workaround for demonstrating nasty Java 8 stacktraces.
-	at dto.Address.country(Address.java:18)
-	at stream.CountriesExtractor.java7(ExtractingNestedValueTest.java:85)
-	at stream.ExtractingNestedValueTest.java7(ExtractingNestedValueTest.java:25)
-</pre>			
-
-		<p>
-			Отладчик в Java 8 тоже не радует своим видом. Сравните сами:
-		<h4 id="illustration-1">
-				Рисунок 1 - Отладка кода на Java 8 и Java 7 соответственно
-		</h4>
-		<p>
-			<img src="illustrations/debugging-java-8-and-java-7.png" width="480px"
-			alt="скришоты стэктрэйсов в окне отладчика IntelliJ IDEA">
-		
-		<p>
-			Но кому-то вид стэка вызовов в Java 8 может понравиться больше. Несмотря на кучу лишних методов, из него 
-			легко понять, что манипуляции производятся над набором данных. А в случае с Java 7 мы видим только имя 
-			метода, в котором возникло исключение, и номер строки исходного кода, что не не всегда дает понимание
-			происходящего в целом.
-		
-		<h3>Отсутствие переменных</h3>
-		
-		<p>
-			Да, промежуточные результаты сохраняются во внуренних переменных (и полях) объектов потоков. Но чтобы их 
-			посмотреть, надо поставить точку останова <em>внутри исходного кода JDK</em>. Какие имена будут у этих 
-			переменных? Правильно, они будут называться так, как это реализовано в JDK, т.е. без какой-либо связи с 
-			предметной областью приложения. 
-		
-		<h3>Логгирование</h3>
-
-		<p>
-			Проблема берет начало от мнимого преимущества цепочки вызовов. Например, потребовалось нам записать 
-			промежуточный результат в журнал. Как это сделать? Для этого есть метод 
-			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#peek-java.util.function.Consumer-">
-				peek()</a>. 
-			В документации сказано, что он служит целям отладки:
-			<blockquote>
 				<p>
-					This method exists mainly to support debugging, where you want to see the elements as they flow past
-					a certain point in a pipeline.
-			</blockquote>
-		
-		<p>
-			Но ежу понятно, что этот метод может использоваться и для других целей. В принципе, можно любой API 
-			использовать не по назначению. Но имя <code>peek()</code> слишком общее. Почему бы не назвать "отладочный" 
-			метод <code>debug()</code> или <code>trace()</code> или <code>log()</code>? Непонятно...
-		
-		<p>
-			А еще прикол в том, что метод <code>peek()</code> возвращает поток. Т.е. чтобы просто записать в лог
-			промежуточный результат (т.е. записать его целиком: элементы разделить запятыми, по краям поставить скобки и
-			т.д.) придеться этот поток предварительно преобразовать в список. Хотя это уже неактуально: наверняка в 
-			современных версиях библиотек, таких как <a href="https://logging.apache.org/log4j">Log4j</a>, можно 
-			логгировать потоки целиком.
-		
-		<h2>Что нового?</h2>	
-		
-		<p>
-			Ничего, кроме лямбда-выражений и ссылок на методы. Потоки можно реализовать и на Java 7. Но придеться 
-			повозиться с типами. В случае с лямбда-выражениями компилятор сам определяет тип возвращаемого значение. А 
-			вот в Java 7 придеться указывать тип явно. Что-то в таком роде (я не проверял, это лишь предположение):
+					Для примитивного способа:
 <pre>
-...	
-new MyLambda implements Lambda {
-    @Override
-    public boolean filter(final Object input, final Class returnType) {
-        ...
-    }
-}
-...
+java.lang.IllegalStateException: This exception is for demonstrating JUnit's magic error messages.
+	at calc.SmartCalculator.multiplyByTwo(SmartCalculator.java:7)
+	at test.calc.java7.CalculatorJava7TestSupport.returnsTwo_whenInputIsOne(CalculatorJava7TestSupport.java:24)
 </pre>
 
 		<p>
-			А вот ссылки на методы - это реально новая фича. До нее в Java можно было использовать указатели на методы. 
-			Но работали указатели через механизм рефлексии, т.е. только во время выполнения. Имя требуемого метода надо 
-			было задавать как строку (т.е. как строковый литерал, константу, переменную), проверок типов не было, 
-			автодополнения IDE - подавно.
-
-		<p>
-			Потоки Java 8 выглядят магически. Но это не так. Чтобы в этом убедиться, не нужно смотреть исходники JDK.
-			Как пишет <i>Benjamin Winterberg</i> в своей статье:
-			<blockquote>
-				<p>
-					An important characteristic of intermediate operations is laziness.
-			</blockquote>
+			Все-таки продвинутое не всегда лучше примитивного. 
 			
-		<p>
-			И еще:
-			<blockquote>
-				<p>
-					The order of the result might be surprising. A naive approach would be to execute the operations 
-					horizontally one after another on all elements of the stream. But instead each element moves along 
-					the chain vertically. The first string "d2" passes filter then forEach, only then the second string 
-					"a2" is processed. 
-			</blockquote>
-
-		<p>
-			"Горизонтальное" выполнение операций над элементами потока и в самом деле было бы неэффективно. Но почему же 
-			тогда потоки "ленивые"?
-			
-		<p>
-			Это не гениальный замысел разработчиков Java 8. Просто в Java, после того, как метод вернул значение или
-			выполнился без возвращения значения (возвращаемый тип <code>void</code>, или в методе возникло исключение), 
-			в него нельзя вернуться. Когда методы выполняются в цепочке, звенья ничего не делают, а только "запоминают" 
-			те операции, которые должны будут выполниться позднее. Скажем, метод <code>filter()</code> всего лишь 
-			сохраняет где-то в приватных полях потока ссылку на лямбда-выражение (по сути, на экземпляр анонимного 
-			класса) или ссылку на метод. Терминальная операция (например, <code>forEach()</code>) просто применяет 
-			записанные ранее действия к каждому из элементов в потоке (как уже было сказано выше, не все элементы 
-			"доживают" до терминальной операции). 
-
-		<h2>Конец первой части</h2>
-
 		<hr>
 
 		<h1>
