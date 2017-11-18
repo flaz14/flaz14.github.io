@@ -26,35 +26,18 @@
 		<h3>
 			<a href="java-8-whats-new-part-1.html">Часть 1. Потоки</a>
 			|
-			<a href="java-8-whats-new-part-3.html">Часть 3. Внутренние классы</a>
-			|
-			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/java-8-whats-new/code/java-8-whats-new">
+			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/java-8-whats-new/code/java-8-whats-new/src/test/java/test">
 				Исходный код
 			</a>
 		</h3>
 		
-		<h2></h2>
-		
 		<p>
-			Привычные библиотеки преобразились с выходом Java 8. Так, JUnit 5 стал совсем не похож на JUnit 4. Так, 
-			благодаря лямбда-выражениям, отпала необходимость в т.н. <code>Rule</code>'ах (в частности, для проверки
-			исключений). Но JUnit 4 рано отправлять на свалку истории. И не только потому, что  
-			чрезмерное использование новых возможностей приводит к усложнению тестового кода. И в то же время такие
-			"навороченные" тесты недотягивают до полноценной спецификации (а "наворотов" в JUnit 5 полным-полно). 
-			Даже до сценариев JBehave им как до Луны. 
-			Правило простое: если код тестов получился сложным, это значит, что основной код приложения вышел еще сложнее.
-			В этом случае и то, и другое надо рефакторить.
-		
+			Эта статья задумывалась как рассказ о том, что Java 8 может заметно преобразить Unit-тесты, построенные на
+			основе уходящей в прошлое библиотеки JUnit 4. Но креатив закончился. Так что получилась отстойная заметка ни
+			о чем. 
+
 		<p>
-			Так что JUnit 4 все еще живет и здравствует. А Java 8 способна вдохнуть в привычную библиотеку новую жизнь.
-			Да не напрасно эта ламерская заметка будет написана.
-			
-		<h2>Использование ссылок на методы в теориях</h2>
-		
-		<p>
-			Пусть нам нужно протестировать несколько реализаций одного и того же интерфейса. Возьмем для примера такой
-			(все упрощено до предела):
-			
+			Пусть нам нужно протестировать несколько реализаций одного и того же интерфейса. Возьмем для примера такой:
 <pre>
 public interface Calculator {
     int multiplyByTwo(int input);
@@ -63,7 +46,6 @@ public interface Calculator {
 
 		<p>
 			Заготовим три реализации:
-			
 			<ol>
 				<li>
 					<p>
@@ -101,9 +83,9 @@ public class StupidCalculator implements Calculator {
 		
 		<p>	
 			Если нужно протестировать эти реализации, то можно поступить так: создать базовый класс и поместить в него 
-			тесты. И добавить абстрактный метод, который в качестве возвращаемого значения имеет интерфейс.
-			А в классах-наследниках этот метод переопределим таким образом, чтобы он возвращал конкретную реализацию.
-			Базовый класс выглядит это примерно так:
+			тесты. И добавить абстрактный метод, который в качестве возвращаемого значения имеет интерфейс. А в
+			классах-наследниках останется только переопределить этот метод таким образом, чтобы он возвращал конкретную 
+			реализацию. Пусть базовый класс выглядит так:
 <pre>
 public abstract class CalculatorJava7TestSupport {
 
@@ -127,7 +109,7 @@ public abstract class CalculatorJava7TestSupport {
 </pre>
 
 		<p>
-			А вот пример теста для реализации <strong>UsualCalculator</strong>:
+			Пример теста для реализации <strong>UsualCalculator</strong>:
 <pre>
 public class UsualCalculatorJava7Test extends CalculatorJava7TestSupport {
     @Override
@@ -141,9 +123,8 @@ public class UsualCalculatorJava7Test extends CalculatorJava7TestSupport {
 			Все просто, не так ли?
 			
 		<p>
-			Но как же круто будет избавиться от лишних классов и запихнуть все в один тест. С теориями 
-			!!!JUnit 4 здесь будет ссылка!!! это возможно. Получилось так:
-			
+			Но как же круто будет избавиться от лишних классов и запихнуть все тесты в один. С 
+			<a href="https://github.com/junit-team/junit4/wiki/theories">теориями JUnit 4</a> это возможно:
 <pre>
 @RunWith(Theories.class)
 public class CalculatorJava8NaiveTest {
@@ -173,13 +154,13 @@ public class CalculatorJava8NaiveTest {
 			Можно добавить Java 8. Ссылки на методы бесполезны в данном случае, но такой вариант тоже работает:
 <pre>
 @RunWith(Theories.class)
-public class CalculatorJava8NaiveTest {
+public class CalculatorJava8PureTest {
 
     @DataPoints
     public static final Calculator[] CALCULATORS = {
-            new UsualCalculator(),
-            new SmartCalculator(),
-            new StupidCalculator()
+            new UsualCalculator()::multiplyByTwo,
+            new SmartCalculator()::multiplyByTwo,
+            new StupidCalculator()::multiplyByTwo
     };
 
     @Theory
@@ -198,8 +179,9 @@ public class CalculatorJava8NaiveTest {
 	
 		<p>
 			Остается только добавить, что если что-то в теории пойдет не так, сообщение об ошибке будет мало полезным.
-			В стэктрэйса мы увидим только индекс параметра теории (т.е. индекс элемента в массиве). А конкретное его 
-			значение - нет. Чтобы продемонстрировать это добавим в реализацию <strong>SmartCalculator</strong> такой код:
+			В стэктрэйсе мы увидим только индекс параметра теории (т.е. индекс элемента в массиве, помеченного 
+			аннотацией <code>@DataPoints</code>). А конкретное его значение - нет. Чтобы продемонстрировать это, добавим
+			в реализацию <strong>SmartCalculator</strong> такой код:
 <pre>
 if (input == 1) {
     throw new IllegalStateException(
@@ -209,10 +191,10 @@ if (input == 1) {
 </pre>
 		
 		<p>
-			Запустим и получим:
+			Запустим тесты и получим:
 			<ul>
 				<li>
-					<p>Для способа с теориями:
+					<p>для способа с теориями:
 <pre>
 org.junit.experimental.theories.internal.ParameterizedAssertionError: returnsTwo_whenInputIsOne(CALCULATORS[1])
 	at org.junit.experimental.theories.Theories$TheoryAnchor.reportParameterizedError(Theories.java:192)
@@ -260,17 +242,22 @@ Caused by: java.lang.IllegalStateException: This exception is for demonstrating 
 	... 31 more
 </pre>
 
-			</ul>
-				<p>
-					Для примитивного способа:
+				<li>
+					<p>
+						для примитивного способа:
 <pre>
 java.lang.IllegalStateException: This exception is for demonstrating JUnit's magic error messages.
 	at calc.SmartCalculator.multiplyByTwo(SmartCalculator.java:7)
 	at test.calc.java7.CalculatorJava7TestSupport.returnsTwo_whenInputIsOne(CalculatorJava7TestSupport.java:24)
 </pre>
+			</ul>
+
 
 		<p>
 			Все-таки продвинутое не всегда лучше примитивного. 
+			
+		<p>
+			На этом всё.
 			
 		<hr>
 
