@@ -1,0 +1,302 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>О бедном Unzip'е замолвите слово...</title>
+	</head>
+	<body>
+		<h1>
+			<big>
+				<a href="/#pitiful-unzip" title="Перейти к оглавлению">&larr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+		
+		<hr>
+		
+		<h1>
+			<a href="http://flaz14.github.io/pitiful-unzip/pitiful-unzip.html">
+				О бедном Unzip'е замолвите слово...
+			</a>
+		</h1>
+		
+		<h3>[2017, Ноябрь]</h3>
+			
+		<h2></h2>
+		
+		<p>
+			Как-то раз (когда я экспериментировал с <strong>umask</strong>) я наткнулся на такой вопрос:
+			<a href="https://superuser.com/questions/603068/unzipping-file-whilst-getting-correct-permissions">
+				Unzipping file whilst getting correct permissions?</a>.
+			Только один пользователь, <i>David Tanzer</i>, ответил офигенно правильно и подробно: 
+			<a href="https://superuser.com/a/940477/538166">zip-файлы могут хранить права доступа</a>. В общем, я решил 
+			полазить по Сети и собрать разрозненную информацию в одной ламерской заметке.
+			
+		<p>
+			Исследования буду проводить в LinuxMint 17.1. Для начала узнаем, какие именно программы установлены:
+<pre>
+yura@Aspire-ES1-521 / $ which zip
+/usr/bin/zip
+
+yura@Aspire-ES1-521 / $ which unzip
+/usr/bin/unzip
+</pre>
+		
+		<p>
+			И их версии:
+<pre>
+yura@Aspire-ES1-521 / $ zip -v
+...
+This is Zip 3.0 (July 5th 2008), by Info-ZIP.
+...
+
+yura@Aspire-ES1-521 / $ unzip -v
+UnZip 6.00 of 20 April 2009, by Debian. Original by Info-ZIP.
+...
+</pre>
+		
+		<p>
+			И наконец, их происхождение:
+<pre>
+yura@Aspire-ES1-521 / $ dpkg --search /usr/bin/zip
+zip: /usr/bin/zip
+
+yura@Aspire-ES1-521 / $ dpkg --search /usr/bin/unzip
+unzip: /usr/bin/unzip
+</pre>			
+	
+		<p>
+			Как видим, <strong>Zip</strong> и <strong>Unzip</strong> - не часть <strong>coreutils</strong>, а самостоятельные
+			пакеты (по крайней мере, в LinuxMint).
+			
+		<h2>Сжимаем-разжимаем</h2>
+		
+		<p>
+			Создадим в <i>/tmp</i> каталог <i>zip_archive_test</i>. А внутри него построим такую структуру:
+<pre>
+zip_archive_test/:
+dir  file.txt
+
+zip_archive_test/dir:
+file1.txt  file2.txt
+</pre>
+		
+		<p>
+			Назначим еще необычных владельцев (таких у меня в системе нет) и странные права доступа (тут главное не 
+			переусердствовать, особенно с правами доступа к каталогам), чтобы они не путались с "обычными" файлами [1]. 
+			В итоге получится вот что:
+<pre>
+zip_archive_test/:
+total 12K
+drwxr-x---  3 yura yura 4,0K Nov 20 20:48 .
+drwxrwxrwt 16 root root 4,0K Nov 20 20:50 ..
+drwxr-xrwx  2 1050 1051 4,0K Nov 20 20:48 dir
+-rw-r----x  1 1025 1026    0 Nov 20 20:47 file.txt
+
+zip_archive_test/dir:
+total 8,0K
+drwxr-xrwx 2 1050 1051 4,0K Nov 20 20:48 .
+drwxr-x--- 3 yura yura 4,0K Nov 20 20:48 ..
+-rw-r----- 1 1050 1051    0 Nov 20 20:48 file1.txt
+-rw-r----- 1 1050 1051    0 Nov 20 20:48 file2.txt
+</pre>
+		
+		<p>
+			А теперь сожмем <i>zip_archive_test</i> (никакие дополнительные опции, кроме совершенно необходимой 
+			<strong>-r</strong> не используются):
+<pre>
+yura@Aspire-ES1-521 /tmp/1 $ sudo zip -r zip_archive_test.zip ../zip_archive_test/
+</pre>
+		
+		<p>
+			Теперь проверим содержимое архива без его распаковки. Чтобы увидеть права доступа нужно задействовать переключатель
+			<strong>-Z</strong>, причем она должна стоять первой среди прочих.
+<pre>
+yura@Aspire-ES1-521 /tmp/1 $ sudo unzip -Z -l zip_archive_test.zip 
+Archive:  zip_archive_test.zip
+Zip file size: 938 bytes, number of entries: 5
+drwxr-x---  3.0 unx        0 bx        0 stor 17-Nov-20 20:48 ../zip_archive_test/
+drwxr-xrwx  3.0 unx        0 bx        0 stor 17-Nov-20 20:48 ../zip_archive_test/dir/
+-rw-r-----  3.0 unx        0 bx        0 stor 17-Nov-20 20:48 ../zip_archive_test/dir/file2.txt
+-rw-r-----  3.0 unx        0 bx        0 stor 17-Nov-20 20:48 ../zip_archive_test/dir/file1.txt
+-rw-r----x  3.0 unx        0 bx        0 stor 17-Nov-20 20:47 ../zip_archive_test/file.txt
+5 files, 0 bytes uncompressed, 0 bytes compressed:  0.0%
+</pre>
+		
+		<p>
+			Биты прав доступа никуда не делись, а владельцы исчезли. Но самый интересный вывод дает опция 
+			<strong>-v</strong>, т.н. list  archive files (verbose format) or show diagnostic version info. 
+			Становится очевидно 
+			Как ни странно, но популярная программа сжатия Zip способна сохранить биты доступа файлов и каталогов в архиве 
+			(в то время как владелец и группа не сохраняются). Но только в том случае, если сжатие производилось на системе
+			Unix. Проверим это еще раз.
+			
+			Зайдем на официальный сайт <a href="http://www.oracle.com">Oracle</a>. Затем наведем курсор на 
+			<strong>Downloads</strong> и в выпадающем списке нажмем на <strong>Java for Developers</strong>. Далее
+			нажмем на большую кнопку с логотипом Java и подписью <strong>Java Platform (JDK) xxx / yyy</strong>. 
+			Откроется страничка с таблицей для разных ОС и архитектур. Например, для <i>Linux x86</i> предлагается 
+			скачать <i>rpm</i>-пакет или тарбол. Для Ubuntu <i>rpm</i>-пакет не подходит (да, преобразовать <i>rpm</i> 
+			в <i>deb</i> возможно, но лучше этого не делать). Так что скачаем тарбол 
+			(<i>jdk-8u111-linux-i586.tar.gz</i>). Все, у нас есть официальный дистрибутив: не из зеркала или 
+			репозитория, а от самой Oracle (правда, контрольную сумму для скачанного архива придется проверить вручную).
+			
+		<h2>Распаковываем</h2>
+		
+		<p>
+			Теперь надо распаковать тарбол и разобраться с переменными окружения. В большинстве случаев достаточно 
+			добавить подкаталог <i>bin</i> распакованного JDK в переменную окружения <strong>PATH</strong>. Не помешает и 
+			новая переменная окружения <strong>JAVA_HOME</strong>, которая указывает на распакованный JDK. Так что 
+			добавим в <i>~/.profile</i>:
+<pre>
+export JAVA_HOME=/path/to/unpacked/jdk
+export PATH=$JAVA_HOME/bin:$PATH
+</pre>
+
+		<p>
+			Тарбол же можно распаковать в <i>~/bin</i>. А можно и в <i>/usr/local/java</i>, к примеру. Достоинство 
+			последнего подхода - никто, кроме <strong>root</strong>, не сможет изменить файлы установленного JDK. Также 
+			есть смысл создать в каталоге с установленным JDK подкаталог <i>src</i> и в него распаковать содержимое 
+			файла <i>src.zip</i>. Эта возня с лихвой окупится, когда понадобится быстро взглянуть на исходный код 
+			стандартной библиотеки Java (например, с помощью <code>grep</code>) или даже открыть код в текстовом 
+			редакторе с графическим интерфейсом, не боясь при этом что-либо испортить.
+			
+		<p>
+			Пусть мы скачали JDK в <i>~/Downloads</i>. Теперь, чтобы поместить содержимое тарбола в 
+			<i>/usr/local/java</i>, достаточно выполнить (от имени <strong>root</strong>, естественно):
+<pre>
+david$ sudo tar \
+    --extract \
+    --directory /usr/local/java/ \
+    --file ~/Downloads/jdk-8u111-linux-i586.tar.gz
+</pre>
+
+		<p>
+			Вроде бы все готово. Посмотрим на результат:
+<pre>
+drwxr-xr-x  8 uucp  143 4,0K Sep 23 02:27 jdk1.8.0_111
+</pre>
+
+		<p>
+			Владелец почему-то <code>uucp</code>, а группа вообще без имени (<code>grep '143' /etc/group</code> ничего 
+			не находит). Ничего удивительного тут нет: поскольку <strong>tar</strong> был запущен с правами 
+			<strong>root</strong>, он распаковал тарбол таким, каким он был (у обычного пользователия так бы не 
+			получилось). Это, конечно же, никуда не годится. Не потому что странные права доступа угрожают безопасности 
+			компьютера, а потому что они просто некрасивые.
+
+		<h2>Перераспаковываем</h2>
+					
+		<p>
+			Что ж, попробуем исправиться:
+<pre>
+david$ tar \
+    --extract \
+    --directory /tmp \
+    --file ~/Downloads/jdk-8u111-linux-i586.tar.gz \
+&& \
+    sudo mv /tmp/jdk1.8.0_111 /usr/local/java
+</pre>
+
+		<p>
+			Посмотрим, что получилось:
+<pre>
+drwxr-xr-x  8 david david 4,0K Sep 23 02:27 jdk1.8.0_111
+</pre>
+		<p>
+			Опять не то, что надо. Хотя все предсказуемо: распаковали тарбол мы от имени обычного пользователя
+			(<strong>david</strong>), а переместили получившиеся файлы от имени <strong>root</strong> (который заботливо
+			сохранил оригинальные права доступа).
+			
+		<p>
+			Усложним команду, чтобы уж наверняка получилось:
+<pre>
+david$ tar \
+    --extract \
+    --directory /tmp \
+    --file ~/Downloads/jdk-8u111-linux-i586.tar.gz \
+&& \
+    sudo cp --recursive /tmp/jdk1.8.0_111 /usr/local/java \
+&& \
+    rm -rf -- /tmp/jdk1.8.0_111/
+</pre>
+
+		<p>
+			Действительно, результат - что надо:
+<pre>
+drwxr-xr-x  8 root root 4,0K Dec  3 15:25 jdk1.8.0_111
+</pre>
+		
+		<p>Но длинная команда расстраивает, особенно присутствие в ней <code>rm -rf</code>...
+			
+		<h2>Все намного проще</h2>
+		
+		<p>
+			У <strong>tar</strong> есть переключатели, которые значительно упрощают жизнь:
+			<blockquote>
+				<p>
+					<code>--no-same-owner</code><br>
+					extract files as yourself (default for ordinary users)
+	
+				<p>	
+					<code>--no-same-permissions</code><br>
+					apply the user's umask when extracting permissions from the archive (default for ordinary users)
+			</blockquote>
+
+		<p>
+			Применим их:
+
+<pre>
+david$ sudo tar \
+	--extract \
+	--directory /usr/local/java/ \
+	--no-same-owner \
+	--no-same-permissions \
+	--file ~/Downloads/jdk-8u111-linux-i586.tar.gz
+</pre>
+			
+		<p>
+			Получилось:
+<pre>
+drwxr-xr-x  8 root root 4,0K Sep 23 02:27 jdk1.8.0_111
+</pre>
+
+		<p>
+			И напоследок:
+<pre>
+david$ java -version
+java version "1.8.0_111"
+Java(TM) SE Runtime Environment (build 1.8.0_111-b14)
+Java HotSpot(TM) Server VM (build 25.111-b14, mixed mode)
+
+david$ javac -version
+javac 1.8.0_111
+</pre>
+			
+		<p>
+			Все OK!
+			
+			
+			
+		Сноски:
+		
+		[1] Все манипуляции с архивами я делаю от имени суперпользователя, т.е. с помощью <strong>sudo</strong>, чтобы
+		чтобы предотвратить возможную нехватку прав на выполнение того или иного действия с содержимым архива.
+			
+			
+		<hr>
+			
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>
