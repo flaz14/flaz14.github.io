@@ -86,21 +86,20 @@ file1.txt  file2.txt
 		<p>
 			Назначим еще необычных владельцев (таких у меня в системе нет) и странные права доступа (тут главное не 
 			переусердствовать, особенно с правами доступа к каталогам), чтобы они не путались с "обычными" файлами [1]. 
-			В итоге получится вот что:
+			В итоге получится вот что (c помощью опции <em>--almost-all</em> опустим ненужные каталоги <i>.</i> и 
+			<i>..</i>):
 <pre>
+yura@Aspire-ES1-521 /tmp $ sudo ls -l --almost-all --recursive zip_archive_test/
+[sudo] password for yura: 
 zip_archive_test/:
-total 12K
-drwxr-x---  3 yura yura 4,0K Nov 20 20:48 .
-drwxrwxrwt 16 root root 4,0K Nov 20 20:50 ..
-drwxr-xrwx  2 1050 1051 4,0K Nov 20 20:48 dir
--rw-r----x  1 1025 1026    0 Nov 20 20:47 file.txt
+total 4
+drwxr-xrwx 2 1050 1051 4096 Nov 20 20:48 dir
+-rw-r----x 1 1025 1026    0 Nov 20 20:47 file.txt
 
 zip_archive_test/dir:
-total 8,0K
-drwxr-xrwx 2 1050 1051 4,0K Nov 20 20:48 .
-drwxr-x--- 3 yura yura 4,0K Nov 20 20:48 ..
--rw-r----- 1 1050 1051    0 Nov 20 20:48 file1.txt
--rw-r----- 1 1050 1051    0 Nov 20 20:48 file2.txt
+total 0
+-rw-r----- 1 1050 1051 0 Nov 20 20:48 file1.txt
+-rw-r----- 1 1050 1051 0 Nov 20 20:48 file2.txt	
 </pre>
 		
 		<p>
@@ -126,11 +125,76 @@ drwxr-xrwx  3.0 unx        0 bx        0 stor 17-Nov-20 20:48 ../zip_archive_tes
 </pre>
 		
 		<p>
-			Биты прав доступа никуда не делись, а владельцы исчезли. Но самый интересный вывод дает опция 
-			<strong>-v</strong>, т.н. list  archive files (verbose format) or show diagnostic version info. 
+			Биты прав доступа никуда не делись, а владельцы исчезли. Чтобы убедиться в этом, распакуем архив (опять-таки, 
+			с правами суперпользователя):
 <pre>
-yura@Aspire-ES1-521 /tmp/1 $ sudo unzip -Z -l -v zip_archive_test.zip
+yura@Aspire-ES1-521 /tmp/333 $ sudo unzip ~/Projects/flaz14.github.io/draft/pitiful-unzip/samples/zip_archive_test.zip
 </pre>
+
+		<p>
+			И получим:
+<pre>
+yura@Aspire-ES1-521 /tmp/2 $ sudo ls -l --almost-all --recursive zip_archive_test/
+zip_archive_test/:
+total 4
+drwxr-xrwx 2 root root 4096 Nov 20 20:48 dir
+-rw-r----x 1 root root    0 Nov 20 20:47 file.txt
+
+zip_archive_test/dir:
+total 0
+-rw-r----- 1 root root 0 Nov 20 20:48 file1.txt
+-rw-r----- 1 root root 0 Nov 20 20:48 file2.txt
+</pre>
+
+		<p>
+			Как видим, биты прав доступа (кроме них, отметки времени), не изменились. А вот владельцем всех файлов стал
+			<strong>root</strong>, что неудивительно.
+			
+		<p>
+			Но самый интересный вывод дает опция <strong>-v</strong>. Из страницу руководства к <strong>Unzip</strong>:
+			<blockquote>
+				<p>
+					
+			</blockquote>
+			
+			
+			
+-------------
+       -K     [AtheOS,  BeOS, Unix only] retain SUID/SGID/Tacky file attributes.  Without this flag, these attribute bits are cleared for security
+              reasons.
+-------------
+
+
+
+-------------
+       -X     [VMS, Unix, OS/2, NT, Tandem] restore owner/protection info (UICs and ACL entries) under VMS, or user and group info (UID/GID) under
+              Unix,  or  access control lists (ACLs) under certain network-enabled versions of OS/2 (Warp Server with IBM LAN Server/Requester 3.0
+              to 5.0; Warp Connect with IBM Peer 1.0), or security ACLs under Windows NT.  In most cases this will require special  system  privi‐
+              leges,  and doubling the option (-XX) under NT instructs unzip to use privileges for extraction; but under Unix, for example, a user
+              who belongs to several groups can restore files owned by any of those groups, as long as the user IDs match his or  her  own.   Note
+              that  ordinary  file  attributes  are  always restored--this option applies only to optional, extra ownership info available on some
+              operating systems.  [NT's access control lists do not appear to be especially compatible with OS/2's,  so  no  attempt  is  made  at
+              cross-platform portability of access privileges.  It is not clear under what conditions this would ever be useful anyway.]
+-------------
+
+
+
+-------------
+       -v     list  archive files (verbose format) or show diagnostic version info.  This option has evolved and now behaves as both an option and
+              a modifier.  As an option it has two purposes:  when a zipfile is specified with no other options, -v lists archive files verbosely,
+              adding  to  the basic -l info the compression method, compressed size, compression ratio and 32-bit CRC.  In contrast to most of the
+              competing utilities, unzip removes the 12 additional header bytes of encrypted entries from the compressed size numbers.  Therefore,
+              compressed size and compression ratio figures are independent of the entry's encryption status and show the correct compression per‐
+              formance.  (The complete size of the encrypted compressed data stream for zipfile entries is reported by the more verbose zipinfo(1)
+              reports,  see the separate manual.)  When no zipfile is specified (that is, the complete command is simply ``unzip -v''), a diagnos‐
+              tic screen is printed.  In addition to the normal header with release date and version, unzip lists the home Info-ZIP ftp  site  and
+              where  to  find  a list of other ftp and non-ftp sites; the target operating system for which it was compiled, as well as (possibly)
+              the hardware on which it was compiled, the compiler and version used, and the compilation date; any special compilation options that
+              might  affect the program's operation (see also DECRYPTION below); and any options stored in environment variables that might do the
+              same (see ENVIRONMENT OPTIONS below).  As a modifier it works in conjunction with other options (e.g., -t) to produce  more  verbose
+              or debugging output; this is not yet fully implemented but will be in future releases.
+-------------			
+			
 			
 			 
 			Как ни странно, но популярная программа сжатия Zip способна сохранить биты доступа файлов и каталогов в архиве 
@@ -146,7 +210,33 @@ yura@Aspire-ES1-521 /tmp/1 $ sudo unzip -Z -l -v zip_archive_test.zip
 			(<i>jdk-8u111-linux-i586.tar.gz</i>). Все, у нас есть официальный дистрибутив: не из зеркала или 
 			репозитория, а от самой Oracle (правда, контрольную сумму для скачанного архива придется проверить вручную).
 			
-		<h2>Распаковываем</h2>
+
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		 , т.н. list  archive files (verbose format) or show diagnostic version info. 
+<pre>
+yura@Aspire-ES1-521 /tmp/1 $ sudo unzip -Z -l -v zip_archive_test.zip
+</pre>
+			
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		<p>
 			Теперь надо распаковать тарбол и разобраться с переменными окружения. В большинстве случаев достаточно 
