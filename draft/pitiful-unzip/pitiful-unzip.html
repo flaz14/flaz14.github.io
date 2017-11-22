@@ -85,26 +85,35 @@ file1.txt  file2.txt
 		
 		<p>
 			Назначим еще необычных владельцев (таких у меня в системе нет) и странные права доступа (тут главное не 
-			переусердствовать, особенно с правами доступа к каталогам), чтобы они не путались с "обычными" файлами [1]. 
+			переусердствовать, особенно с правами доступа к каталогам), чтобы они не путались с "обычными" файлами [2].
+			Еще для файла <i>file.txt</i> назначим биты <em>setuid</em>, <em>setgid</em> и <em>sticky</em>-бит. 
+			И назначим эти же биты 
+			для директории <i>dir</i>. 
 			В итоге получится вот что (c помощью опции <em>--almost-all</em> опустим ненужные каталоги <i>.</i> и 
 			<i>..</i>):
 <pre>
 yura@Aspire-ES1-521 /tmp $ sudo ls -l --almost-all --recursive zip_archive_test/
-[sudo] password for yura: 
 zip_archive_test/:
 total 4
-drwxr-xrwx 2 1050 1051 4096 Nov 20 20:48 dir
--rw-r----x 1 1025 1026    0 Nov 20 20:47 file.txt
+drwsr-srwt 2 1050 1051 4096 Nov 20 20:48 dir
+-rwSr-S--t 1 1025 1026    0 Nov 20 20:47 file.txt
 
 zip_archive_test/dir:
 total 0
 -rw-r----- 1 1050 1051 0 Nov 20 20:48 file1.txt
--rw-r----- 1 1050 1051 0 Nov 20 20:48 file2.txt	
+-rw-r----- 1 1050 1051 0 Nov 20 20:48 file2.txt
 </pre>
 		
 		<p>
-			А теперь сожмем <i>zip_archive_test</i> (никакие дополнительные опции, кроме совершенно необходимой 
-			<strong>-r</strong> не используются):
+			А теперь создадим в <i>/tmp</i> новый каталог <i>1</i>, перейдем в него и сожмем 
+			<i>zip_archive_test</i> (никакие дополнительные опции, кроме совершенно необходимой 
+			<strong>-r</strong>, она же <strong>--recurse-paths</strong> не используются
+			
+			!!!
+			тут будет сноска про то, что программа unzip, в отличие от zip, не поддерживает длинные опции, а только короткие
+			!!!
+			
+			):
 <pre>
 yura@Aspire-ES1-521 /tmp/1 $ sudo zip -r zip_archive_test.zip ../zip_archive_test/
 </pre>
@@ -113,29 +122,30 @@ yura@Aspire-ES1-521 /tmp/1 $ sudo zip -r zip_archive_test.zip ../zip_archive_tes
 			Теперь проверим содержимое архива без его распаковки. Чтобы увидеть права доступа нужно задействовать переключатель
 			<strong>-Z</strong>, причем она должна стоять первой среди прочих.
 <pre>
-yura@Aspire-ES1-521 /tmp/1 $ sudo unzip -Z -l zip_archive_test.zip 
+yura@Aspire-ES1-521 /tmp/1 $ sudo unzip -Z -l zip_archive_test.zip
 Archive:  zip_archive_test.zip
 Zip file size: 938 bytes, number of entries: 5
 drwxr-x---  3.0 unx        0 bx        0 stor 17-Nov-20 20:48 ../zip_archive_test/
-drwxr-xrwx  3.0 unx        0 bx        0 stor 17-Nov-20 20:48 ../zip_archive_test/dir/
+drwsr-srwt  3.0 unx        0 bx        0 stor 17-Nov-20 20:48 ../zip_archive_test/dir/
 -rw-r-----  3.0 unx        0 bx        0 stor 17-Nov-20 20:48 ../zip_archive_test/dir/file2.txt
 -rw-r-----  3.0 unx        0 bx        0 stor 17-Nov-20 20:48 ../zip_archive_test/dir/file1.txt
--rw-r----x  3.0 unx        0 bx        0 stor 17-Nov-20 20:47 ../zip_archive_test/file.txt
+-rwSr-S--t  3.0 unx        0 bx        0 stor 17-Nov-20 20:47 ../zip_archive_test/file.txt
 5 files, 0 bytes uncompressed, 0 bytes compressed:  0.0%
 </pre>
 		
 		<p>
-			Биты прав доступа никуда не делись, а владельцы исчезли. Чтобы убедиться в этом, распакуем архив (опять-таки, 
+			Биты прав доступа никуда не делись, а владельцы исчезли (по крайней мере, в листинге их не видно). 
+			Распакуем архив (опять-таки, 
 			с правами суперпользователя):
 <pre>
-yura@Aspire-ES1-521 /tmp/333 $ sudo unzip ~/Projects/flaz14.github.io/draft/pitiful-unzip/samples/zip_archive_test.zip
+yura@Aspire-ES1-521 /tmp/2 $ sudo unzip ../1/zip_archive_test.zip
 </pre>
 
 		<p>
 			И получим:
 <pre>
-yura@Aspire-ES1-521 /tmp/2 $ sudo ls -l --almost-all --recursive zip_archive_test/
-zip_archive_test/:
+yura@Aspire-ES1-521 /tmp/2 $ sudo ls -l --almost-all --recursive zip_archive_test
+zip_archive_test:
 total 4
 drwxr-xrwx 2 root root 4096 Nov 20 20:48 dir
 -rw-r----x 1 root root    0 Nov 20 20:47 file.txt
@@ -147,9 +157,279 @@ total 0
 </pre>
 
 		<p>
-			Как видим, биты прав доступа (кроме них, отметки времени), не изменились. А вот владельцем всех файлов стал
-			<strong>root</strong>, что неудивительно.
+			Как видим, биты прав доступа (кроме них, отметки времени), остались. А вот владельцы пропали (вместо них 
+			всеми объектами владеет <em>root</em>), равно как и 
+			<em>setuid</em>, <em>setguid</em> и <em>sticky</em> биты.
 			
+		<p>
+			Непонятно... В листинге архива мы видели и права доступа, и расширенные биты. А в распакованном виде мы 
+			видим только права доступа, причем расширенные биты пропали... Прежде, чем углубляться в дебри,
+			 заглянем в страницу руководства по <strong>zip</strong>. Там есть 
+			упоминание об опции <em>-sc</em> (<em>--show-command</em>):
+			<blockquote>
+				<p>
+					Show  the command line starting zip as processed and exit.
+					The new command parser permutes the arguments, putting all
+					options  and  any  values  associated with them before any
+					non-option arguments.  This allows  an  option  to  appear
+					anywhere in the command line as long as any values that go
+					with the option go with it.  This option displays the command 
+					line as zip sees it, including any arguments from the
+					environment such  as  from  the  ZIPOPT  variable.   Where
+					allowed,  options  later  in the command line can override
+					options earlier in the command line.
+			</blockquote>
+	
+		<p>
+			Этот параметр поможет нам восстановить картину сжатия, т.е. убедиться, какие еще опции кроме <em>-r</em>
+			были применены по-умолчанию (включая взятые из окружения командной строки):
+<pre>
+yura@Aspire-ES1-521 /tmp/3 $ sudo zip --show-command -r zip_archive_test.zip ../zip_archive_test/
+command line:
+'zip'  '--show-command'  '-r'  'zip_archive_test.zip'  '../zip_archive_test/'  
+
+zip error: Interrupted (show command line)
+</pre>
+
+		<p>
+			Как видим, ничего особенного. Все та же <em>-r</em>, и больше ничего нового. Что ж, покурим <code>man zip</code>
+			еще... И обнаружим параметр <em>-X</em> (<em>--no-extra</em>):
+			<blockquote>
+				<p>
+					Do  not save extra file attributes (Extended Attributes on
+					OS/2, uid/gid and file times on  Unix).   The  zip  format
+					uses  extra  fields  to include additional information for
+					each entry.  Some extra fields are specific to  particular
+					systems  while others are applicable to all systems.  Nor‐
+					mally when zip reads entries from an existing archive,  it
+					reads the extra fields it knows, strips the rest, and adds
+					the extra fields applicable to that system.  With -X,  zip
+					strips  all  old  fields and only includes the Unicode and
+					Zip64 extra fields (currently these two extra fields  cannot 
+					be disabled).
+				<p>
+					Negating  this option, -X-, includes all the default extra
+					fields,  but  also  copies  over  any  unrecognized  extra
+					fields.
+			</blockquote>
+			
+		<p>
+			<cite>Do  not save extra file attributes ...</cite>, далее 
+			<cite>Negating  this option, -X-, includes all the default extra fields ...</cite> намекает на то, что
+			по-умолчанию этот параметр включен. Т.о. все атрибуты Unix сохраняются в архив по-умолчанию. Правда, в 
+			листинге архива почему-то нету сведений о владельцах. Опция <em>-v</em> программы <strong>unzip</strong> 
+			поможет получить больше сведений:
+<pre>
+yura@Aspire-ES1-521 /tmp/1 $ sudo unzip -Z -l -v zip_archive_test.zip
+Archive:  zip_archive_test.zip
+There is no zipfile comment.
+
+End-of-central-directory record:
+-------------------------------
+
+  Zip archive file size:                       938 (00000000000003AAh)
+  Actual end-cent-dir record offset:           916 (0000000000000394h)
+  Expected end-cent-dir record offset:         916 (0000000000000394h)
+  (based on the length of the central directory and its expected offset)
+
+  This zipfile constitutes the sole disk of a single-part archive; its
+  central directory contains 5 entries.
+  The central directory is 488 (00000000000001E8h) bytes long,
+  and its (expected) offset in bytes from the beginning of the zipfile
+  is 428 (00000000000001ACh).
+
+
+Central directory entry #1:
+---------------------------
+
+  ../zip_archive_test/
+
+  offset of local header from start of archive:   0
+                                                  (0000000000000000h) bytes
+  file system or operating system of origin:      Unix
+  version of encoding software:                   3.0
+  minimum file system compatibility required:     MS-DOS, OS/2 or NT FAT
+  minimum software version required to extract:   1.0
+  compression method:                             none (stored)
+  file security status:                           not encrypted
+  extended local header:                          no
+  file last modified on (DOS date/time):          2017 Nov 20 20:48:18
+  file last modified on (UT extra field modtime): 2017 Nov 20 20:48:18 local
+  file last modified on (UT extra field modtime): 2017 Nov 20 17:48:18 UTC
+  32-bit CRC value (hex):                         00000000
+  compressed size:                                0 bytes
+  uncompressed size:                              0 bytes
+  length of filename:                             20 characters
+  length of extra field:                          24 bytes
+  length of file comment:                         0 characters
+  disk number on which file begins:               disk 1
+  apparent file type:                             binary
+  Unix file attributes (040750 octal):            drwxr-x---
+  MS-DOS file attributes (10 hex):                dir 
+
+  The central-directory extra field contains:
+  - A subfield with ID 0x5455 (universal time) and 5 data bytes.
+    The local extra field has UTC/GMT modification/access times.
+  - A subfield with ID 0x7875 (Unix UID/GID (any size)) and 11 data bytes:
+    01 04 e8 03 00 00 04 e8 03 00 00.
+
+  There is no file comment.
+
+Central directory entry #2:
+---------------------------
+
+  ../zip_archive_test/dir/
+
+  offset of local header from start of archive:   78
+                                                  (000000000000004Eh) bytes
+  file system or operating system of origin:      Unix
+  version of encoding software:                   3.0
+  minimum file system compatibility required:     MS-DOS, OS/2 or NT FAT
+  minimum software version required to extract:   1.0
+  compression method:                             none (stored)
+  file security status:                           not encrypted
+  extended local header:                          no
+  file last modified on (DOS date/time):          2017 Nov 20 20:48:44
+  file last modified on (UT extra field modtime): 2017 Nov 20 20:48:43 local
+  file last modified on (UT extra field modtime): 2017 Nov 20 17:48:43 UTC
+  32-bit CRC value (hex):                         00000000
+  compressed size:                                0 bytes
+  uncompressed size:                              0 bytes
+  length of filename:                             24 characters
+  length of extra field:                          24 bytes
+  length of file comment:                         0 characters
+  disk number on which file begins:               disk 1
+  apparent file type:                             binary
+  Unix file attributes (047757 octal):            drwsr-srwt
+  MS-DOS file attributes (10 hex):                dir 
+
+  The central-directory extra field contains:
+  - A subfield with ID 0x5455 (universal time) and 5 data bytes.
+    The local extra field has UTC/GMT modification/access times.
+  - A subfield with ID 0x7875 (Unix UID/GID (any size)) and 11 data bytes:
+    01 04 1a 04 00 00 04 1b 04 00 00.
+
+  There is no file comment.
+
+Central directory entry #3:
+---------------------------
+
+  ../zip_archive_test/dir/file2.txt
+
+  offset of local header from start of archive:   160
+                                                  (00000000000000A0h) bytes
+  file system or operating system of origin:      Unix
+  version of encoding software:                   3.0
+  minimum file system compatibility required:     MS-DOS, OS/2 or NT FAT
+  minimum software version required to extract:   1.0
+  compression method:                             none (stored)
+  file security status:                           not encrypted
+  extended local header:                          no
+  file last modified on (DOS date/time):          2017 Nov 20 20:48:44
+  file last modified on (UT extra field modtime): 2017 Nov 20 20:48:43 local
+  file last modified on (UT extra field modtime): 2017 Nov 20 17:48:43 UTC
+  32-bit CRC value (hex):                         00000000
+  compressed size:                                0 bytes
+  uncompressed size:                              0 bytes
+  length of filename:                             33 characters
+  length of extra field:                          24 bytes
+  length of file comment:                         0 characters
+  disk number on which file begins:               disk 1
+  apparent file type:                             binary
+  Unix file attributes (100640 octal):            -rw-r-----
+  MS-DOS file attributes (00 hex):                none
+
+  The central-directory extra field contains:
+  - A subfield with ID 0x5455 (universal time) and 5 data bytes.
+    The local extra field has UTC/GMT modification/access times.
+  - A subfield with ID 0x7875 (Unix UID/GID (any size)) and 11 data bytes:
+    01 04 1a 04 00 00 04 1b 04 00 00.
+
+  There is no file comment.
+
+Central directory entry #4:
+---------------------------
+
+  ../zip_archive_test/dir/file1.txt
+
+  offset of local header from start of archive:   251
+                                                  (00000000000000FBh) bytes
+  file system or operating system of origin:      Unix
+  version of encoding software:                   3.0
+  minimum file system compatibility required:     MS-DOS, OS/2 or NT FAT
+  minimum software version required to extract:   1.0
+  compression method:                             none (stored)
+  file security status:                           not encrypted
+  extended local header:                          no
+  file last modified on (DOS date/time):          2017 Nov 20 20:48:40
+  file last modified on (UT extra field modtime): 2017 Nov 20 20:48:40 local
+  file last modified on (UT extra field modtime): 2017 Nov 20 17:48:40 UTC
+  32-bit CRC value (hex):                         00000000
+  compressed size:                                0 bytes
+  uncompressed size:                              0 bytes
+  length of filename:                             33 characters
+  length of extra field:                          24 bytes
+  length of file comment:                         0 characters
+  disk number on which file begins:               disk 1
+  apparent file type:                             binary
+  Unix file attributes (100640 octal):            -rw-r-----
+  MS-DOS file attributes (00 hex):                none
+
+  The central-directory extra field contains:
+  - A subfield with ID 0x5455 (universal time) and 5 data bytes.
+    The local extra field has UTC/GMT modification/access times.
+  - A subfield with ID 0x7875 (Unix UID/GID (any size)) and 11 data bytes:
+    01 04 1a 04 00 00 04 1b 04 00 00.
+
+  There is no file comment.
+
+Central directory entry #5:
+---------------------------
+
+  ../zip_archive_test/file.txt
+
+  offset of local header from start of archive:   342
+                                                  (0000000000000156h) bytes
+  file system or operating system of origin:      Unix
+  version of encoding software:                   3.0
+  minimum file system compatibility required:     MS-DOS, OS/2 or NT FAT
+  minimum software version required to extract:   1.0
+  compression method:                             none (stored)
+  file security status:                           not encrypted
+  extended local header:                          no
+  file last modified on (DOS date/time):          2017 Nov 20 20:47:18
+  file last modified on (UT extra field modtime): 2017 Nov 20 20:47:17 local
+  file last modified on (UT extra field modtime): 2017 Nov 20 17:47:17 UTC
+  32-bit CRC value (hex):                         00000000
+  compressed size:                                0 bytes
+  uncompressed size:                              0 bytes
+  length of filename:                             28 characters
+  length of extra field:                          24 bytes
+  length of file comment:                         0 characters
+  disk number on which file begins:               disk 1
+  apparent file type:                             binary
+  Unix file attributes (107641 octal):            -rwSr-l--t
+  MS-DOS file attributes (00 hex):                none
+
+  The central-directory extra field contains:
+  - A subfield with ID 0x5455 (universal time) and 5 data bytes.
+    The local extra field has UTC/GMT modification/access times.
+  - A subfield with ID 0x7875 (Unix UID/GID (any size)) and 11 data bytes:
+    01 04 01 04 00 00 04 02 04 00 00.
+
+  There is no file comment.
+</pre>
+			
+		<p>
+			Даа, есть в чем поковыряться! Рассмотрим многострадальный файл 
+			
+			!!!
+			Тут будет сноска:
+			Лично я прочитал все руководство к <strong>zip</strong> сверху вниз. И на нашел, кроме <em>-X</em>, ничего,
+			что относилось бы к правам доступа и расширенным атрибутам Unix.
+			!!!
+			
+						
 		<p>
 			Но самый интересный вывод дает опция <strong>-v</strong>. Из страницу руководства к <strong>Unzip</strong>:
 			<blockquote>
@@ -157,7 +437,72 @@ total 0
 					
 			</blockquote>
 			
+из man zip:
+
+------------------------------------------------------------------------------------------------------------------------
+       -X
+       --no-extra
+              Do  not save extra file attributes (Extended Attributes on
+              OS/2, uid/gid and file times on  Unix).   The  zip  format
+              uses  extra  fields  to include additional information for
+              each entry.  Some extra fields are specific to  particular
+              systems  while others are applicable to all systems.  Nor‐
+              mally when zip reads entries from an existing archive,  it
+              reads the extra fields it knows, strips the rest, and adds
+              the extra fields applicable to that system.  With -X,  zip
+              strips  all  old  fields and only includes the Unicode and
+              Zip64 extra fields (currently these two extra fields  can‐
+              not be disabled).
+
+              Negating  this option, -X-, includes all the default extra
+              fields,  but  also  copies  over  any  unrecognized  extra
+              fields.
+------------------------------------------------------------------------------------------------------------------------
+
+       -sc
+       --show-command
+              Show  the command line starting zip as processed and exit.
+              The new command parser permutes the arguments, putting all
+              options  and  any  values  associated with them before any
+              non-option arguments.  This allows  an  option  to  appear
+              anywhere in the command line as long as any values that go
+              with the option go with it.  This option displays the com‐
+              mand line as zip sees it, including any arguments from the
+              environment such  as  from  the  ZIPOPT  variable.   Where
+              allowed,  options  later  in the command line can override
+              options earlier in the command line.
+
+------------------------------------------------------------------------------------------------------------------------
+
+
+Переменные окружения:
+
+
+       ZIPOPT
+              contains  default  options  that will be used when running
+              zip.  The contents of this environment variable  will  get
+              added to the command line just after the zip command.
+
+
 			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+из man unzip:			
 			
 -------------
        -K     [AtheOS,  BeOS, Unix only] retain SUID/SGID/Tacky file attributes.  Without this flag, these attribute bits are cleared for security
@@ -374,7 +719,7 @@ javac 1.8.0_111
 			
 		Сноски:
 		
-		[1] Все манипуляции с архивами я делаю от имени суперпользователя, т.е. с помощью <strong>sudo</strong>, чтобы
+		[2] Все манипуляции с архивами я делаю от имени суперпользователя, т.е. с помощью <strong>sudo</strong>, чтобы
 		чтобы предотвратить возможную нехватку прав на выполнение того или иного действия с содержимым архива.
 			
 			
