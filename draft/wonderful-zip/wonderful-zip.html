@@ -3,12 +3,12 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>О бедном Unzip'е замолвите слово...</title>
+		<title>Чудесный ZIP</title>
 	</head>
 	<body>
 		<h1>
 			<big>
-				<a href="/#pitiful-unzip" title="Перейти к оглавлению">&larr;</a>
+				<a href="/#wonderful-zip" title="Перейти к оглавлению">&larr;</a>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<a href="/" title="Перейти на главную страницу">&#8962;</a>
 			</big>
@@ -17,35 +17,35 @@
 		<hr>
 		
 		<h1>
-			<a href="http://flaz14.github.io/pitiful-unzip/pitiful-unzip.html">
-				О бедном Unzip'е замолвите слово...
+			<a href="http://flaz14.github.io/wonderful-zip/wonderful-zip.html">
+				Чудесный ZIP
 			</a>
 		</h1>
 		
 		<h3>[2017, Ноябрь]</h3>
 			
-		<h2></h2>
+		<h2>Тогда</h2>
 		
 		<p>
-			Как-то раз (когда я экспериментировал с <strong>umask</strong>) я наткнулся на такой вопрос:
+			Как-то раз, когда экспериментировал с <strong>umask</strong>, я наткнулся на такой вопрос:
 			<a href="https://superuser.com/questions/603068/unzipping-file-whilst-getting-correct-permissions">
 				Unzipping file whilst getting correct permissions?</a>.
 			Только один пользователь, <i>David Tanzer</i>, ответил офигенно правильно и подробно: 
-			<a href="https://superuser.com/a/940477/538166">zip-файлы могут хранить права доступа</a>. В общем, я решил 
-			полазить по Сети и собрать разрозненную информацию в одной ламерской заметке.
-			
+			<a href="https://superuser.com/a/940477/538166">zip-файлы могут хранить права доступа</a>. Я решил
+			собрать разрозненную информацию в одной ламерской заметке.
+		
 		<p>
-			Исследования буду проводить в LinuxMint 17.1. Для начала узнаем, какие именно программы установлены:
+			"Исследовать" будем в LinuxMint 17.1. Для начала узнаем, какие именно программы установлены:
 <pre>
-yura@Aspire-ES1-521 / $ which zip
+$ which zip
 /usr/bin/zip
 
-yura@Aspire-ES1-521 / $ which unzip
+$ which unzip
 /usr/bin/unzip
 </pre>
 		
 		<p>
-			И их версии:
+			Узнаем также их версии:
 <pre>
 yura@Aspire-ES1-521 / $ zip -v
 ...
@@ -58,7 +58,7 @@ UnZip 6.00 of 20 April 2009, by Debian. Original by Info-ZIP.
 </pre>
 		
 		<p>
-			И наконец, их происхождение:
+			И наконец, узнаем их происхождение:
 <pre>
 yura@Aspire-ES1-521 / $ dpkg --search /usr/bin/zip
 zip: /usr/bin/zip
@@ -68,10 +68,10 @@ unzip: /usr/bin/unzip
 </pre>			
 	
 		<p>
-			Как видим, <strong>Zip</strong> и <strong>Unzip</strong> - не часть <strong>coreutils</strong>, а самостоятельные
-			пакеты (по крайней мере, в LinuxMint).
+			Как видим, <strong>Zip</strong> и <strong>Unzip</strong> - не часть <strong>coreutils</strong>, а 
+			самостоятельные пакеты. Сделаны программы рабочей группой <a href="http://www.info-zip.org/">Info-ZIP</a>.
 			
-		<h2>Сжимаем-разжимаем</h2>
+		<h2>Сейчас</h2>
 		
 		<p>
 			Создадим в <i>/tmp</i> каталог <i>zip_archive_test</i>. А внутри него построим такую структуру:
@@ -84,15 +84,16 @@ file1.txt  file2.txt
 </pre>
 		
 		<p>
-			Назначим еще необычных владельцев (таких у меня в системе нет) и странные права доступа (тут главное не 
-			переусердствовать, особенно с правами доступа к каталогам), чтобы они не путались с "обычными" файлами [2].
-			Еще для файла <i>file.txt</i> назначим биты <em>setuid</em>, <em>setgid</em> и <em>sticky</em>-бит. 
-			И назначим эти же биты 
-			для директории <i>dir</i>. 
-			В итоге получится вот что (c помощью опции <em>--almost-all</em> опустим ненужные каталоги <i>.</i> и 
-			<i>..</i>):
+			Назначим необычных владельцев (таких у меня в системе нет) и странные права доступа, чтобы они не путались с
+			"обычными" файлами <sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>.
+			Кроме этого, для файла <i>file.txt</i> и директории <i>dir</i> назначим биты SETUID, SETGID и sticky-бит. 
+			Получившаяся каша изображена в <a href="#listing-1">листинге 1</a> (с помощью опции <em>--almost-all</em> 
+			команды <strong>ls</strong>
+			опустим ненужные каталоги <i>.</i> и <i>..</i>):
+			
+<h4 id="listing-1">Листинг 1 - Структура исходного каталога</h4> 
 <pre>
-yura@Aspire-ES1-521 /tmp $ sudo ls -l --almost-all --recursive zip_archive_test/
+$ sudo ls -l --almost-all --recursive zip_archive_test/
 zip_archive_test/:
 total 4
 drwsr-srwt 2 1050 1051 4096 Nov 20 20:48 dir
@@ -105,24 +106,21 @@ total 0
 </pre>
 		
 		<p>
-			А теперь создадим в <i>/tmp</i> новый каталог <i>1</i>, перейдем в него и сожмем 
+			А теперь создадим в <i>/tmp</i> новый каталог <i>1</i>, перейдем в него и упакуем в архив каталог 
 			<i>zip_archive_test</i> (никакие дополнительные опции, кроме совершенно необходимой 
-			<strong>-r</strong>, она же <strong>--recurse-paths</strong> не используются
-			
-			!!!
-			тут будет сноска про то, что программа unzip, в отличие от zip, не поддерживает длинные опции, а только короткие
-			!!!
-			
-			):
+			<em>-r</em>, она же <em>--recurse-paths</em> не используются 
+			<sup id="footnote-2-top"><a href="#footnote-2-bottom">[2]</a></sup>):
 <pre>
-yura@Aspire-ES1-521 /tmp/1 $ sudo zip -r zip_archive_test.zip ../zip_archive_test/
+$ sudo zip -r zip_archive_test.zip ../zip_archive_test/
 </pre>
 		
 		<p>
-			Теперь проверим содержимое архива без его распаковки. Чтобы увидеть права доступа нужно задействовать переключатель
-			<strong>-Z</strong>, причем она должна стоять первой среди прочих.
+			Теперь проверим содержимое архива без его распаковки. Чтобы увидеть биты доступа, нужно задействовать 
+			переключатель <strong>-Z</strong>, причем он должен стоять первым среди прочих.
+
+<h4 id="listing-2">Листинг 2 - Содержимое архива без распаковки</h4>
 <pre>
-yura@Aspire-ES1-521 /tmp/1 $ sudo unzip -Z -l zip_archive_test.zip
+$ sudo unzip -Z -l zip_archive_test.zip
 Archive:  zip_archive_test.zip
 Zip file size: 938 bytes, number of entries: 5
 drwxr-x---  3.0 unx        0 bx        0 stor 17-Nov-20 20:48 ../zip_archive_test/
@@ -132,19 +130,21 @@ drwsr-srwt  3.0 unx        0 bx        0 stor 17-Nov-20 20:48 ../zip_archive_tes
 -rwSr-S--t  3.0 unx        0 bx        0 stor 17-Nov-20 20:47 ../zip_archive_test/file.txt
 5 files, 0 bytes uncompressed, 0 bytes compressed:  0.0%
 </pre>
-		
+	
 		<p>
-			Биты прав доступа никуда не делись, а владельцы исчезли (по крайней мере, в листинге их не видно). 
-			Распакуем архив (опять-таки, 
-			с правами суперпользователя):
+			Биты прав доступа никуда не делись, а вот владелец и группа исчезли (по крайней мере, в 
+			<a href="#listing-2">листинге 2</a> их не видно). 
+			Распакуем архив (опять-таки, с правами суперпользователя):
 <pre>
-yura@Aspire-ES1-521 /tmp/2 $ sudo unzip ../1/zip_archive_test.zip
+$ sudo unzip zip_archive_test.zip
 </pre>
 
 		<p>
-			И получим:
+			И получим <a href="#listing-3">листинг 3</a>.
+
+<h4>Листинг 3 - Структура каталога после извлечения их архива</h4>			
 <pre>
-yura@Aspire-ES1-521 /tmp/2 $ sudo ls -l --almost-all --recursive zip_archive_test
+$ sudo ls -l --almost-all --recursive zip_archive_test
 zip_archive_test:
 total 4
 drwxr-xrwx 2 root root 4096 Nov 20 20:48 dir
@@ -157,14 +157,9 @@ total 0
 </pre>
 
 		<p>
-			Как видим, биты прав доступа (кроме них, отметки времени), остались. А вот владельцы пропали (вместо них 
-			всеми объектами владеет <em>root</em>), равно как и 
-			<em>setuid</em>, <em>setguid</em> и <em>sticky</em> биты.
-			
-		<p>
-			Непонятно... В листинге архива мы видели и права доступа, и расширенные биты. А в распакованном виде мы 
-			видим только права доступа, причем расширенные биты пропали... Прежде, чем углубляться в дебри,
-			 заглянем в страницу руководства по <strong>zip</strong>. Там есть 
+			По сравнению с <a href="#listing-2">листингом 2</a> биты доступа остались. Владелец и группа пропали. 
+			SETUID, SETGID и sticky-бит тоже исчезли. Странно... Прежде, чем углубляться в дебри,
+			заглянем в страницу руководства по <strong>zip</strong>. Там есть 
 			упоминание об опции <em>-sc</em> (<em>--show-command</em>):
 			<blockquote>
 				<p>
@@ -181,10 +176,10 @@ total 0
 			</blockquote>
 	
 		<p>
-			Этот параметр поможет нам восстановить картину сжатия, т.е. убедиться, какие еще опции кроме <em>-r</em>
+			Этот переключатель поможет нам восстановить картину сжатия, т.е. убедиться, какие еще опции кроме <em>-r</em>
 			были применены по-умолчанию (включая взятые из окружения командной строки):
 <pre>
-yura@Aspire-ES1-521 /tmp/3 $ sudo zip --show-command -r zip_archive_test.zip ../zip_archive_test/
+$ sudo zip --show-command -r zip_archive_test.zip ../zip_archive_test/
 command line:
 'zip'  '--show-command'  '-r'  'zip_archive_test.zip'  '../zip_archive_test/'  
 
@@ -193,15 +188,8 @@ zip error: Interrupted (show command line)
 
 		<p>
 			Как видим, ничего особенного. Все та же <em>-r</em>, и больше ничего нового. Что ж, покурим <code>man zip</code>
-			еще... И обнаружим параметр <em>-X</em> (<em>--no-extra</em>):
-			
-			!!!
-			Тут будет сноска:
-			Лично я прочитал все руководство к <strong>zip</strong> сверху вниз. И на нашел, кроме <em>-X</em>, ничего,
-			что относилось бы к правам доступа и расширенным атрибутам Unix.
-			!!!
-			
-			
+			еще... И обнаружим параметр <em>-X</em> (<em>--no-extra</em>) 
+			<sup id="footnote-3-top"><a href="#footnote-3-bottom">[3]</a></sup>:
 			<blockquote>
 				<p>
 					Do  not save extra file attributes (Extended Attributes on
@@ -223,12 +211,15 @@ zip error: Interrupted (show command line)
 			
 		<p>
 			<cite>Do  not save extra file attributes ...</cite>, далее 
-			<cite>Negating  this option, -X-, includes all the default extra fields ...</cite> намекает на то, что
+			<cite>Negating  this option, -X-, includes all the default extra fields ...</cite> намекают на то, что
 			по-умолчанию этот параметр включен. Т.о. все атрибуты Unix сохраняются в архив по-умолчанию. Правда, в 
-			листинге архива почему-то нету сведений о владельцах. Опция <em>-v</em> программы <strong>unzip</strong> 
-			поможет получить больше сведений:
+			<a href="#listing-2">листинге 2</a> мы владелец и группа не были обранужены. Опция <em>-v</em> программы 
+			<strong>unzip</strong> 
+			поможет получить больше сведений, которые приведены в длинном-предлинном <a href="#listing-4">листинге 4</a>:
+
+<h4>Листинг 4 - Подробное содержимое архива</h4>
 <pre>
-yura@Aspire-ES1-521 /tmp/1 $ sudo unzip -Z -l -v zip_archive_test.zip
+$ sudo unzip -Z -l -v zip_archive_test.zip
 Archive:  zip_archive_test.zip
 There is no zipfile comment.
 
@@ -430,68 +421,66 @@ Central directory entry #5:
 			
 		<p>
 			Даа, есть в чем поковыряться! Рассмотрим многострадальный файл <i>file.txt</i>. Мы видим, что биты доступа
-			(включая расширенные) присутствуют в архиве в поле <em>Unix file attributes</em>. А вот владельцы
-			в явном виде не встречаются. Но в примечании <em>The central-directory extra field contains</em> мы видим
+			(включая расширенные) присутствуют в архиве в поле <em>Unix file attributes</em>. А вот владелец и группа
+			в явном виде не встречаются. Но в примечании <em>The central-directory extra field contains</em> сказано:
 <pre>
   - A subfield with ID 0x7875 (Unix UID/GID (any size)) and 11 data bytes:
     01 04 01 04 00 00 04 02 04 00 00.
 </pre>
 			
 		<p>
-			Может именно эти загадочные циферки и есть наши владельцы? Надо разобраться. Как следует из раннего листинга
-			каталога до упаковки, у файла <i>file.txt</i>
-			(в десятичной системе счисления) <code>UID=1025</code> и <code>GID=1026</code>.
-			
-			Ограничения на UID и GID в моей системе (LinuxMint 17.1) таковы (спасибо <i>kirelagin</i> за ответ:  
+			Может именно эти загадочные циферки и есть наши UID и GID? Надо разобраться. Как следует из 
+			<a href="#listing-1">листинга 1</a>, у файла <i>file.txt</i>
+			UID=1025 и GID=1026 (в десятичной системе счисления). Ограничения на UID и GID в моей системе 
+			(LinuxMint 17.1) таковы (спасибо <i>kirelagin</i> за ответ:  
 			<a href="https://serverfault.com/a/585435/283774">How big (in bits) is a Unix UID?</a>):
 
 		<p>
 <pre>
-yura@Aspire-ES1-521 / $ grep 'UID' /usr/include/x86_64-linux-gnu/bits/typesizes.h
+$ grep 'UID' /usr/include/x86_64-linux-gnu/bits/typesizes.h
 #define __UID_T_TYPE		__U32_TYPE
 
-yura@Aspire-ES1-521 / $ grep 'GID' /usr/include/x86_64-linux-gnu/bits/typesizes.h
+$ grep 'GID' /usr/include/x86_64-linux-gnu/bits/typesizes.h
 #define __GID_T_TYPE		__U32_TYPE
 
-
-yura@Aspire-ES1-521 / $ grep '__U32_TYPE' /usr/include/x86_64-linux-gnu/bits/types.h 
+$ grep '__U32_TYPE' /usr/include/x86_64-linux-gnu/bits/types.h 
 #define __U32_TYPE		unsigned int
 </pre>
 
 		<p>
 			<code>unsigned int</code> - это 4 байта (а хоть бы и 2 байта - в ранних версиях Linux максимально возможное
-			число пользователей было 65535, что укладывалось в 2 байта, по крайней мере в книжках так писали). Т.о.
-			UID + GID = 8 байт (в крайнем случае, UID + GID = 4 байта). Но никак не <cite>11 data bytes</cite>. Значит, UID и GID каким-то хитрым образом 
+			число пользователей было 65535, что укладывалось в 2 байта, по крайней мере, в книжках так писали). Т.о.
+			UID + GID = 8 байт (в крайнем случае, UID + GID = 4 байта). Но никак не <cite>11 data bytes</cite>. Значит, 
+			UID и GID каким-то хитрым образом 
 			расположены (или может быть даже закодированы каким-нибудь эффективным способом, или разделены 
-			байтами-маркерами и т.п.)
-			 в строчке 
+			байтами-маркерами и т.п.) в строчке 
 			<tt>01 04 01 04 00 00 04 02 04 00 00</tt>. Конечно, точный и окончательный ответ на этот вопрос даст исходный
 			код утилиты <strong>zip</strong>. Но я исходники не смотрел. Я попробовал читать эти 11 байт задом наперед.
-			Т.е. справа налево.
-			
-			Так, возьмем фрагмент <tt>00 00 04 02</tt>, начиная с нулей (предположим, что здесь используется 
-			шестнадцатиричная система
-			счисления). И переведем в десятичную: 
-			<tt>00 00 04 02<sub>16</sub>=1026</tt>. Что такое <tt>1026</tt>? Правильно, наш UID! 
+		
+		<p>
+			Так, возьмем крайний справа фрагмент <tt>02 04 00 00</tt>, перевернем его (так, чтобы он начинался с нулей),
+			и переведем в десятичную систему счисления (предположим, что в оригинале шестнадцатеричная): 
+			<tt>00 00 04 02<sub>16</sub>=1026</tt>. Что такое <tt>1026</tt>? Правильно, наш GID! 
 			
 		<p>
-			Проделаем то же самое для UID (опять таки, начнем с нулей): 
-			 <tt>00 00 04 01</tt>. И переведем в десятичную: 
+			Проделаем то же самое для UID: 
+			 <tt>01 04 00 00</tt>. Перевернем и переведем в десятичную: 
 			<tt>00 00 04 01<sub>16</sub>=1025<sub>10</sub></tt>. Что равняется UID.
 			
 		<p>
-			Что там делают остальные байты? Непонятно... Надо смотреть исходный код.
+			Что там делают остальные байты? Непонятно. Надо смотреть исходный код...
 			
 		<p>
 			Но вывод однозначен: при создании архива на Unix (по крайней мере, на Linux) с помощью <strong>zip</strong>
-			с одной только опцией <em>-r</em> владелец, группа, биты прав доступа (рискну предположить, что Posix ACL и
+			с одной только опцией <em>-r</em> владелец, группа, биты прав доступа сохраняются в ZIP-архиве
+			 (рискну предположить, что Posix ACL и
 			аттрибуты конкретной файловой системы, например аттрибут <em>Immutable</em> файловой системы <em>ext4</em>,
-			сохранены в архиве не будут) сохраняются в ZIP-архиве.
+			сохранены в архиве не будут).
 			
 		<h2></h2>
 		
 		<p>
-			Возникает вопрос, как эти аттрибуты достать. Это несложно. Чтобы извлечь биты SUID/SGID, нужно применить 
+			Возникает вопрос, как эти аттрибуты достать. Это несложно. Чтобы извлечь биты SUID и SGID, нужно применить 
 			опцию <strong>-K</strong>:
 			<blockquote>
 				<p>
@@ -503,13 +492,10 @@ yura@Aspire-ES1-521 / $ grep '__U32_TYPE' /usr/include/x86_64-linux-gnu/bits/typ
 		<p>
 			Попробуем:
 <pre>
-yura@Aspire-ES1-521 /tmp/4 $ sudo unzip -K ../1/zip_archive_test.zip
-</pre> 
+$ sudo unzip -K zip_archive_test.zip
 
-Затем
 
-<pre>
-yura@Aspire-ES1-521 /tmp/4 $ sudo ls -l --almost-all --recursive zip_archive_test
+$ sudo ls -l --almost-all --recursive zip_archive_test
 zip_archive_test:
 total 4
 drwsr-srwt 2 root root 4096 Nov 20 20:48 dir
@@ -525,10 +511,10 @@ total 0
 			Получилось!
 			
 		<p>
-			Владельца/группу можно достать с помощь параметра <strong>-X</strong>:
+			Владельца и группу можно достать с помощь параметра <strong>-X</strong>:
 			<blockquote>
 				<p>
-			[VMS, Unix, OS/2, NT, Tandem] restore owner/protection info (UICs and ACL entries) under VMS, or user and group info (UID/GID) under
+					[VMS, Unix, OS/2, NT, Tandem] restore owner/protection info (UICs and ACL entries) under VMS, or user and group info (UID/GID) under
               Unix,  or  access control lists (ACLs) under certain network-enabled versions of OS/2 (Warp Server with IBM LAN Server/Requester 3.0
               to 5.0; Warp Connect with IBM Peer 1.0), or security ACLs under Windows NT.  In most cases this will require special  system  privi‐
               leges,  and doubling the option (-XX) under NT instructs unzip to use privileges for extraction; but under Unix, for example, a user
@@ -539,13 +525,10 @@ total 0
 			</blockquote>
 
 <pre>
-yura@Aspire-ES1-521 /tmp/5 $ sudo unzip -X ../1/zip_archive_test.zip
-</pre>		
+$ sudo unzip -X zip_archive_test.zip
 
-И
 
-<pre>
-yura@Aspire-ES1-521 /tmp/5 $ sudo ls -l --almost-all --recursive zip_archive_test
+$ sudo ls -l --almost-all --recursive zip_archive_test
 zip_archive_test:
 total 4
 drwxr-xrwx 2 1050 1051 4096 Nov 20 20:48 dir
@@ -561,13 +544,13 @@ total 0
 			Работает! Хотя раньше это был баг: 
 			<a href="https://sourceforge.net/p/infozip/bugs/45/">
 				#45 Problems with Unix UID/GID support in Zip/Unzip</a>. Судя по статусу бага, он еще не исправлен 
-			разработчиками. Может мэйнтейнеры дистрибутива LinuxMint (Ubuntu, Debian) пропатчили программу сами?..
+			разработчиками. Может, мэйнтейнеры дистрибутива LinuxMint (Ubuntu, Debian) пропатчили программу самостоятельно?..
 		
-		<h2>Что же все-таки не так с битами доступа?</h2>
+		<h2>Что же все-таки не так?</h2>
 		
 		<p>
-			Вообще-то, сохранение битов доступа в архиве - нужно. Если бы этой фичи не было в ZIP, он был бы почти 
-			бесполезным. Представьте, что вы скачали дистрибутив какой-нибудь программы в виде ZIP-архива. И в архиве
+			Сохранение битов доступа в архиве - нужно. Если бы этой фичи не было в ZIP, он был бы почти 
+			бесполезным. Представьте себе, вы скачали дистрибутив какой-нибудь программы в виде ZIP-архива. И в архиве
 			не сохранены биты доступа. Придеться самостоятельно в таком случае искать исполняемые файлы и вручную делать
 			их исполняемыми. Так что с этой точки зрения с программой <strong>unzip</strong> все в порядке. Проблема 
 			в другом. При распаковке архива <strong>unzip</strong> не обращает внимание на <strong>umask</strong>.
@@ -577,7 +560,7 @@ total 0
 		<p>
 			Например, в моей системе у других пользователей нету никакого доступа к моим файлам, а именно:
 <pre>
-yura@Aspire-ES1-521 / $ umask
+$ umask
 0027
 </pre>
 			
@@ -585,9 +568,10 @@ yura@Aspire-ES1-521 / $ umask
 			Но <strong>unzip</strong> при распаковке все равно разрешает доступ другим пользователям наперекор 
 			<strong>umask</strong>:
 <pre>
-yura@Aspire-ES1-521 /tmp/6 $ unzip ../1/zip_archive_test.zip
+$ unzip ../1/zip_archive_test.zip
 
-yura@Aspire-ES1-521 /tmp/6 $ ls -l --almost-all --recursive zip_archive_test
+
+$ ls -l --almost-all --recursive zip_archive_test
 zip_archive_test:
 total 4
 drwxr-xrwx 2 yura yura 4096 Nov 20 20:48 dir
@@ -609,28 +593,46 @@ total 0
 					archive (default for ordinary users)
 			</blockquote>
 			
-		<h2>И все равно Info-ZIP рулит!</h2>
+		<h2>Все равно Info-ZIP рулит!</h2>
 		
 		<p>
-			Не так-то просто исправлять баги в программах zip/unzip. И не так-то просто добавлять новые возможности. 
+			Не так-то просто исправлять баги в программах вроде <strong>unzip</strong>. И не так-то просто добавлять 
+			новые возможности. 
 			Почему? Казалось бы, нет ничего трудного в том, чтобы исправить или добавить. Ведь это - всего лишь утилиты
 			командной строки, они не взаимодействуют с серверами в Интернете, не работают с базами данных и т.д. Но
 			эти простые программы сохраняют совместимость (в некоторых случаях совместимости нет, об этом есть замечания
 			в руководстве) со старыми программами и архивами, созданными сто лет назад. Эти утилиты компилируются под
 			почти любую платформу (включая древние VMS и редкие в наши времена Amiga) и работают там. Админы их используют 
-			каждый день на серверах, и т.д. и т.п.
+			каждый день на серверах и т.д. и т.п.
 		
 		<p>
-			Так что если вы решили добавить новую опцию, которая применима только к битам доступа на Unix, то перед отправкой
-			pull-request'а будьте добры проверить, что ваша новая фича работает во всех (по крайней мере, в нескольких)
-			Unix'ах, а не только в вашем Linux любимом. И что опция игнорируется на других системах (но ведь мало кто
-			взвалит на себя ношу проверки на той же Amiga, про MS-DOS и то все забыли).
+			Так что добавление опции, которая применима только к битам доступа на Unix, то необходимо проверить, что 
+			новая фича работает во всех (по крайней мере, в нескольких)
+			Unix'ах, а не только в Линуксе любимом. И что опция игнорируется в других системах (если MS-DOS развернуть просто, 
+			то ту же Amiga OS посложнее будет).
 			
-		Сноски:
-		
-		[2] Все манипуляции с архивами я делаю от имени суперпользователя, т.е. с помощью <strong>sudo</strong>, чтобы
-		чтобы предотвратить возможную нехватку прав на выполнение того или иного действия с содержимым архива.
-			
+		<p>
+			__________
+			<ol>
+				<li id="footnote-1-bottom">
+					<p>
+						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
+						Все манипуляции с файлами и каталогами, которые имеют необычные биты доступа, лучше
+						делать от имени суперпользователя, т.е. с помощью <strong>sudo</strong>. Это заведомо устранит
+						возможные отказы в доступе при создании архива.
+
+				<li id="footnote-2-bottom">
+					<p>
+						<a href="#footnote-2-top" title="Перейти к основному тексту">&uarr;</a> 
+						Утилита <strong>unzip</strong>, в отличие от <strong>zip</strong>, не поддерживает длинные 
+						опции, а только короткие.
+
+				<li id="footnote-3-bottom">
+					<p>
+						<a href="#footnote-3-top" title="Перейти к основному тексту">&uarr;</a> 
+						Я прочитал все руководство к <strong>zip</strong> сверху вниз. И не нашел, кроме <em>-X</em>, 
+						ничего, что относилось бы к битам доступа в Unix.
+			</ol>	
 			
 		<hr>
 			
