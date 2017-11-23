@@ -467,13 +467,16 @@ yura@Aspire-ES1-521 / $ grep '__U32_TYPE' /usr/include/x86_64-linux-gnu/bits/typ
 			 в строчке 
 			<tt>01 04 01 04 00 00 04 02 04 00 00</tt>. Конечно, точный и окончательный ответ на этот вопрос даст исходный
 			код утилиты <strong>zip</strong>. Но я исходники не смотрел. Я попробовал читать эти 11 байт задом наперед.
-			Так, возьмем фрагмент <tt>02 04 00 00</tt>, начиная с нулей (предположим, что здесь используется шестнадцатиричная система
-			счисления), т.е на самом деле я взял фрагмент задом наперед: <tt>00 00 04 02</tt>. И переведем в десятичную: 
-			<tt>00 00 04 02<sub>16</sub>=1026</tt>. А что такое <tt>1026</tt>? Правильно, наш UID! 
+			Т.е. справа налево.
+			
+			Так, возьмем фрагмент <tt>00 00 04 02</tt>, начиная с нулей (предположим, что здесь используется 
+			шестнадцатиричная система
+			счисления). И переведем в десятичную: 
+			<tt>00 00 04 02<sub>16</sub>=1026</tt>. Что такое <tt>1026</tt>? Правильно, наш UID! 
 			
 		<p>
 			Проделаем то же самое для UID (опять таки, начнем с нулей): 
-			<tt>01 04 00 00</tt>. Перевернем: <tt>00 00 04 01</tt>. И переведем в десятичную: 
+			 <tt>00 00 04 01</tt>. И переведем в десятичную: 
 			<tt>00 00 04 01<sub>16</sub>=1025<sub>10</sub></tt>. Что равняется UID.
 			
 		<p>
@@ -482,18 +485,148 @@ yura@Aspire-ES1-521 / $ grep '__U32_TYPE' /usr/include/x86_64-linux-gnu/bits/typ
 		<p>
 			Но вывод однозначен: при создании архива на Unix (по крайней мере, на Linux) с помощью <strong>zip</strong>
 			с одной только опцией <em>-r</em> владелец, группа, биты прав доступа (рискну предположить, что Posix ACL и
-			аттрибуты конкретной файловой системы, например ) 
+			аттрибуты конкретной файловой системы, например аттрибут <em>Immutable</em> файловой системы <em>ext4</em>,
+			сохранены в архиве не будут) сохраняются в ZIP-архиве.
 			
-		
 		<h2></h2>
 		
-		
 		<p>
-			Но самый интересный вывод дает опция <strong>-v</strong>. Из страницу руководства к <strong>Unzip</strong>:
+			Возникает вопрос, как эти аттрибуты достать. Это несложно. Чтобы извлечь биты SUID/SGID, нужно применить 
+			опцию <strong>-K</strong>:
 			<blockquote>
 				<p>
-					
+					[AtheOS,  BeOS, Unix only] retain SUID/SGID/Tacky file attributes.  Without this flag, these 
+					attribute bits are cleared for security
+					reasons.
 			</blockquote>
+			
+		<p>
+			Попробуем:
+<pre>
+yura@Aspire-ES1-521 /tmp/4 $ sudo unzip -K ../1/zip_archive_test.zip
+</pre> 
+
+Затем
+
+<pre>
+yura@Aspire-ES1-521 /tmp/4 $ sudo ls -l --almost-all --recursive zip_archive_test
+zip_archive_test:
+total 4
+drwsr-srwt 2 root root 4096 Nov 20 20:48 dir
+-rwSr-S--t 1 root root    0 Nov 20 20:47 file.txt
+
+zip_archive_test/dir:
+total 0
+-rw-r----- 1 root root 0 Nov 20 20:48 file1.txt
+-rw-r----- 1 root root 0 Nov 20 20:48 file2.txt	
+</pre>
+
+		<p>
+			Получилось!
+			
+		<p>
+			Владельца/группу можно достать с помощь параметра <strong>-X</strong>:
+			<blockquote>
+				<p>
+			[VMS, Unix, OS/2, NT, Tandem] restore owner/protection info (UICs and ACL entries) under VMS, or user and group info (UID/GID) under
+              Unix,  or  access control lists (ACLs) under certain network-enabled versions of OS/2 (Warp Server with IBM LAN Server/Requester 3.0
+              to 5.0; Warp Connect with IBM Peer 1.0), or security ACLs under Windows NT.  In most cases this will require special  system  privi‐
+              leges,  and doubling the option (-XX) under NT instructs unzip to use privileges for extraction; but under Unix, for example, a user
+              who belongs to several groups can restore files owned by any of those groups, as long as the user IDs match his or  her  own.   Note
+              that  ordinary  file  attributes  are  always restored--this option applies only to optional, extra ownership info available on some
+              operating systems.  [NT's access control lists do not appear to be especially compatible with OS/2's,  so  no  attempt  is  made  at
+              cross-platform portability of access privileges.  It is not clear under what conditions this would ever be useful anyway.]
+			</blockquote>
+
+<pre>
+yura@Aspire-ES1-521 /tmp/5 $ sudo unzip -X ../1/zip_archive_test.zip
+</pre>		
+
+И
+
+<pre>
+yura@Aspire-ES1-521 /tmp/5 $ sudo ls -l --almost-all --recursive zip_archive_test
+zip_archive_test:
+total 4
+drwxr-xrwx 2 1050 1051 4096 Nov 20 20:48 dir
+-rw-r----x 1 1025 1026    0 Nov 20 20:47 file.txt
+
+zip_archive_test/dir:
+total 0
+-rw-r----- 1 1050 1051 0 Nov 20 20:48 file1.txt
+-rw-r----- 1 1050 1051 0 Nov 20 20:48 file2.txt
+</pre>		
+		
+		<p>
+			Работает! Хотя раньше это был баг: 
+			<a href="https://sourceforge.net/p/infozip/bugs/45/">
+				#45 Problems with Unix UID/GID support in Zip/Unzip</a>. Судя по статусу бага, он еще не исправлен 
+			разработчиками. Может мэйнтейнеры дистрибутива LinuxMint (Ubuntu, Debian) пропатчили программу сами?..
+		
+		<h2>Что же все-таки не так с битами доступа?</h2>
+		
+		<p>
+			Вообще-то, сохранение битов доступа в архиве - нужно. Если бы этой фичи не было в ZIP, он был бы почти 
+			бесполезным. Представьте, что вы скачали дистрибутив какой-нибудь программы в виде ZIP-архива. И в архиве
+			не сохранены биты доступа. Придеться самостоятельно в таком случае искать исполняемые файлы и вручную делать
+			их исполняемыми. Так что с этой точки зрения с программой <strong>unzip</strong> все в порядке. Проблема 
+			в другом. При распаковке архива <strong>unzip</strong> не обращает внимание на <strong>umask</strong>.
+			Такое поведение по-умолчанию логично, если архив распаковывает суперпользователь (ведь он может назначить
+			какие угодно права доступа). Но не для обычного пользователя.
+		
+		<p>
+			Например, в моей системе у других пользователей нету никакого доступа к моим файлам, а именно:
+<pre>
+yura@Aspire-ES1-521 / $ umask
+0027
+</pre>
+			
+		<p>
+			Но <strong>unzip</strong> при распаковке все равно разрешает доступ другим пользователям наперекор 
+			<strong>umask</strong>:
+<pre>
+yura@Aspire-ES1-521 /tmp/6 $ unzip ../1/zip_archive_test.zip
+
+yura@Aspire-ES1-521 /tmp/6 $ ls -l --almost-all --recursive zip_archive_test
+zip_archive_test:
+total 4
+drwxr-xrwx 2 yura yura 4096 Nov 20 20:48 dir
+-rw-r----x 1 yura yura    0 Nov 20 20:47 file.txt
+
+zip_archive_test/dir:
+total 0
+-rw-r----- 1 yura yura 0 Nov 20 20:48 file1.txt
+-rw-r----- 1 yura yura 0 Nov 20 20:48 file2.txt
+</pre>
+
+		<p>
+			И с этим ничего не поделаешь :( Как же круто было бы иметь в <strong>unzip</strong> опцию, подобную 
+			<em>--no-same-permissions</em> программы <strong>tar</strong> (я смотрел руководство к <em>GNU Tar</em>):
+			<blockquote>
+				<p>
+					apply the user's umask when extracting permissions from the
+					archive (default for ordinary users)
+			</blockquote>
+			
+		<h2>И все равно Info-ZIP рулит!</h2>
+		
+		<p>
+			Не так-то просто исправлять баги в программах zip/unzip. И не так-то просто добавлять новые возможности. 
+			Почему? Казалось бы, нет ничего трудного в том, чтобы исправить или добавить. Ведь это - всего лишь утилиты
+			командной строки, они не взаимодействуют с серверами в Интернете, не работают с базами данных и т.д. Но
+			эти простые программы сохраняют совместимость (в некоторых случаях совместимости нет, об этом есть замечания
+			в руководстве) со старыми программами и архивами, созданными сто лет назад. Эти утилиты компилируются под
+			почти любую платформу (включая древние VMS и редкие в наши времена Amiga) и работают там. Админы их используют 
+			каждый день на серверах, и т.д. и т.п.
+		
+		<p>
+			Так что если вы решили добавить новую опцию, которая применима только к битам доступа на Unix, то перед отправкой
+			pull-request'а будьте добры проверить, что ваша новая фича работает во всех (по крайней мере, в нескольких)
+			Unix'ах, а не только в вашем Linux любимом. И что опция игнорируется на других системах (но ведь мало кто
+			взвалит на себя ношу проверки на той же Amiga, про MS-DOS и то все забыли).
+			
+		<p>
+			А вообще, 
 			
 из man zip:
 
