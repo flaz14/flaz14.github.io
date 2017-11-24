@@ -25,7 +25,7 @@
 		<h3>[2017, Ноябрь]</h3>
 		
 		<h3>
-			<a href="тут будет ссылка на примеры файлов">
+			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/wonderful-zip/samples">
 				Примеры файлов
 			</a>
 		</h3>
@@ -70,10 +70,10 @@ UnZip 6.00 of 20 April 2009, by Debian. Original by Info-ZIP.
 		<p>
 			И наконец, узнаем их происхождение:
 <pre>
-yura@Aspire-ES1-521 / $ dpkg --search /usr/bin/zip
+$ dpkg --search /usr/bin/zip
 zip: /usr/bin/zip
 
-yura@Aspire-ES1-521 / $ dpkg --search /usr/bin/unzip
+$ dpkg --search /usr/bin/unzip
 unzip: /usr/bin/unzip
 </pre>			
 	
@@ -227,7 +227,7 @@ zip error: Interrupted (show command line)
 			 Правда, в 
 			<a href="#listing-2">листинге 2</a> владелец и группа не были обнаружены. Опция <em>-v</em> программы 
 			<strong>unzip</strong> 
-			поможет получить больше сведений, которые приведены в длинном-предлинном <a href="#listing-4">листинге 4</a>:
+			поможет получить больше сведений. Они приведены в длинном-предлинном <a href="#listing-4">листинге 4</a>:
 
 <h4 id="listing-4">Листинг 4 - Подробное содержимое архива</h4>
 <pre>
@@ -464,7 +464,7 @@ $ grep '__U32_TYPE' /usr/include/x86_64-linux-gnu/bits/types.h
 			число пользователей было 65535, что укладывалось в 2 байта, по крайней мере, в книжках так писали). Т.о.
 			UID + GID = 8 байт (в крайнем случае, UID + GID = 4 байта). Но никак не <cite>11 data bytes</cite>. Значит, 
 			UID и GID каким-то хитрым образом 
-			расположены (или может быть даже закодированы каким-нибудь эффективным способом, или разделены 
+			расположены (или закодированы каким-либо эффективным способом, или разделены 
 			байтами-маркерами и т.п.) в строчке 
 			<tt>01 04 01 04 00 00 04 02 04 00 00</tt>. Конечно, точный и окончательный ответ на этот вопрос даст исходный
 			код утилиты <strong>zip</strong>. Но я исходники не смотрел. Я попробовал читать эти 11 байт задом наперед.
@@ -483,8 +483,8 @@ $ grep '__U32_TYPE' /usr/include/x86_64-linux-gnu/bits/types.h
 			Что там делают остальные байты? Непонятно. Надо смотреть исходный код...
 			
 		<p>
-			Но вывод однозначен: при создании архива на Unix (по крайней мере, на Linux) с помощью <strong>zip</strong>
-			с одной только опцией <em>-r</em> владелец, группа, биты прав доступа сохраняются в ZIP-архиве
+			Но вывод однозначен: если создать архив на Unix (по крайней мере, на Linux) с помощью <strong>zip</strong>
+			с одной только опцией <em>-r</em>, то владелец, группа, биты прав доступа будут сохранены в ZIP-архиве
 			 (рискну предположить, что Posix ACL и
 			аттрибуты конкретной файловой системы, например аттрибут <em>Immutable</em> файловой системы <em>ext4</em>,
 			сохранены в архиве не будут).
@@ -492,7 +492,8 @@ $ grep '__U32_TYPE' /usr/include/x86_64-linux-gnu/bits/types.h
 		<h2></h2>
 		
 		<p>
-			Возникает вопрос, как эти аттрибуты достать. Это несложно. Чтобы извлечь биты SUID и SGID, нужно применить 
+			Возникает вопрос, как эти аттрибуты достать. Это несложно. Чтобы извлечь SETUID, SETGID и sticky-бит, нужно 
+			применить 
 			опцию <strong>-K</strong>:
 			<blockquote>
 				<p>
@@ -528,12 +529,7 @@ total 0
 				<p>
 					[VMS, Unix, OS/2, NT, Tandem] restore owner/protection info (UICs and ACL entries) under VMS, or user and group info (UID/GID) under
               Unix,  or  access control lists (ACLs) under certain network-enabled versions of OS/2 (Warp Server with IBM LAN Server/Requester 3.0
-              to 5.0; Warp Connect with IBM Peer 1.0), or security ACLs under Windows NT.  In most cases this will require special  system  privi‐
-              leges,  and doubling the option (-XX) under NT instructs unzip to use privileges for extraction; but under Unix, for example, a user
-              who belongs to several groups can restore files owned by any of those groups, as long as the user IDs match his or  her  own.   Note
-              that  ordinary  file  attributes  are  always restored--this option applies only to optional, extra ownership info available on some
-              operating systems.  [NT's access control lists do not appear to be especially compatible with OS/2's,  so  no  attempt  is  made  at
-              cross-platform portability of access privileges.  It is not clear under what conditions this would ever be useful anyway.]
+              to 5.0; Warp Connect with IBM Peer 1.0), or security ACLs under Windows NT...
 			</blockquote>
 
 <pre>
@@ -565,7 +561,7 @@ total 0
 			бесполезным. Представьте себе, вы скачали дистрибутив какой-нибудь программы в виде ZIP-архива. И в архиве
 			не сохранены биты доступа. Придеться самостоятельно в таком случае искать исполняемые файлы и вручную делать
 			их исполняемыми. Так что с этой точки зрения с программой <strong>unzip</strong> все в порядке. Проблема 
-			в другом. <strong>unzip</strong> при распаковке архива не обращает внимание на <strong>umask</strong>.
+			в другом: <strong>unzip</strong> при распаковке архива не обращает внимание на <strong>umask</strong>.
 			Такое поведение по-умолчанию логично, если архив распаковывает суперпользователь (ведь он может назначить
 			какие угодно права доступа). Но не для обычного пользователя.
 		
@@ -577,7 +573,7 @@ $ umask
 </pre>
 			
 		<p>
-			Но <strong>unzip</strong> при извлечении все равно разрешает доступ другим пользователям наперекор 
+			Но <strong>unzip</strong> при извлечении все равно разрешает доступ другим пользователям, наперекор 
 			<strong>umask</strong>:
 <pre>
 $ unzip ../1/zip_archive_test.zip
@@ -614,16 +610,16 @@ total 0
 			командной строки, они не взаимодействуют с серверами в Интернете, не работают с базами данных и т.д. Но
 			эти простые программы сохраняют совместимость (в некоторых случаях совместимости нет, об этом есть замечания
 			в руководстве) со старыми программами и архивами, созданными сто лет назад. Эти утилиты компилируются под
-			почти любую платформу (включая древнюю VMS и редкую в наши времена Amiga OS) и работают там. Админы их используют 
-			каждый день на серверах и т.д. и т.п.
+			почти любую платформу (включая древнюю VMS и редкую в наши времена AmigaOS) и работают там. Админы их используют 
+			каждый день и т.д. и т.п.
 		
 		<p>
-			Так что перед тем, как добавить новый переключатель, который применим только к битам доступа на Unix, 
+			Так что перед тем, как добавить новый переключатель, который применим только к битам доступа Unix, 
 			 необходимо проверить, что 
 			новая фича работает во всех 
 			Unix'ах (по крайней мере, в нескольких), а не только в Линуксе любимом. И что опция игнорируется в других 
-			системах (если MS-DOS развернуть просто, 
-			то ту же Amiga OS посложнее будет).
+			системах (если MS-DOS развернуть довольно просто, 
+			то ту же AmigaOS посложнее будет).
 			
 		<p>
 			__________
