@@ -33,7 +33,7 @@
 			<a href="https://superuser.com/questions/603068/unzipping-file-whilst-getting-correct-permissions">
 				Unzipping file whilst getting correct permissions?</a>. 
 			Только один пользователь, <i>David Tanzer</i>, ответил офигенно правильно и подробно: 
-			<a href="https://superuser.com/a/940477/538166">zip-файлы могут хранить права доступа</a>. Вдохновившись его
+			<a href="https://superuser.com/a/940477/538166">ZIP-файлы могут хранить права доступа</a>. Вдохновившись его
 			ответом, я решил написать эту ламерскую заметку.
 		
 		<p>
@@ -161,7 +161,7 @@ total 0
 		<p>
 			По сравнению с <a href="#listing-2">листингом 2</a> биты доступа остались. Владелец и группа пропали. 
 			SETUID, SETGID и sticky-бит тоже исчезли. Странно... Но прежде, чем углубляться в дебри, заглянем в страницу
-			руководства по <strong>zip</strong>. Там есть упоминание об опции <em>-sc</em> (<em>--show-command</em>):
+			руководства к <strong>zip</strong>. Там есть упоминание об опции <em>-sc</em> (<em>--show-command</em>):
 			<blockquote>
 				<p>
 					Show the command line starting zip as processed and exit. The new command parser permutes the 
@@ -185,7 +185,7 @@ zip error: Interrupted (show command line)
 
 		<p>
 			Как видим, ничего особенного. Все та же <em>-r</em>, и больше ничего нового. Что ж, покурим 
-			<code>man zip</code>еще... И обнаружим параметр <em>-X</em> (<em>--no-extra</em>) 
+			<code>man zip</code> еще... И обнаружим параметр <em>-X</em> (<em>--no-extra</em>) 
 			<sup id="footnote-3-top"><a href="#footnote-3-bottom">[3]</a></sup>:
 			<blockquote>
 				<p>
@@ -411,9 +411,10 @@ Central directory entry #5:
 </pre>
 			
 		<p>
-			Да, есть в чем поковыряться! Рассмотрим многострадальный файл <i>file.txt</i>. Мы видим, что биты доступа
-			(включая расширенные) присутствуют в архиве в поле <em>Unix file attributes</em>. А вот владелец и группа в 
-			явном виде не встречаются. Но в примечании <em>The central-directory extra field contains</em> сказано:
+			Да, есть в чем поковыряться! Рассмотрим многострадальный файл <i>file.txt</i> (он расположен в листинге
+			прямо над этим абзацем). Мы видим, что биты доступа (включая расширенные) присутствуют в архиве в поле 
+			<em>Unix file attributes</em>. А вот владелец и группа в явном виде не встречаются. Но в примечании 
+			<em>The central-directory extra field contains</em> сказано:
 <pre>
   - A subfield with ID 0x7875 (Unix UID/GID (any size)) and 11 data bytes:
     01 04 01 04 00 00 04 02 04 00 00.
@@ -462,9 +463,13 @@ $ grep '__U32_TYPE' /usr/include/x86_64-linux-gnu/bits/types.h
 			(рискну предположить, что Posix ACL и атрибуты конкретной файловой системы, например атрибут 
 			<em>immutable</em> файловой системы <em>Ext4</em>, сохранены в архиве не будут).
 			
+		<h2>Как достать атрибуты?</h2>	
+			
 		<p>
-			Возникает вопрос, как эти аттрибуты достать. Это несложно. Чтобы извлечь SETUID, SETGID и sticky-бит, нужно 
-			применить опцию <strong>-K</strong>:
+			Это несложно. 
+			
+		<p>
+			Чтобы извлечь SETUID, SETGID и sticky-бит, нужно применить опцию <strong>-K</strong>:
 			<blockquote>
 				<p>
 					[AtheOS, BeOS, Unix only] retain SUID/SGID/Tacky file attributes. Without this flag, these attribute
