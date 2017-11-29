@@ -220,9 +220,61 @@ lambda.thiz.SomeClass$1.func(LambdaVsAnonymousClass.java:36)
 </pre>
 
 		<p>
-			Но только на первый взгляд.
+			Т.о. в данном конкретном случае лямбда-выражения ничего не выигрывают (но и не проигрывают) у 
+			анонимных классов в плане читаемости
+			стэктрэйсов (а стало быть, и логов на сервере). В целом же можно сказать, что именованное всегда лучше 
+			неименованного. Т.е. лучше всего и лямбда-выражение, и анонимный класс вынести в отдельный класс с подходящим 
+			и емким названием. И больше не путаться в загадочных значках и циферках. Но так лучше только на первый взгляд.
+			И доказательством этому служит... многопоточность!
 			
-		<h2>Lambda </h2>
+		<h2>Lambda expressions + Multithreading = ♥</h2>
+		
+		<p>
+			Добавим в наш многострадальный класс-обертку два метода, которые запускают реализации метода <code>func()</code>
+			из функционального интерфейса <strong>MyFunction</strong> в работу параллельно. Потоки беруться из 
+			фиксированного пула потоков, т.е для каждой из реализаций используются пул единичного размера (это для того, 
+			чтобы для каждой реализации использовался персональный поток, на всякий случай). Получившиеся методы
+			<em></em>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+------------------------------------------------------------------------------------------------------------------------
+/usr/local/soft/jdk1.8.0_111/bin/java -Didea.launcher.port=7535 -Didea.launcher.bin.path=/usr/local/soft/idea-IC-139.1603.1/bin -Dfile.encoding=UTF-8 -classpath /usr/local/soft/jdk1.8.0_111/jre/lib/resources.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/plugin.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/charsets.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/rt.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/deploy.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/jfr.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/management-agent.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/javaws.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/jsse.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/jce.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/jfxswt.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/sunpkcs11.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/sunec.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/nashorn.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/dnsns.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/jaccess.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/jfxrt.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/cldrdata.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/zipfs.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/localedata.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/sunjce_provider.jar:/home/yura/Projects/flaz14.github.io/java-8-whats-new/code/java-8-whats-new/target/classes:/usr/local/soft/idea-IC-139.1603.1/lib/idea_rt.jar com.intellij.rt.execution.application.AppMain lambda.thiz.LambdaVsAnonymousClass
+Do some work in the separate thread.
+lambda.thiz.StubException: Some error has been occurred.
+	at lambda.thiz.SomeClass.lambda$doWithLambdaInSeparateThread$1(LambdaVsAnonymousClass.java:57)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+
+
+
+
+/usr/local/soft/jdk1.8.0_111/bin/java -Didea.launcher.port=7534 -Didea.launcher.bin.path=/usr/local/soft/idea-IC-139.1603.1/bin -Dfile.encoding=UTF-8 -classpath /usr/local/soft/jdk1.8.0_111/jre/lib/resources.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/plugin.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/charsets.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/rt.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/deploy.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/jfr.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/management-agent.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/javaws.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/jsse.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/jce.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/jfxswt.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/sunpkcs11.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/sunec.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/nashorn.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/dnsns.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/jaccess.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/jfxrt.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/cldrdata.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/zipfs.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/localedata.jar:/usr/local/soft/jdk1.8.0_111/jre/lib/ext/sunjce_provider.jar:/home/yura/Projects/flaz14.github.io/java-8-whats-new/code/java-8-whats-new/target/classes:/usr/local/soft/idea-IC-139.1603.1/lib/idea_rt.jar com.intellij.rt.execution.application.AppMain lambda.thiz.LambdaVsAnonymousClass
+Do some work in the separate thread.
+lambda.thiz.StubException: Some error has been occurred.
+	at lambda.thiz.SomeClass$2.run(LambdaVsAnonymousClass.java:73)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+------------------------------------------------------------------------------------------------------------------------			
+			
+			
+			
+			
 
 		<h2>Начало</h2>
 

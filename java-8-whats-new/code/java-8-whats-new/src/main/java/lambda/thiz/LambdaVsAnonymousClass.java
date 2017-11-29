@@ -1,13 +1,19 @@
 package lambda.thiz;
 
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 public class LambdaVsAnonymousClass {
     public static void main(String args[]) {
         final SomeClass someObject = new SomeClass();
-        someObject.doWorkWithLambda();
-        someObject.doWorkWithAnonymousInnerClass();
-        someObject.doWorkWithStandaloneClass();
+
+        //someObject.doWorkWithLambda();
+        //someObject.doWorkWithAnonymousInnerClass();
+        //someObject.doWorkWithStandaloneClass();
+
+        //someObject.doWorkWithLambdaInSeparateThread();
+        //someObject.doWorkWithAnonymousClassInSeparateThread();
+        someObject.doWorkWithStandaloneClassInSeparateThread();
     }
 }
 
@@ -46,6 +52,51 @@ class SomeClass {
         function.func();
         System.out.println("------------------------------------------------------");
     }
+
+    public void doWorkWithLambdaInSeparateThread() {
+        Executors.newFixedThreadPool(1).submit(
+                () -> {
+                    System.out.println("Do some work in the separate thread.");
+                    try {
+                        throw new StubException("Some error has been occurred.");
+                    } catch (StubException thrownManually) {
+                        thrownManually.printStackTrace();
+                    }
+                }
+        );
+    }
+
+    public void doWorkWithAnonymousClassInSeparateThread() {
+        Executors.newFixedThreadPool(1).submit(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("Do some work in the separate thread.");
+                        try {
+                            throw new StubException("Some error has been occurred.");
+                        } catch (StubException thrownManually) {
+                            thrownManually.printStackTrace();
+                        }
+                    }
+                }
+        );
+    }
+
+    public void doWorkWithStandaloneClassInSeparateThread() {
+        Executors.newFixedThreadPool(1).submit(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("Do some work in the separate thread.");
+                        try {
+                            throw new StubException("Some error has been occurred.");
+                        } catch (StubException thrownManually) {
+                            thrownManually.printStackTrace();
+                        }
+                    }
+                }
+        );
+    }
 }
 
 class StandaloneClass implements SomeFunction {
@@ -61,5 +112,11 @@ class StacktracePrinter {
         final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
         Stream.of(stacktrace).
                 forEach(System.out::println);
+    }
+}
+
+class StubException extends Exception {
+    public StubException(String s) {
+        super(s);
     }
 }
