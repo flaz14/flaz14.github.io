@@ -40,7 +40,7 @@
 		<p>
 			Казалось бы, чего нового можно сказать про лямбда-выражения? Все уже и так сказали.
 			Например, в статье 
-			<a href="https://habrahabr.ru/post/224593/">Лямбда-выражения в Java 8</a> (cобственно, оттуда я и взял идею 
+			<a id="external-link-1" href="https://habrahabr.ru/post/224593/">Лямбда-выражения в Java 8</a> (cобственно, оттуда я и взял идею 
 			для этой дурацкой заметки). Просто захотелось
 			самому закопаться в функции.
 			
@@ -177,11 +177,52 @@ com.intellij.rt.execution.application.AppMain.main(AppMain.java:134)
 
 		<p>
 			Длинновато получилось. Ну да ладно. Посмотрим, как отработала лямбда-функция. Первое отличие от анонимного
-			внутреннего класса заключается в том, что <code>this</code> ведет в разные места:
+			внутреннего класса заключается в том, что <strong>this</strong> "ведет" в разные места:
 <pre>
 doWorkWithLambda(): lambda.thiz.SomeClass
-
+doWorkWithAnonymousInnerClass(): lambda.thiz.SomeClass$1
 </pre>
+
+		<p>
+			В случае с лямбда-выражением <code>this</code> указывает на объект окружающего класса, т.е. на объект того
+			класса, внутри которого было определено лямбда-выражение. А в случае с внутренним анонимным классом 
+			<code>this</code> указывает на экземпляр самого внутреннего класса. Ну а с отдельно стоящим классом и так 
+			все понятно: у него нет ничего общего с тем объектом, в котором он был создан его экземпляр. Ничего нового
+			тут нет: про эту особенность давным-давно рассказывалось в <a href="#external-link-1">вышеупомянутой статье</a>.
+			
+		<p>
+			Если посмотреть в стэктрэйсы, можно тоже увидеть много интересного. Так, при использовании лямбда-выражения
+			реализация метода <code>func</code> называется <code>lambda.thiz.SomeClass.lambda$doWorkWithLambda$0</code>.
+			Т.е. включает в себя имя метода <em>doWorkWithLambda()</em>, в котором выражение было определено. 
+			Имя того метода
+			можно выяснить из нижележащего элемента стэктрэйса:
+<pre>
+doWorkWithLambda(): lambda.thiz.SomeClass
+java.lang.Thread.getStackTrace(Thread.java:1556)
+lambda.thiz.StacktracePrinter.print(LambdaVsAnonymousClass.java:61)
+lambda.thiz.SomeClass.lambda$doWorkWithLambda$0(LambdaVsAnonymousClass.java:24)
+lambda.thiz.SomeClass.doWorkWithLambda(LambdaVsAnonymousClass.java:26)
+lambda.thiz.LambdaVsAnonymousClass.main(LambdaVsAnonymousClass.java:8)
+</pre>
+	
+		<p>
+			На первый взгляд, имеет место простое дублирование. Может сложиться впечатление, что разработчики Java 8
+			"подстраховались", чтобы лямбда-выражения не пугали своими стэктрэйсами. Ибо в строчке:
+<pre>
+lambda.thiz.SomeClass.lambda$doWorkWithLambda$0(LambdaVsAnonymousClass.java:24)
+</pre>
+	
+		<p>
+			за эпическим словом <em>lambda</em> мы видим знаки <em>$</em> и число на конце. "Старомодный" анонимный
+			класс в стрэктрэйсе смотрится проще и понятнее (лишь один <em>$</em> и число):
+<pre>
+lambda.thiz.SomeClass$1.func(LambdaVsAnonymousClass.java:36)
+</pre>
+
+		<p>
+			Но только на первый взгляд.
+			
+		<h2>Lambda </h2>
 
 		<h2>Начало</h2>
 
