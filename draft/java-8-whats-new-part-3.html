@@ -38,9 +38,12 @@
 		<h2>Графомания продолжается</h2>
 		
 		<p>
-			Казалось бы, чего нового можно сказать про лямбда-выражения? Все уже и так сказали. Но мне гуглить лень. Я
-			лучше сам попробую "открыть" что-нибудь новое. Поехали!<br>
-			(т.е. еду я один, все равно эту хрень никто читать не будет)
+			Казалось бы, чего нового можно сказать про лямбда-выражения? Все уже и так сказали.
+			Например, в статье 
+			<a href="https://habrahabr.ru/post/224593/">Лямбда-выражения в Java 8</a> (cобственно, оттуда я и взял идею 
+			для этой дурацкой заметки). Просто захотелось
+			самому закопаться в функции.
+			
 
 		<h2>Lambda expression != Anonymous class</h2>
 		
@@ -50,11 +53,135 @@
 			
 		<p>
 			Пусть у нас есть простой функциональный интерфейс <strong>SomeFunction</strong>:
+<h4 id="listing-1">Листинг 1 - простой функциональный интерфейс</h4>
 <pre>
+@FunctionalInterface
+interface SomeFunction {
+    void func();
+}
 </pre>
-			
-	
+		
+		<p>
+			Подготовим три реализации этого интерфейса: с помощью лямбда-выражения, с помощью привычного анонимного 
+			внутреннего класса и с помощью еще более обыденного внешнего класса. И сделаем так, чтобы они вызывались из
+			некоего объекта (см. <a href="#listing-2">листинг 2</a>). (горизонтальные линейки я добавил для ясности, 
+			чтобы результаты работы разных методов не путались).
 
+<h4 id="listing-2">Листинг 2 - Класс-обертка для реализаций функционального интерфейса</h4>
+<pre>
+class SomeClass {
+    public void doWorkWithLambda() {
+        System.out.println("------------------------------------------------------");
+        final SomeFunction function = () -> {
+            System.out.println("doWorkWithLambda(): " + this.getClass().getName());
+            StacktracePrinter.print();
+        };
+        function.func();
+        System.out.println("------------------------------------------------------");
+    }
+
+    public void doWorkWithAnonymousInnerClass() {
+        System.out.println("------------------------------------------------------");
+        final SomeFunction function = new SomeFunction() {
+            @Override
+            public void func() {
+                System.out.println("doWorkWithAnonymousInnerClass(): " + this.getClass().getName());
+                StacktracePrinter.print();
+            }
+        };
+        function.func();
+        System.out.println("------------------------------------------------------");
+    }
+
+    public void doWorkWithStandaloneClass() {
+        System.out.println("------------------------------------------------------");
+        final SomeFunction function = new StandaloneClass();
+        function.func();
+        System.out.println("------------------------------------------------------");
+    }
+}
+</pre>
+
+		<p>
+			Ниже приведена реализация метода <code>func()</code> посредством обычного класса:
+<h4 id="listing-3">Листинг 3 - реализация функционального интерфейса с помощью обычного класса</h4>
+<pre>
+class StandaloneClass implements SomeFunction {
+    @Override
+    public void func() {
+        System.out.println("StandaloneClass: " + this.getClass().getName());
+        StacktracePrinter.print();
+    }
+}
+</pre>
+
+		<p>
+			Все эти реализации всего лишь печают имя класса (далее мы узнаем, какие именно это классы) и стэк вызовов. Для
+			распечатки используется вспомогательный класс с единственным статическим методом; ничего особенного.
+<h4 id="listing-4">Листинг 4 - вспомогательный класс для распечатки стэка вызовов</h4>
+<pre>
+class StacktracePrinter {
+    public static void print() {
+        final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
+        Stream.of(stacktrace).
+                forEach(System.out::println);
+    }
+}
+</pre>
+
+		<p>
+			А теперь запустим все это хозяйство. И получим вывод, приведенный в <a href="#listing-5">листинге 5</a>:
+
+<h4 id="listing-5">Листинг 5 - результаты работы разных реализаций</h4>
+<pre>
+------------------------------------------------------
+doWorkWithLambda(): lambda.thiz.SomeClass
+java.lang.Thread.getStackTrace(Thread.java:1556)
+lambda.thiz.StacktracePrinter.print(LambdaVsAnonymousClass.java:61)
+lambda.thiz.SomeClass.lambda$doWorkWithLambda$0(LambdaVsAnonymousClass.java:24)
+lambda.thiz.SomeClass.doWorkWithLambda(LambdaVsAnonymousClass.java:26)
+lambda.thiz.LambdaVsAnonymousClass.main(LambdaVsAnonymousClass.java:8)
+sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+java.lang.reflect.Method.invoke(Method.java:498)
+com.intellij.rt.execution.application.AppMain.main(AppMain.java:134)
+------------------------------------------------------
+------------------------------------------------------
+doWorkWithAnonymousInnerClass(): lambda.thiz.SomeClass$1
+java.lang.Thread.getStackTrace(Thread.java:1556)
+lambda.thiz.StacktracePrinter.print(LambdaVsAnonymousClass.java:61)
+lambda.thiz.SomeClass$1.func(LambdaVsAnonymousClass.java:36)
+lambda.thiz.SomeClass.doWorkWithAnonymousInnerClass(LambdaVsAnonymousClass.java:39)
+lambda.thiz.LambdaVsAnonymousClass.main(LambdaVsAnonymousClass.java:9)
+sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+java.lang.reflect.Method.invoke(Method.java:498)
+com.intellij.rt.execution.application.AppMain.main(AppMain.java:134)
+------------------------------------------------------
+------------------------------------------------------
+StandaloneClass: lambda.thiz.StandaloneClass
+java.lang.Thread.getStackTrace(Thread.java:1556)
+lambda.thiz.StacktracePrinter.print(LambdaVsAnonymousClass.java:61)
+lambda.thiz.StandaloneClass.func(LambdaVsAnonymousClass.java:55)
+lambda.thiz.SomeClass.doWorkWithStandaloneClass(LambdaVsAnonymousClass.java:46)
+lambda.thiz.LambdaVsAnonymousClass.main(LambdaVsAnonymousClass.java:10)
+sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+java.lang.reflect.Method.invoke(Method.java:498)
+com.intellij.rt.execution.application.AppMain.main(AppMain.java:134)
+------------------------------------------------------
+</pre>
+
+		<p>
+			Длинновато получилось. Ну да ладно. Посмотрим, как отработала лямбда-функция. Первое отличие от анонимного
+			внутреннего класса заключается в том, что <code>this</code> ведет в разные места:
+<pre>
+doWorkWithLambda(): lambda.thiz.SomeClass
+
+</pre>
 
 		<h2>Начало</h2>
 

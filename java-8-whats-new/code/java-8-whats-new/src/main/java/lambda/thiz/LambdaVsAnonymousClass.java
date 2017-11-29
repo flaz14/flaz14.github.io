@@ -9,8 +9,6 @@ public class LambdaVsAnonymousClass {
         someObject.doWorkWithAnonymousInnerClass();
         someObject.doWorkWithStandaloneClass();
     }
-
-
 }
 
 @FunctionalInterface
