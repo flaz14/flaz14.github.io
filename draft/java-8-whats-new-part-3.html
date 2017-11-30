@@ -234,9 +234,119 @@ lambda.thiz.SomeClass$1.func(LambdaVsAnonymousClass.java:36)
 			из функционального интерфейса <strong>MyFunction</strong> в работу параллельно. Потоки беруться из 
 			фиксированного пула потоков, т.е для каждой из реализаций используются пул единичного размера (это для того, 
 			чтобы для каждой реализации использовался персональный поток, на всякий случай). Получившиеся методы
-			<em></em>
+			<em>doWorkWithLambdaInSeparateThread()</em>, <em>doWorkWithAnonymousClassInSeparateThread()</em> и 
+			<em>doWorkWithStandaloneClassInSeparateThread()</em>, а также отдельностоящий класс,
+			который описывает поток, приведены в <a href="#listing-6">листинге 6</a>.
 			
+<h4 id="listing-6">Листинг 6 - функциональный интерфейс, работающий в разных потоках - плохое название, исправить!!!</h4>
+<pre>
+class SomeClass {
+    ...
+    public void doWorkWithLambdaInSeparateThread() {
+        Executors.newFixedThreadPool(1).submit(
+                () -> {
+                    System.out.println("!!! doWorkWithLambdaInSeparateThread()");
+                    try {
+                        throw new StubException("Some error has been occurred.");
+                    } catch (StubException thrownManually) {
+                        thrownManually.printStackTrace();
+                    }
+                }
+        );
+    }
+
+    public void doWorkWithAnonymousClassInSeparateThread() {
+        Executors.newFixedThreadPool(1).submit(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("!!! doWorkWithAnonymousClassInSeparateThread()");
+                        try {
+                            throw new StubException("Some error has been occurred.");
+                        } catch (StubException thrownManually) {
+                            thrownManually.printStackTrace();
+                        }
+                    }
+                }
+        );
+    }
+
+    public void doWorkWithStandaloneClassInSeparateThread() {
+        Executors.newFixedThreadPool(1).submit(new StandaloneThreadDefinition());
+    }
+    ...
+}
+
+class StandaloneThreadDefinition implements Runnable {
+    @Override
+    public void run() {
+        System.out.println("!!! StandaloneThreadDefinition");
+        try {
+            throw new StubException("Some error has been occurred.");
+        } catch (StubException thrownManually) {
+            thrownManually.printStackTrace();
+        }
+    }
+}
+</pre>
+
+		<p>
+			Суть этих "многопоточных" реализаций заключается в том, чтобы сделать в отдельном потоке полезную работу 
+			(напечатать строку), затем выбросить исключение и посмотреть, что будет. Т.е. увидеть стэктрэйс. Чем стэктрэйс
+			метода, выполненного в отдельном потоке (т.е. не в основном потоке, а в потоке, взятом, к примеру, из 
+			<em>ExecutorService</em>) не имеет ничего общего со стэктрэйсом потока, который отправил задачу на выполнение. 
+			А именно: предоставил реализацию интерфейса <strong>Runnable</strong> (на самом деле, вариантов больше
+			!!!здесь будет ссылка на Javadoc!!!, просто Runnable - самый простой из них).
+			Что ж, посмотрим на стэктрэйсы.
 			
+<h4 id="listing-7">Листинг 7 - Стэктрэйсы методов, выполнившихся в отдельных потоках</h4>
+<pre>
+!!! doWorkWithLambdaInSeparateThread()
+lambda.thiz.StubException: Some error has been occurred.
+	at lambda.thiz.SomeClass.lambda$doWorkWithLambdaInSeparateThread$1(LambdaVsAnonymousClass.java:61)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+
+
+!!! doWorkWithAnonymousClassInSeparateThread()
+lambda.thiz.StubException: Some error has been occurred.
+	at lambda.thiz.SomeClass$2.run(LambdaVsAnonymousClass.java:76)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+
+
+!!! StandaloneThreadDefinition
+lambda.thiz.StubException: Some error has been occurred.
+	at lambda.thiz.StandaloneThreadDefinition.run(LambdaVsAnonymousClass.java:103)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+</pre>
+			
+		<p>
+			Строчки, начинающиеся с <tt>!!!</tt> можно проигнорировать (вышеупомянутся "полезная работа"), они были 
+			добавлены, чтобы стэктрэйсы не путались в листинге.
+			Посмотрим на сами стэктрэйсы. 
+			Начнем с самого простого: <em>StandaloneThreadDefinition</em>. Что мы видим? Что в потоке выполнения первыми
+			были вызваны методы классов из пакета <em>java.util.concurrent</em>, что не удивительно, ведь мы не создавали
+			потоки сами, а использовали ExecutorService - стандартное средство из JDK. Выше в стэктрэйсе мы видим строчку:
+<pre>
+	at lambda.thiz.StandaloneThreadDefinition.run(LambdaVsAnonymousClass.java:103)
+</pre>
+		
+		<p>
+			Тут тоже все понятно: когда задача отправляется на выполнение с помощью метода <code>submit()</code> 
+			!!!тут будет ссылка на Javadoc!!!, то вызывается метод <code>run()</code> из переданного экземпляра класса,
+			который реализует интерфейс Runnable. Вот мы и видим его в стэктрэйсе. Номер строки исходного кода <b>103</b>,  
+			(а именно фрагмент <tt>LambdaVsAnonymousClass.java:103</tt>) соответствует 
 			
 			
 			

@@ -56,7 +56,7 @@ class SomeClass {
     public void doWorkWithLambdaInSeparateThread() {
         Executors.newFixedThreadPool(1).submit(
                 () -> {
-                    System.out.println("Do some work in the separate thread.");
+                    System.out.println("!!! doWorkWithLambdaInSeparateThread()");
                     try {
                         throw new StubException("Some error has been occurred.");
                     } catch (StubException thrownManually) {
@@ -71,7 +71,7 @@ class SomeClass {
                 new Runnable() {
                     @Override
                     public void run() {
-                        System.out.println("Do some work in the separate thread.");
+                        System.out.println("!!! doWorkWithAnonymousClassInSeparateThread()");
                         try {
                             throw new StubException("Some error has been occurred.");
                         } catch (StubException thrownManually) {
@@ -83,19 +83,7 @@ class SomeClass {
     }
 
     public void doWorkWithStandaloneClassInSeparateThread() {
-        Executors.newFixedThreadPool(1).submit(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        System.out.println("Do some work in the separate thread.");
-                        try {
-                            throw new StubException("Some error has been occurred.");
-                        } catch (StubException thrownManually) {
-                            thrownManually.printStackTrace();
-                        }
-                    }
-                }
-        );
+        Executors.newFixedThreadPool(1).submit(new StandaloneThreadDefinition());
     }
 }
 
@@ -104,6 +92,18 @@ class StandaloneClass implements SomeFunction {
     public void func() {
         System.out.println("StandaloneClass: " + this.getClass().getName());
         StacktracePrinter.print();
+    }
+}
+
+class StandaloneThreadDefinition implements Runnable {
+    @Override
+    public void run() {
+        System.out.println("!!! StandaloneThreadDefinition");
+        try {
+            throw new StubException("Some error has been occurred.");
+        } catch (StubException thrownManually) {
+            thrownManually.printStackTrace();
+        }
     }
 }
 
