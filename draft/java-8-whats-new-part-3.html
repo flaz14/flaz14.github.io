@@ -292,16 +292,15 @@ class StandaloneThreadDefinition implements Runnable {
 			(напечатать строку), затем выбросить исключение и посмотреть, что будет. Т.е. увидеть стэктрэйс. 
 			Всем известно, что стэктрэйс
 			метода, выполненного в отдельном потоке (т.е. не в основном потоке приложения, а в потоке, взятом из пула потоков)
-			не имеет ничего общего со стэктрэйсом потока, который отправил задачу  на выполнение. 
-			А именно: предоставил реализацию интерфейса <strong>Runnable</strong> (на самом деле, вариантов больше
-			!!!здесь будет ссылка на Javadoc!!!, просто Runnable - самый простой из них).
-			Что ж, посмотрим на стэктрэйсы.
+			не имеет ничего общего со стэктрэйсом потока, который отправил задачу на выполнение посредством 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ExecutorService.html#submit-java.lang.Runnable-">
+				java.util.concurrent.ExecutorService#submit(java.lang.Runnable)</a>. Что ж, посмотрим на стэктрэйсы.
 			
 <h4 id="listing-7">Листинг 7 - Стэктрэйсы методов, выполнившихся в отдельных потоках</h4>
 <pre>
 !!! doWorkWithLambdaInSeparateThread()
 lambda.thiz.StubException: Some error has been occurred.
-	at lambda.thiz.SomeClass.lambda$doWorkWithLambdaInSeparateThread$1(LambdaVsAnonymousClass.java:61)
+	at lambda.thiz.SomeClass.lambda$doWorkWithLambdaInSeparateThread$1(LambdaVsAnonymousClass.java:62)
 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
@@ -311,7 +310,7 @@ lambda.thiz.StubException: Some error has been occurred.
 
 !!! doWorkWithAnonymousClassInSeparateThread()
 lambda.thiz.StubException: Some error has been occurred.
-	at lambda.thiz.SomeClass$2.run(LambdaVsAnonymousClass.java:76)
+	at lambda.thiz.SomeClass$2.run(LambdaVsAnonymousClass.java:78)
 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
@@ -321,7 +320,7 @@ lambda.thiz.StubException: Some error has been occurred.
 
 !!! StandaloneThreadDefinition
 lambda.thiz.StubException: Some error has been occurred.
-	at lambda.thiz.StandaloneThreadDefinition.run(LambdaVsAnonymousClass.java:103)
+	at lambda.thiz.StandaloneThreadDefinition.run(LambdaVsAnonymousClass.java:106)
 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
@@ -330,37 +329,96 @@ lambda.thiz.StubException: Some error has been occurred.
 </pre>
 			
 		<p>
-			Строчки, начинающиеся с <tt>!!!</tt> можно проигнорировать (вышеупомянутся "полезная работа"), они были 
-			добавлены, чтобы стэктрэйсы не путались в листинге.
-			Посмотрим на сами стэктрэйсы. 
-			Начнем с самого простого: <em>StandaloneThreadDefinition</em>. Что мы видим? Что в потоке выполнения первыми
+			Строчки, начинающиеся с <tt>!!!</tt> можно проигнорировать (это вышеупомянутая "полезная работа"), они были 
+			добавлены, чтобы стэктрэйсы не путались в листинге. Посмотрим на сами стэктрэйсы. 
+			Начнем с самого простого: <strong>StandaloneThreadDefinition</strong>. Что мы видим? Что в потоке выполнения первыми
 			были вызваны методы классов из пакета <em>java.util.concurrent</em>, что не удивительно, ведь мы не создавали
-			потоки сами, а использовали ExecutorService - стандартное средство из JDK. Выше в стэктрэйсе мы видим строчку:
+			потоки сами, а использовали <em>ExecutorService</em> - стандартное средство из JDK. 
+			Выше в стэктрэйсе мы видим строчку:
 <pre>
 	at lambda.thiz.StandaloneThreadDefinition.run(LambdaVsAnonymousClass.java:103)
 </pre>
 		
 		<p>
-			Тут тоже все понятно: когда задача отправляется на выполнение с помощью метода <code>submit()</code> 
-			!!!тут будет ссылка на Javadoc!!!, то вызывается метод <code>run()</code> из переданного экземпляра класса,
-			который реализует интерфейс Runnable. Вот мы и видим его в стэктрэйсе. Номер строки исходного кода <b>103</b>,  
-			(а именно фрагмент <tt>LambdaVsAnonymousClass.java:103</tt>) соответствует месту в теле метода <em>run()</em>
-			класса <strong>StandaloneThreadDefinition</strong>. Выше в стэктрэйсе мы видим только само исключение
-			<em>StubException</em>. И все! Больше ничего нет! Т.е. глядя только на стэктрэйс потока, в котором выполнился
-			метод <code>run()</code> мы никак не узнаем, кто же выполнение этого метода породил, т.е. мы не узнаем, кто
-			приказал ExecutorService'у выполнить данную задачу. И не имеет значение, где определен метод <code>run()</code>,
-			в анонимном внутреннем классе, или в отдельном классе.
+			Тут тоже все понятно: когда задача отправляется на выполнение с помощью метода 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ExecutorService.html#submit-java.lang.Runnable-">
+				java.util.concurrent.ExecutorService#submit(java.lang.Runnable)</a>, вызывается метод 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html#run--">
+				java.lang.Runnable#run</a>, из переданного экземпляра класса, 
+			который реализует интерфейс <em>Runnable</em>. Вот мы и видим его в стэктрэйсе. 
+			Номер строки исходного кода <b>106</b> 
+			(<tt>LambdaVsAnonymousClass.java:106</tt>) соответствует месту в теле метода <code>run()</code>
+			класса <strong>StandaloneThreadDefinition</strong> (см. рисунок 1).
 			
+<h4 id="illustration-1">Рисунок 1 - исходный кода класса StandaloneThreadDefinition</h4>
+<img src="StandaloneThreadDefinition.png" width="640px">
 			
 		<p>
-			Казалось бы, чего нового можно сказать про лямбда-выражения? Все уже и так сказали.
-			Например, в статье 
-			 (cобственно,
-			 оттуда я и взял идею 
-			для этой дурацкой заметки). Просто захотелось
-			самому закопаться в функции.
+			Выше в стэктрэйсе мы видим только само исключение
+			<em>StubException</em>. И все! Больше ничего нет! Т.е. глядя только на стэктрэйс потока, в котором выполнился
+			метод <code>run()</code> мы никак не узнаем, кто же породил выполнение этого метода в отдельном потоке.
+			
+		<p>
+			Теперь рассмотрим ситуацию с анонимным внутренним классом. Строчка
+<pre>
+	at lambda.thiz.SomeClass$2.run(LambdaVsAnonymousClass.java:78)
+</pre>
 
+		<p>
+			недвусмысленно говорит, что исключение возникло в методе <code>run()</code> анонимного внутреннего класса.
+			По номеру строки исходного текста <b>78</b> найдем местоположение проблемного кода:
+			
+<h4 id="illustration-2">Рисунок 2 - исходный код анонимного внутреннего класса, реализующего Runnable</h4>
+<img src="doWorkWithAnonymousClassInSeparateThread().png">
+			
+		<p>
+			Это уже лучше, чем в случае с отдельностоящим классом. Анонимный внутренний класс может быть отправлен на 
+			"обработку" в отдельном потоке только из того места, где этот анонимный класс был определен. Что заметно
+			сужает область поиска причины ошибки.
+			
+		<p>
+			И наконец, разберем ситуацию с лямбда-выражением. Мы не увидим в стэктрэйсе упоминание о выполнении метода
+			<code>run()</code>, как будто наша лямбда-функция и не реализует интерфейс <strong>Runnable</strong>. Кроме
+			одинаковых с предыдующими двумя случаями строк, мы найдем в стэктрэйсе (непосдственно перед самим исключением)
+			вот эту:
+<pre>
+	at lambda.thiz.SomeClass.lambda$doWorkWithLambdaInSeparateThread$1(LambdaVsAnonymousClass.java:62)
+</pre>
 
+		<p>
+			О чем она говорит и что в ней особенного? Номер строки исходного текста <b>62</b> как обычно указывает на место 
+			возникновения исключения (см. <a href="#illustration-3">рисунок 3</a>).
+
+<h4 id="illustration-3">Рисунок 3 - исходный текст лямбда-выражения, реализующего Runnable</h4>
+<img src="doWorkWithLambdaInSeparateThread().png" width="640px">
+
+		<p>
+			Так же, как и в случае с анонимным внутренним классом, лямбда-выражение "привязано" к методу, в котором 
+			оно определено. Но есть одна особенность: в стэктрэйсе мы видим, кроме номера строки исходного кода, 
+			имя синтетического метода, соответствующее лямбда-выражению: <tt>lambda$doWorkWithLambdaInSeparateThread$1</tt>.
+			А в нем мы видим <b>имя метода, в котором было определено лямбда-выражение</b>, т.е.
+			<tt>doWorkWithLambdaInSeparateThread()</tt> в нашем примере.
+			
+		<p>
+			Т.о. в случае возникновения
+			исключения в лямбда выражении, выполняющемся в отдельном потоке, мы получим не только номер строки исходного текста, 
+			в котором возникло исключение, но и имя метода, который отправил задачу на выполнение. Это не такой уж большой
+			плюс по сравнению со старомодным анонимным внутренним классом. Тем не менее, дополнительная зацепка всегда кстати.
+			Ведь кроме поиска по номеру строки в исходниках эти самые исходники можно быстренько "грепнуть" 
+			на предмет метода, 
+			имя которого было с заботой приклеено к имени лямбда-выражения автоматически. Конечно, в реальных приложениях
+			лучше сохранять трассировку стэка клиента, как об этом рассказано в статье 
+			<a href="https://habrahabr.ru/post/260953/">10 советов по использованию ExecutorService</a>. Но боятся 
+			лямбда-выражений в многопоточном программировании точно не стоит.
+			
+		<h2>Итог</h2>
+		
+		<p>
+			Лямбда-выражения - это больше, чем синтаксический сахар. Указатель <strong>this</strong> ведет туда, куда надо, 
+			а не в синтетический класс какой-нибудь. И лямбда-выражения ничем не уступают своим традиционным собратьям -
+			анонимным внутренним классам. Даже выигрывают у них немного. Что же касается отдельностоящих классов, то
+			в многопоточном программировании лямбда-выражения уделывают своих именнованных сородичей. Кто бы мог подумать...
+			
 		<hr>
 
 		<h1>
