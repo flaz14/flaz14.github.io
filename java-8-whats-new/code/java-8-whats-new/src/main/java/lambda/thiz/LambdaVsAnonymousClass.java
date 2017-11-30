@@ -13,7 +13,7 @@ public class LambdaVsAnonymousClass {
 
         //someObject.doWorkWithLambdaInSeparateThread();
         //someObject.doWorkWithAnonymousClassInSeparateThread();
-        someObject.doWorkWithStandaloneClassInSeparateThread();
+        //someObject.doWorkWithStandaloneClassInSeparateThread();
     }
 }
 
@@ -54,36 +54,39 @@ class SomeClass {
     }
 
     public void doWorkWithLambdaInSeparateThread() {
-        Executors.newFixedThreadPool(1).submit(
-                () -> {
-                    System.out.println("!!! doWorkWithLambdaInSeparateThread()");
-                    try {
-                        throw new StubException("Some error has been occurred.");
-                    } catch (StubException thrownManually) {
-                        thrownManually.printStackTrace();
-                    }
-                }
-        );
+        Executors.newFixedThreadPool(1).
+                submit(
+                        () -> {
+                            System.out.println("!!! doWorkWithLambdaInSeparateThread()");
+                            try {
+                                throw new StubException("Some error has been occurred.");
+                            } catch (StubException thrownManually) {
+                                thrownManually.printStackTrace();
+                            }
+                        }
+                );
     }
 
     public void doWorkWithAnonymousClassInSeparateThread() {
-        Executors.newFixedThreadPool(1).submit(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        System.out.println("!!! doWorkWithAnonymousClassInSeparateThread()");
-                        try {
-                            throw new StubException("Some error has been occurred.");
-                        } catch (StubException thrownManually) {
-                            thrownManually.printStackTrace();
+        Executors.newFixedThreadPool(1).
+                submit(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                System.out.println("!!! doWorkWithAnonymousClassInSeparateThread()");
+                                try {
+                                    throw new StubException("Some error has been occurred.");
+                                } catch (StubException thrownManually) {
+                                    thrownManually.printStackTrace();
+                                }
+                            }
                         }
-                    }
-                }
-        );
+                );
     }
 
     public void doWorkWithStandaloneClassInSeparateThread() {
-        Executors.newFixedThreadPool(1).submit(new StandaloneThreadDefinition());
+        Executors.newFixedThreadPool(1).
+                submit(new StandaloneThreadDefinition());
     }
 }
 
