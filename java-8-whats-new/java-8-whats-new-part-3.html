@@ -332,10 +332,12 @@ lambda.thiz.StubException: Some error has been occurred.
 		<p>
 			Строчки, начинающиеся с <tt>!!!</tt>, можно проигнорировать (это вышеупомянутая "полезная работа"), они были 
 			добавлены, чтобы стэктрэйсы не путались в листинге. Посмотрим на сами стэктрэйсы. 
-			Начнем с самого простого: <em>StandaloneThreadDefinition</em>. Что мы видим? Что в потоке выполнения первыми
+			Начнем с самого простого: <code>StandaloneThreadDefinition</code>. Что мы видим? Что в потоке выполнения первыми
 			были вызваны методы классов из пакета <em>java.util.concurrent</em>, что не удивительно, ведь мы не создавали
-			потоки сами, а использовали <a href="">ExecutorService</a> - стандартное средство JDK. 
-			Выше в стэктрэйсе мы видим строчку:
+			потоки сами, а использовали 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ExecutorService.html">
+				ExecutorService</a> - стандартное средство JDK. 
+			Непосредственно за строкой, соответствующей возникшему исключению, в стэктрэйсе мы видим строчку:
 <pre>
 	at lambda.thiz.StandaloneThreadDefinition.run(LambdaVsAnonymousClass.java:103)
 </pre>
@@ -346,18 +348,20 @@ lambda.thiz.StubException: Some error has been occurred.
 				java.util.concurrent.ExecutorService#submit(java.lang.Runnable)</a>, вызывается метод 
 			<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html#run--">
 				java.lang.Runnable#run</a>, из переданного экземпляра класса, 
-			который реализует интерфейс <em>Runnable</em>. Вот мы и видим его в стэктрэйсе. 
+			который реализует интерфейс 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html">Runnable</a>. Вот мы и видим его
+			 в стэктрэйсе. 
 			Номер строки исходного кода <b>106</b> 
 			(<tt>LambdaVsAnonymousClass.java:106</tt>) соответствует месту в теле метода <code>run()</code>
-			класса <strong>StandaloneThreadDefinition</strong> (см. рисунок 1).
+			класса <code>StandaloneThreadDefinition</code> (см. <a href="#illustration-1">рисунок 1</a>).
 			
 <h4 id="illustration-1">Рисунок 1 - исходный кода класса StandaloneThreadDefinition</h4>
-<img src="StandaloneThreadDefinition.png" width="640px">
+<img src="illustrations/StandaloneThreadDefinition.png" width="480px">
 			
 		<p>
 			Выше в стэктрэйсе мы видим только само исключение
-			<em>StubException</em>. И все! Больше ничего нет! Т.е. глядя только на стэктрэйс потока, в котором выполнился
-			метод <code>run()</code> мы никак не узнаем, кто же породил выполнение этого метода в отдельном потоке.
+			<code>StubException</code>. И все! Больше ничего нет! Т.е. глядя только на стэктрэйс потока, в котором выполнился
+			метод <code>run()</code>, мы никак не узнаем, кто же породил выполнение этого метода в отдельном потоке.
 			
 		<p>
 			Теперь рассмотрим ситуацию с анонимным внутренним классом. Строчка
@@ -370,7 +374,8 @@ lambda.thiz.StubException: Some error has been occurred.
 			По номеру строки исходного текста <b>78</b> найдем местоположение проблемного кода:
 			
 <h4 id="illustration-2">Рисунок 2 - исходный код анонимного внутреннего класса, реализующего Runnable</h4>
-<img src="doWorkWithAnonymousClassInSeparateThread().png">
+<img src="illustrations/doWorkWithAnonymousClassInSeparateThread().png"
+width="640px">
 			
 		<p>
 			Это уже лучше, чем в случае с отдельностоящим классом. Анонимный внутренний класс может быть отправлен на 
@@ -387,11 +392,11 @@ lambda.thiz.StubException: Some error has been occurred.
 </pre>
 
 		<p>
-			О чем она говорит и что в ней особенного? Номер строки исходного текста <b>62</b> как обычно указывает на место 
+			О чем она говорит, и что в ней особенного? Номер строки исходного текста <b>62</b> как обычно указывает на место 
 			возникновения исключения (см. <a href="#illustration-3">рисунок 3</a>).
 
 <h4 id="illustration-3">Рисунок 3 - исходный текст лямбда-выражения, реализующего Runnable</h4>
-<img src="doWorkWithLambdaInSeparateThread().png" width="640px">
+<img src="illustrations/doWorkWithLambdaInSeparateThread().png" width="640px">
 
 		<p>
 			Так же, как и в случае с анонимным внутренним классом, лямбда-выражение "привязано" к методу, в котором 
@@ -405,7 +410,7 @@ lambda.thiz.StubException: Some error has been occurred.
 			исключения в лямбда выражении, выполняющемся в отдельном потоке, мы получим не только номер строки исходного текста, 
 			в котором возникло исключение, но и имя метода, который отправил задачу на выполнение. Это не такой уж большой
 			плюс по сравнению со старомодным анонимным внутренним классом. Тем не менее, дополнительная зацепка всегда кстати.
-			Ведь кроме поиска по номеру строки в исходниках эти самые исходники можно быстренько "грепнуть" 
+			Ведь кроме поиска по номеру строки в исходниках эти самые исходники можно будет быстренько "грепнуть" 
 			на предмет метода, 
 			имя которого было с заботой приклеено к имени лямбда-выражения автоматически. Конечно, в реальных приложениях
 			лучше сохранять трассировку стэка клиента, как об этом рассказано в статье 
