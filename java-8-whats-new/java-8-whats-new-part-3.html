@@ -39,7 +39,8 @@ href="https://github.com/flaz14/flaz14.github.io/blob/master/java-8-whats-new/co
 		<h2>Lambda expression != Anonymous inner class</h2>
 		
 		<p>
-			Мы привыкли думать, что лямбда-выражения и анонимные классы - это одно и то же (кроме улучшенных синтаксиса
+			Мы привыкли думать, что лямбда-выражения и анонимные внутренние классы - это одно и то же (кроме улучшенных 
+			синтаксиса
 			и правил выведения типов). Но это не так. 
 			
 		<p>
@@ -183,22 +184,20 @@ doWorkWithAnonymousInnerClass(): lambda.thiz.SomeClass$1
 			В случае с лямбда-выражением <code>this</code> указывает на объект окружающего класса, т.е. на объект того
 			класса, внутри которого было определено лямбда-выражение. А в случае с анонимным внутренним классом 
 			<code>this</code> указывает на экземпляр самого внутреннего класса. С отдельно же стоящим классом и так 
-			все понятно: у него нет ничего общего с тем объектом, в котором был создан его экземпляр. Ничего нового я 
+			все понятно: у него нет ничего общего с тем объектом, в котором был создан его экземпляр. Америку я 
 			не открыл. Про эту особенность давным-давно рассказывалось в статье
 			<a href="https://habrahabr.ru/post/224593/">Лямбда-выражения в Java 8</a>.
 		
 		<p>
 			Если посмотреть в стэктрэйсы, можно увидеть много интересного. Так, при использовании лямбда-выражения
-			реализация метода <code>func()</code> называется <strong>lambda.thiz.SomeClass.lambda$doWorkWithLambda$0</strong>.
+			реализация метода <code>func()</code> называется <b>lambda.thiz.SomeClass.lambda$doWorkWithLambda$0</b>.
 			Такое синтетическое имя включает в себя имя метода <code>doWorkWithLambda()</code>, в котором лямбда-выражение
 			было определено. Очевидно, что <code>doWorkWithLambda()</code> - это нижележащий элемент стэктрэйса:
 <pre>
-doWorkWithLambda(): lambda.thiz.SomeClass
-java.lang.Thread.getStackTrace(Thread.java:1556)
-lambda.thiz.StacktracePrinter.print(LambdaVsAnonymousClass.java:61)
+...
 lambda.thiz.SomeClass.lambda$doWorkWithLambda$0(LambdaVsAnonymousClass.java:24)
 lambda.thiz.SomeClass.doWorkWithLambda(LambdaVsAnonymousClass.java:26)
-lambda.thiz.LambdaVsAnonymousClass.main(LambdaVsAnonymousClass.java:8)
+...
 </pre>
 	
 		<p>
@@ -218,7 +217,7 @@ lambda.thiz.SomeClass$1.func(LambdaVsAnonymousClass.java:36)
 		<p>
 			Т.о. в данном конкретном случае лямбда-выражения ничего не выигрывают (но и не проигрывают) по сравнению с
 			анонимными внутренними классами в плане читаемости
-			стэктрэйсов (а стало быть, и логов на сервере). В целом же можно сказать, что именованное всегда лучше 
+			стэктрэйсов (а стало быть, и логов на сервере). Вообще, именованное всегда лучше 
 			неименованного. Т.е. лучше всего и лямбда-выражение, и анонимный класс вынести в отдельный класс с подходящим 
 			и емким названием. И больше не путаться в загадочных значках и циферках. Но так лучше не всегда.
 			Яркий пример тому ... многопоточность!
@@ -231,7 +230,9 @@ lambda.thiz.SomeClass$1.func(LambdaVsAnonymousClass.java:36)
 			использовался персональный поток. Получившиеся методы
 			<code>doWorkWithLambdaInSeparateThread()</code>, <code>doWorkWithAnonymousClassInSeparateThread()</code> и 
 			<code>doWorkWithStandaloneClassInSeparateThread()</code>, а также отдельностоящий класс,
-			который реализует <strong>Runnable</strong>, приведены в <a href="#listing-6">листинге 6</a>.
+			который реализует 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html">Runnable</a>, приведены в 
+			<a href="#listing-6">листинге 6</a>.
 			
 <h4 id="listing-6">Листинг 6 - примеры методов, выполняющихся в разных потоках</h4>
 <pre>
@@ -289,7 +290,7 @@ class StandaloneThreadDefinition implements Runnable {
 </pre>
 
 		<p>
-			Суть этих "многопоточных" реализаций заключается в том, чтобы сделать в отдельном потоке полезную работу 
+			Суть этих многопоточных реализаций заключается в том, чтобы сделать в отдельном потоке полезную работу 
 			(напечатать строку), затем выбросить исключение и посмотреть, что будет. Т.е. увидеть стэктрэйс. 
 			Всем известно, что стэктрэйс
 			метода, выполнившегося в отдельном потоке (т.е. не в основном потоке приложения, а в потоке, взятом из пула)
@@ -331,7 +332,7 @@ lambda.thiz.StubException: Some error has been occurred.
 			
 		<p>
 			Строчки, начинающиеся с <tt>!!!</tt>, можно проигнорировать (это вышеупомянутая "полезная работа"), они были 
-			добавлены, чтобы стэктрэйсы не путались в листинге. Посмотрим на сами стэктрэйсы. 
+			добавлены, чтобы стэктрэйсы не путались в листинге. 
 			Начнем с самого простого: <code>StandaloneThreadDefinition</code>. Что мы видим? Что в потоке выполнения первыми
 			были вызваны методы классов из пакета <em>java.util.concurrent</em>, что не удивительно, ведь мы не создавали
 			потоки сами, а использовали 
@@ -356,7 +357,9 @@ lambda.thiz.StubException: Some error has been occurred.
 			класса <code>StandaloneThreadDefinition</code> (см. <a href="#illustration-1">рисунок 1</a>).
 			
 <h4 id="illustration-1">Рисунок 1 - исходный кода класса StandaloneThreadDefinition</h4>
-<img src="illustrations/StandaloneThreadDefinition.png" width="480px">
+<img src="illustrations/StandaloneThreadDefinition.png" 
+width="480px"
+alt="фрагмент исходного кода с номерами строк, открытого в IDE IntelliJ IDEA">
 			
 		<p>
 			Выше в стэктрэйсе мы видим только само исключение
@@ -375,7 +378,8 @@ lambda.thiz.StubException: Some error has been occurred.
 			
 <h4 id="illustration-2">Рисунок 2 - исходный код анонимного внутреннего класса, реализующего Runnable</h4>
 <img src="illustrations/doWorkWithAnonymousClassInSeparateThread().png"
-width="640px">
+width="640px"
+alt="фрагмент исходного кода с номерами строк, открытого в IDE IntelliJ IDEA">
 			
 		<p>
 			Это уже лучше, чем в случае с отдельностоящим классом. Анонимный внутренний класс может быть отправлен на 
@@ -384,8 +388,9 @@ width="640px">
 			
 		<p>
 			И наконец, разберем ситуацию с лямбда-выражением. Мы не увидим в стэктрэйсе упоминание о выполнении метода
-			<code>run()</code>, как будто наша лямбда-функция и не реализует интерфейс <strong>Runnable</strong>. Кроме
-			одинаковых с предыдующими двумя случаями строк, мы найдем в стэктрэйсе (непосдственно перед самим исключением)
+			<code>run()</code>, как будто наша лямбда-функция и не реализует интерфейс 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html">Runnable</a>. Кроме
+			одинаковых с предыдующими двумя случаями строк, мы найдем в стэктрэйсе (непосредственно перед самим исключением)
 			вот эту:
 <pre>
 	at lambda.thiz.SomeClass.lambda$doWorkWithLambdaInSeparateThread$1(LambdaVsAnonymousClass.java:62)
@@ -396,12 +401,14 @@ width="640px">
 			возникновения исключения (см. <a href="#illustration-3">рисунок 3</a>).
 
 <h4 id="illustration-3">Рисунок 3 - исходный текст лямбда-выражения, реализующего Runnable</h4>
-<img src="illustrations/doWorkWithLambdaInSeparateThread().png" width="640px">
+<img src="illustrations/doWorkWithLambdaInSeparateThread().png" 
+width="640px"
+alt="фрагмент исходного кода с номерами строк, открытого в IDE IntelliJ IDEA">
 
 		<p>
 			Так же, как и в случае с анонимным внутренним классом, лямбда-выражение "привязано" к методу, в котором 
 			оно определено. Но есть одна особенность: в стэктрэйсе мы видим, кроме номера строки исходного кода, 
-			имя синтетического метода, соответствующее лямбда-выражению: <tt>lambda$doWorkWithLambdaInSeparateThread$1</tt>.
+			имя синтетического метода, соответствующего лямбда-выражению: <tt>lambda$doWorkWithLambdaInSeparateThread$1</tt>.
 			А в нем мы видим <b>имя метода, в котором было определено лямбда-выражение</b>, т.е.
 			<tt>doWorkWithLambdaInSeparateThread()</tt> в нашем примере.
 			
@@ -423,7 +430,7 @@ width="640px">
 			Лямбда-выражения - это больше, чем синтаксический сахар. Указатель <strong>this</strong> ведет туда, куда надо, 
 			а не в синтетический класс какой-нибудь. И лямбда-выражения ничем не уступают своим традиционным собратьям -
 			анонимным внутренним классам. Даже выигрывают у них немного. Что же касается отдельностоящих классов, то
-			в многопоточном программировании лямбда-выражения уделывают своих именнованных сородичей. Кто бы мог подумать...
+			в многопоточном программировании лямбда-выражения уделывают именнованных особ.
 			
 		<hr>
 
