@@ -29,6 +29,16 @@ public class ReadFileLineByLineAndPrintTest {
     }
 
     @Test
+    public void java8StreamWithoutEncodingSpecified() throws URISyntaxException {
+        final Path inputFile = Paths.get(ClassLoader.getSystemResource(FILE).toURI());
+        try (final Stream<String> lines = Files.lines(inputFile)) {
+            lines.forEach(line -> System.out.println("[" + line + "]"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     public void java7Scanner() throws URISyntaxException {
         final File inputFile = Paths.get(ClassLoader.getSystemResource(FILE).toURI()).toFile();
         try (final Scanner scanner = new Scanner(inputFile, ENCODING.name())) {
@@ -44,7 +54,7 @@ public class ReadFileLineByLineAndPrintTest {
     @Test
     public void java7ScannerWithoutEncodingSpecified() throws URISyntaxException {
         final File inputFile = Paths.get(ClassLoader.getSystemResource(FILE).toURI()).toFile();
-        try (final Scanner scanner = new Scanner(inputFile, ENCODING.name())) {
+        try (final Scanner scanner = new Scanner(inputFile)) {
             while (scanner.hasNextLine()) {
                 final String line = scanner.nextLine();
                 System.out.println("[" + line + "]");
@@ -54,7 +64,8 @@ public class ReadFileLineByLineAndPrintTest {
         }
     }
 
-    public void getDefaultEncoding() {
-        
+    @Test
+    public void getDefaultCharset() {
+        System.out.println(Charset.defaultCharset());
     }
 }
