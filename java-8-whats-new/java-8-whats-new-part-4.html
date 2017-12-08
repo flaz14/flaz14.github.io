@@ -1,0 +1,536 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Новое, клёвое и хреновое в Java 8. Часть 4. Ввод-вывод и кодировки</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/#java-8-whats-new" title="Перейти к оглавлению">&larr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a href="http://flaz14.github.io/java-8-whats-new/java-8-whats-new-part-4.html">
+				Новое, клёвое и хреновое в Java 8. Часть 4. Ввод-вывод и кодировки
+			</a>
+		</h1>
+		
+		<h3>[2017, Декабрь]</h3>
+
+		<h3>
+			<a href="java-8-whats-new-part-1.html">Часть 1. Потоки</a>
+			|
+			<a href="java-8-whats-new-part-2.html">Часть 2. Unit-тесты</a>
+			|
+			<a href="java-8-whats-new-part-3.html">Часть 3. Лямбда-выражения</a>
+			|
+			<a 
+href="тут будет ссылка на каталог с исходным кодом">
+				Исходный код
+			</a>
+		</h3>
+
+
+
+
+
+---
+
+
+
+
+
+
+
+		<h2></h2>
+		
+		<p>
+			Как-то раз я прочитал статью 
+			<a href="https://habrahabr.ru/post/315374/">
+				Откуда в Java всплывают проблемы с кодировками и возможная причина падения марсианского зонда</a> и 
+			комментарии к ней. И решил написать коротенькую заметку по этому поводу.
+
+		<h2>java.nio.file.Files</h2>
+		
+		<p>
+			Класс <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html">java.nio.file.Files</a>
+			существует начиная с Java 7. И уже тогда в нем были полезные методы, которые избавят от проблем с кодировками.
+			Вот они:
+			
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#newBufferedReader-java.nio.file.Path-java.nio.charset.Charset-">
+				newBufferedReader(Path path, Charset cs)</a>
+	
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#newBufferedWriter-java.nio.file.Path-java.nio.charset.Charset-java.nio.file.OpenOption...-">
+				newBufferedWriter(Path path, Charset cs, OpenOption... options)</a>
+
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#readAllLines-java.nio.file.Path-java.nio.charset.Charset-">
+				readAllLines(Path path, Charset cs)</a>
+				
+			
+			
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#write-java.nio.file.Path-java.lang.Iterable-java.nio.charset.Charset-java.nio.file.OpenOption...-">
+				write(Path path, Iterable&lt;? extends CharSequence&gt; lines, Charset cs, OpenOption... options)</a>
+			
+			Java 8 предлагает к вышеперечисленным методам их сокращенные формы. В них просто опущен параметр 
+			<strong>Charset</strong> (используется кодировка <em>UTF-8</em>).
+
+			В Java 8 появилcя лишь один новый метод, учитывающий кодировку: 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#lines-java.nio.file.Path-java.nio.charset.Charset-">
+				lines(Path path, Charset cs)</a> (и его собрат, всегда использующий UTF-8).
+			Так что теперь можно читать файлы построчно и "лениво".
+			
+
+			
+		<h2>java.util.Scanner</h2>
+		
+		<p>
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html">java.util.Scanner</a> - это 
+			древний класс, существующий со времен Java 5. Писать с его помощью в файл не получиться, а вот читать - как нечего можно.
+			За подробностями обращайтесь к статье 
+			<a href="https://weblogs.java.net/blog/pat/archive/2004/10/stupid_scanner_1.html">
+				Stupid Scanner tricks...</a> (сайт <em>java.net</em> закрыт, так что ссылка ведет на Web-архив). 
+
+
+------------------
+
+    nextLine
+
+    public String nextLine()
+
+    Advances this scanner past the current line and returns the input that was skipped. This method returns the rest of the current line, excluding any line separator at the end. The position is set to the beginning of the next line.
+
+    Since this method continues to search through the input looking for a line separator, it may buffer all of the input searching for the line to skip if no line separators are present.
+
+    Returns:
+        the line that was skipped
+    Throws:
+        NoSuchElementException - if no line was found
+        IllegalStateException - if this scanner is closed
+------------------
+
+
+		<p>
+			...
+			Ну а старые методы, работа которых зависит от окружения, в котором запущена программа, так и остались не
+			<code>@Deprecated</code>.
+
+
+		
+		<h2>Lambda expression != Anonymous inner class</h2>
+		
+		<p>
+			Мы привыкли думать, что лямбда-выражения и анонимные внутренние классы - это одно и то же (кроме улучшенных 
+			синтаксиса и правил выведения типов). Но это не так. 
+		
+		<p>
+			Пусть у нас есть простой функциональный интерфейс <code>SomeFunction</code>.
+
+<h4 id="listing-1">Листинг 1 - простой функциональный интерфейс</h4>
+<pre>
+@FunctionalInterface
+interface SomeFunction {
+    void func();
+}
+</pre>
+		
+		<p>
+			Подготовим три реализации этого интерфейса: с использованием лямбда-выражения, с помощью привычного 
+			анонимного внутреннего класса и с помощью внешнего класса. Сделаем так, чтобы они вызывались из	
+			нестатических методов класса <code>SomeClass</code> (см. <a href="#listing-2">листинг 2</a>, горизонтальные 
+			линейки я добавил для ясности, чтобы результаты работы разных методов не путались).
+
+<h4 id="listing-2">Листинг 2 - класс для демонстрации реализаций функционального интерфейса</h4>
+<pre>
+class SomeClass {
+    public void doWorkWithLambda() {
+        System.out.println("------------------------------------------------------");
+        final SomeFunction function = () -> {
+            System.out.println("doWorkWithLambda(): " + this.getClass().getName());
+            StacktracePrinter.print();
+        };
+        function.func();
+        System.out.println("------------------------------------------------------");
+    }
+
+    public void doWorkWithAnonymousInnerClass() {
+        System.out.println("------------------------------------------------------");
+        final SomeFunction function = new SomeFunction() {
+            @Override
+            public void func() {
+                System.out.println("doWorkWithAnonymousInnerClass(): " + this.getClass().getName());
+                StacktracePrinter.print();
+            }
+        };
+        function.func();
+        System.out.println("------------------------------------------------------");
+    }
+
+    public void doWorkWithStandaloneClass() {
+        System.out.println("------------------------------------------------------");
+        final SomeFunction function = new StandaloneClass();
+        function.func();
+        System.out.println("------------------------------------------------------");
+    }
+
+    ...
+}
+</pre>
+
+		<p>
+			Ниже приведена реализация метода <code>func()</code> посредством обычного класса.
+
+<h4 id="listing-3">Листинг 3 - реализация функционального интерфейса с помощью внешнего класса</h4>
+<pre>
+class StandaloneClass implements SomeFunction {
+    @Override
+    public void func() {
+        System.out.println("StandaloneClass: " + this.getClass().getName());
+        StacktracePrinter.print();
+    }
+}
+</pre>
+
+		<p>
+			Все три реализации всего лишь печают имя класса и стэк вызовов. Для распечатки стэктрэйса используется 
+			вспомогательный класс с единственным статическим методом, ничего особенного.
+			
+<h4 id="listing-4">Листинг 4 - вспомогательный класс для распечатки стэка вызовов</h4>
+<pre>
+class StacktracePrinter {
+    public static void print() {
+        final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
+        Stream.of(stacktrace).
+                forEach(System.out::println);
+    }
+}
+</pre>
+
+		<p>
+			Теперь запустим все это хозяйство. И получим вывод, приведенный в <a href="#listing-5">листинге 5</a>.
+
+<h4 id="listing-5">Листинг 5 - результаты работы разных реализаций</h4>
+<pre>
+------------------------------------------------------
+doWorkWithLambda(): lambda.thiz.SomeClass
+java.lang.Thread.getStackTrace(Thread.java:1556)
+lambda.thiz.StacktracePrinter.print(LambdaVsAnonymousClass.java:115)
+lambda.thiz.SomeClass.lambda$doWorkWithLambda$0(LambdaVsAnonymousClass.java:30)
+lambda.thiz.SomeClass.doWorkWithLambda(LambdaVsAnonymousClass.java:32)
+lambda.thiz.LambdaVsAnonymousClass.main(LambdaVsAnonymousClass.java:10)
+sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+java.lang.reflect.Method.invoke(Method.java:498)
+com.intellij.rt.execution.application.AppMain.main(AppMain.java:134)
+------------------------------------------------------
+------------------------------------------------------
+doWorkWithAnonymousInnerClass(): lambda.thiz.SomeClass$1
+java.lang.Thread.getStackTrace(Thread.java:1556)
+lambda.thiz.StacktracePrinter.print(LambdaVsAnonymousClass.java:115)
+lambda.thiz.SomeClass$1.func(LambdaVsAnonymousClass.java:42)
+lambda.thiz.SomeClass.doWorkWithAnonymousInnerClass(LambdaVsAnonymousClass.java:45)
+lambda.thiz.LambdaVsAnonymousClass.main(LambdaVsAnonymousClass.java:11)
+sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+java.lang.reflect.Method.invoke(Method.java:498)
+com.intellij.rt.execution.application.AppMain.main(AppMain.java:134)
+------------------------------------------------------
+------------------------------------------------------
+StandaloneClass: lambda.thiz.StandaloneClass
+java.lang.Thread.getStackTrace(Thread.java:1556)
+lambda.thiz.StacktracePrinter.print(LambdaVsAnonymousClass.java:115)
+lambda.thiz.StandaloneClass.func(LambdaVsAnonymousClass.java:97)
+lambda.thiz.SomeClass.doWorkWithStandaloneClass(LambdaVsAnonymousClass.java:52)
+lambda.thiz.LambdaVsAnonymousClass.main(LambdaVsAnonymousClass.java:12)
+sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+java.lang.reflect.Method.invoke(Method.java:498)
+com.intellij.rt.execution.application.AppMain.main(AppMain.java:134)
+------------------------------------------------------
+</pre>
+
+		<p>
+			Посмотрим, как отработала лямбда-функция. Первое отличие от анонимного внутреннего класса заключается в том,
+			что <strong>this</strong> "ведет" в разные места:
+<pre>
+doWorkWithLambda(): lambda.thiz.SomeClass
+doWorkWithAnonymousInnerClass(): lambda.thiz.SomeClass$1
+</pre>
+
+		<p>
+			В случае с лямбда-выражением <code>this</code> указывает на объект окружающего класса, т.е. на объект того
+			класса, внутри которого было определено лямбда-выражение. А в случае с анонимным внутренним классом 
+			<code>this</code> указывает на экземпляр самого внутреннего класса. С отдельно же стоящим классом и так все 
+			понятно: у него нет ничего общего с тем объектом, в котором был создан его экземпляр. Америку я не открыл. 
+			Про эту особенность давным-давно рассказали в статье
+			<a href="https://habrahabr.ru/post/224593/">Лямбда-выражения в Java 8</a>.
+		
+		<p>
+			Если посмотреть на стэктрэйсы, можно увидеть много интересного. Так, при использовании лямбда-выражения
+			реализация метода <code>func()</code> называется <b>lambda.thiz.SomeClass.lambda$doWorkWithLambda$0</b>.
+			Такое синтетическое имя включает в себя имя метода <code>doWorkWithLambda()</code>, в котором 
+			лямбда-выражение было определено. Очевидно, что <code>doWorkWithLambda()</code> - это нижележащий элемент 
+			стэктрэйса:
+<pre>
+...
+lambda.thiz.SomeClass.lambda$doWorkWithLambda$0(LambdaVsAnonymousClass.java:24)
+lambda.thiz.SomeClass.doWorkWithLambda(LambdaVsAnonymousClass.java:26)
+...
+</pre>
+	
+		<p>
+			На первый взгляд, имеет место простое дублирование. Может сложиться впечатление, что разработчики Java 8
+			"подстраховались", чтобы лямбда-выражения не пугали своими стэктрэйсами. Ибо в строчке:
+<pre>
+lambda.thiz.SomeClass.lambda$doWorkWithLambda$0(LambdaVsAnonymousClass.java:24)
+</pre>
+	
+		<p>
+			за эпическим словом <em>lambda</em> мы видим знаки <em>$</em> и число на конце. Старомодный анонимный класс 
+			в стрэктрэйсе выглядит проще и понятнее (лишь один <em>$</em> и число):
+<pre>
+lambda.thiz.SomeClass$1.func(LambdaVsAnonymousClass.java:36)
+</pre>
+
+		<p>
+			Т.о. в данном конкретном случае лямбда-выражения ничего не выигрывают (но и не проигрывают) по сравнению с
+			анонимными внутренними классами в плане читаемости стэктрэйсов (а стало быть, и логов на сервере). Вообще, 
+			именованное всегда лучше неименованного. Т.е. лучше всего и лямбда-выражение, и анонимный класс вынести в 
+			отдельный класс с подходящим и емким названием. Больше не придеться путаться в загадочных значках и 
+			циферках. Но так лучше не всегда. Яркий пример тому... многопоточность!
+		
+		<h2>Lambda expressions + Multithreading = ♥</h2>
+		
+		<p>
+			Добавим в наш многострадальный демонстрационный класс еще три метода метода, которые будут выполняться 
+			параллельно. Потоки будем брать из фиксированного пула потоков единичного размера, чтобы каждая реализация  
+			выполнялась в персональном потоке. Получившиеся методы <code>doWorkWithLambdaInSeparateThread()</code>, 
+			<code>doWorkWithAnonymousClassInSeparateThread()</code> и 
+			<code>doWorkWithStandaloneClassInSeparateThread()</code>, а также отдельностоящий класс, который реализует 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html">Runnable</a>, приведены в 
+			<a href="#listing-6">листинге 6</a>.
+
+<h4 id="listing-6">Листинг 6 - примеры методов, выполняющихся в разных потоках</h4>
+<pre>
+class SomeClass {
+    ...
+
+    public void doWorkWithLambdaInSeparateThread() {
+        Executors.newFixedThreadPool(1).
+                submit(
+                        () -> {
+                            System.out.println("!!! doWorkWithLambdaInSeparateThread()");
+                            try {
+                                throw new StubException("Some error has been occurred.");
+                            } catch (StubException thrownManually) {
+                                thrownManually.printStackTrace();
+                            }
+                        }
+                );
+    }
+
+    public void doWorkWithAnonymousClassInSeparateThread() {
+        Executors.newFixedThreadPool(1).
+                submit(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                System.out.println("!!! doWorkWithAnonymousClassInSeparateThread()");
+                                try {
+                                    throw new StubException("Some error has been occurred.");
+                                } catch (StubException thrownManually) {
+                                    thrownManually.printStackTrace();
+                                }
+                            }
+                        }
+                );
+    }
+
+    public void doWorkWithStandaloneClassInSeparateThread() {
+        Executors.newFixedThreadPool(1).
+                submit(new StandaloneThreadDefinition());
+    }
+}
+
+class StandaloneThreadDefinition implements Runnable {
+    @Override
+    public void run() {
+        System.out.println("!!! StandaloneThreadDefinition");
+        try {
+            throw new StubException("Some error has been occurred.");
+        } catch (StubException thrownManually) {
+            thrownManually.printStackTrace();
+        }
+    }
+}
+</pre>
+
+		<p>
+			Суть этих многопоточных реализаций заключается в том, чтобы сделать в отдельном потоке полезную работу 
+			(напечатать строку), затем выбросить исключение и посмотреть, что будет. Т.е. увидеть стэктрэйс. Всем 
+			известно, что стэктрэйс метода, выполнившегося в отдельном потоке (т.е. не в основном потоке приложения, а в
+			потоке, взятом из пула) не имеет ничего общего со стэктрэйсом потока, который отправил задачу на выполнение 
+			посредством 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ExecutorService.html#submit-java.lang.Runnable-">
+				java.util.concurrent.ExecutorService#submit(java.lang.Runnable)</a>. Что ж, посмотрим на стэктрэйсы.
+
+<h4 id="listing-7">Листинг 7 - стэктрэйсы методов, выполнившихся в разных потоках</h4>
+<pre>
+!!! doWorkWithLambdaInSeparateThread()
+lambda.thiz.StubException: Some error has been occurred.
+	at lambda.thiz.SomeClass.lambda$doWorkWithLambdaInSeparateThread$1(LambdaVsAnonymousClass.java:62)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+
+
+!!! doWorkWithAnonymousClassInSeparateThread()
+lambda.thiz.StubException: Some error has been occurred.
+	at lambda.thiz.SomeClass$2.run(LambdaVsAnonymousClass.java:78)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+
+
+!!! StandaloneThreadDefinition
+lambda.thiz.StubException: Some error has been occurred.
+	at lambda.thiz.StandaloneThreadDefinition.run(LambdaVsAnonymousClass.java:106)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+</pre>
+			
+		<p>
+			Строчки, начинающиеся с <tt>!!!</tt>, можно проигнорировать (это вышеупомянутая "полезная работа"); они были 
+			добавлены, чтобы стэктрэйсы не путались в листинге. Начнем с самого простого: 
+			<code>StandaloneThreadDefinition</code>. Что мы видим? Что в потоке выполнения первыми были вызваны методы 
+			классов из пакета <em>java.util.concurrent</em>, что неудивительно, ведь мы не создавали потоки сами, а 
+			использовали 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ExecutorService.html">
+				ExecutorService</a> - стандартное средство JDK. Непосредственно за строкой, соответствующей возникшему 
+			исключению, в стэктрэйсе мы видим строчку:
+<pre>
+	at lambda.thiz.StandaloneThreadDefinition.run(LambdaVsAnonymousClass.java:103)
+</pre>
+		
+		<p>
+			Тут тоже все понятно: когда задача отправляется на выполнение с помощью метода 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ExecutorService.html#submit-java.lang.Runnable-">
+				java.util.concurrent.ExecutorService#submit(java.lang.Runnable)</a>, вызывается метод 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html#run--">
+				java.lang.Runnable#run</a>, из переданного экземпляра класса, который реализует интерфейс 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html">Runnable</a>. Вот мы и видим его
+			в стэктрэйсе. 
+			Номер строки исходного кода <b>106</b> (<tt>LambdaVsAnonymousClass.java:106</tt>) соответствует месту в теле
+			метода <code>run()</code> класса <code>StandaloneThreadDefinition</code> (см. 
+			<a href="#illustration-1">рисунок 1</a>).
+			
+<h4 id="illustration-1">Рисунок 1 - исходный кода класса StandaloneThreadDefinition</h4>
+<p>
+	<img src="illustrations/StandaloneThreadDefinition.png" 
+	width="480px"
+	alt="фрагмент исходного кода с номерами строк, открытого в IDE IntelliJ IDEA">
+			
+		<p>
+			Выше в стэктрэйсе мы видим только само исключение <code>StubException</code>. И все! Больше ничего нет! Т.е.
+			глядя только на стэктрэйс потока, в котором выполнился метод <code>run()</code>, мы никак не узнаем, кто же 
+			породил выполнение этого метода в отдельном потоке.
+		
+		<p>
+			Теперь рассмотрим ситуацию с анонимным внутренним классом. Строчка
+<pre>
+	at lambda.thiz.SomeClass$2.run(LambdaVsAnonymousClass.java:78)
+</pre>
+
+		<p>
+			недвусмысленно говорит, что исключение возникло в методе <code>run()</code> анонимного внутреннего класса.
+			По номеру строки исходного текста <b>78</b> найдем местоположение проблемного кода:
+			
+<h4 id="illustration-2">Рисунок 2 - исходный код анонимного внутреннего класса, реализующего Runnable</h4>
+<p>
+	<img src="illustrations/doWorkWithAnonymousClassInSeparateThread().png"
+	width="640px"
+	alt="фрагмент исходного кода с номерами строк, открытого в IDE IntelliJ IDEA">
+			
+		<p>
+			Это уже лучше, чем в случае с отдельностоящим классом. Анонимный внутренний класс может быть отправлен на 
+			обработку в отдельном потоке только из того места, где этот анонимный класс был определен. Что заметно
+			сужает область поиска причины ошибки.
+			
+		<p>
+			И наконец, разберем ситуацию с лямбда-выражением. Мы не увидим в стэктрэйсе упоминание о выполнении метода
+			<code>run()</code>, как будто наша лямбда-функция и не реализует интерфейс 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html">Runnable</a>. Кроме одинаковых с
+			предыдующими двумя случаями строк, мы найдем в стэктрэйсе (непосредственно перед самим исключением) вот эту:
+<pre>
+	at lambda.thiz.SomeClass.lambda$doWorkWithLambdaInSeparateThread$1(LambdaVsAnonymousClass.java:62)
+</pre>
+
+		<p>
+			О чем она говорит, и что в ней особенного? Номер строки исходного текста <b>62</b> как обычно указывает на 
+			место возникновения исключения (см. <a href="#illustration-3">рисунок 3</a>).
+
+<h4 id="illustration-3">Рисунок 3 - исходный текст лямбда-выражения, реализующего Runnable</h4>
+<p>
+	<img src="illustrations/doWorkWithLambdaInSeparateThread().png" 
+	width="640px"
+	alt="фрагмент исходного кода с номерами строк, открытого в IDE IntelliJ IDEA">
+
+		<p>
+			Так же, как и в случае с анонимным внутренним классом, лямбда-выражение "привязано" к методу, в котором оно 
+			определено. Но есть одна особенность: в стэктрэйсе мы видим, кроме номера строки исходного кода, имя 
+			синтетического метода, соответствующего лямбда-выражению: 
+			<tt>lambda$doWorkWithLambdaInSeparateThread$1</tt>. А в нем мы видим <b>имя метода, в котором было 
+			определено лямбда-выражение</b>, т.е. <tt>doWorkWithLambdaInSeparateThread()</tt> в нашем примере.
+		
+		<p>
+			Т.о. в случае возникновения исключения в лямбда-выражении, выполняющемся в отдельном потоке, мы получим не 
+			только номер строки исходного текста, в котором возникло исключение, но и имя метода, который отправил 
+			задачу на выполнение. Это не такой уж большой плюс по сравнению со старомодным анонимным внутренним классом.
+			Тем не менее, дополнительная зацепка всегда кстати. Ведь кроме поиска по номеру строки в исходниках эти 
+			самые исходники можно будет быстренько "грепнуть" на предмет метода, имя которого было с заботой приклеено к
+			синтетическому имени автоматически. Конечно, в реальных приложениях лучше сохранять трассировку стэка 
+			клиента полностью, как об этом рассказано в статье 
+			<a href="https://habrahabr.ru/post/260953/">10 советов по использованию ExecutorService</a>. Но боятся 
+			лямбда-выражений в многопоточном программировании точно не стоит.
+			
+		<h2>Итог</h2>
+		
+		<p>
+			Лямбда-выражения - это больше, чем синтаксический сахар. Указатель <strong>this</strong> ведет туда, куда 
+			надо, а не в синтетический класс какой-нибудь. И лямбда-выражения ничем не уступают своим традиционным 
+			собратьям - анонимным внутренним классам. Даже выигрывают у них немного. Что же касается отдельностоящих 
+			классов, то в многопоточном программировании лямбда-выражения уделывают именнованных особ.
+		
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>
