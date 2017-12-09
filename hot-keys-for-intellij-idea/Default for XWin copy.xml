@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <keymap version="1" name="My Sexy keymap" parent="Default for XWin">
   <action id="ActivateChangesToolWindow" />
   <action id="ActivateDatabaseToolWindow">
@@ -69,6 +68,9 @@
     <mouse-shortcut keystroke="control alt button1" />
     <keyboard-shortcut first-keystroke="F5" />
   </action>
+  <action id="GotoLine">
+    <keyboard-shortcut first-keystroke="control J" />
+  </action>
   <action id="GotoNextError" />
   <action id="Graph.ZoomIn" />
   <action id="Graph.ZoomOut" />
@@ -76,6 +78,7 @@
   <action id="HippieCompletion" />
   <action id="Images.ShowThumbnails" />
   <action id="Images.Thumbnails.ToggleRecursive" />
+  <action id="InsertLiveTemplate" />
   <action id="MaintenanceAction" />
   <action id="Move" />
   <action id="Mvc.RunTarget" />
@@ -169,4 +172,3 @@
   <action id="XPathView.Actions.Evaluate" />
   <action id="XPathView.Actions.FindByExpression" />
 </keymap>
-
