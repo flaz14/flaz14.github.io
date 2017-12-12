@@ -63,12 +63,12 @@ def load_ascii_picture():
 def flat_char_map(char_map):
 	assert char_map
 	char_set = set([char for char_list in [char_map[group] for group in char_map] for char in char_list])
-	total_unique_characters = len(set)
+	total_unique_characters = len(char_set)
 	if total_unique_characters < 2:
-		error_message = 
-			'There should be at least two unique characters in the map but [{}] encountered.'.
-			format(total_unique_characters)
+		error_message =	'There should be at least two unique characters in the map but [{}] encountered.'.format(
+			total_unique_characters)
 		raise ValueError(error_message)
+	return char_set
 
 
 def add_unicode_spaces(lines):
@@ -90,18 +90,8 @@ def add_unicode_spaces(lines):
 	return tuple(lines_with_spaces)
 
 
-def create_temp_dir_layout_by_name(lines):
+def create_temp_dir_layout(lines):
 	temp_dir = tempfile.mkdtemp()
-	#print(temp_dir)
-	temp_dir_file_descriptor = os.open(temp_dir, os.O_DIRECTORY)
-	for file_name in lines:
-		os.mknod(file_name, mode=0o400, dir_fd = temp_dir_file_descriptor)
-	return temp_dir
-
-
-def create_temp_dir_layout_by_time(lines):
-	temp_dir = tempfile.mkdtemp()
-	#print(temp_dir)
 	temp_dir_file_descriptor = os.open(temp_dir, os.O_DIRECTORY)
 	for file_name, seconds in zip(
 		lines, 
@@ -125,8 +115,7 @@ def create_temp_dir_layout_by_time(lines):
 def main():
 	ascii_picture = load_ascii_picture()
 	ascii_picture_with_unicode_spaces = add_unicode_spaces(ascii_picture)
-	#temp_dir = create_temp_dir_layout_by_name(ascii_picture_with_unicode_spaces)
-	#temp_dir = create_temp_dir_layout_by_time(ascii_picture_with_unicode_spaces)
+	temp_dir = create_temp_dir_layout(ascii_picture_with_unicode_spaces)
 	print(temp_dir)
 
 
