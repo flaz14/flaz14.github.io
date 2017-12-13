@@ -56,8 +56,8 @@ UNICODE_SPACES = {
 
 
 FILE_NAME_FORBIDDEN_CHARACTERS_MAPPING = {
-	ord('/')	: ord('∕'), #ord('╱'), # 
-	0			: 0x0032  # plain-old space
+	ord('/')	: ord('\u2215'), # DIVISION SLASH - generic division operator 
+	0			: ord('\u0020')  # plain-old space, e.g. ASCII #32
 }
 
 
