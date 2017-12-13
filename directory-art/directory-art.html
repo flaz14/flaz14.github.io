@@ -50,15 +50,17 @@
 			портили рисунок. Но можно использовать
 			и обычные, т.е. видимые символы. По-моему, рисунок они не испортят. А если и испортят, то не сильно. Потому 
 			что консольные файловые менеджеры в DOS показывают расширение файла/каталога поодаль от его имени. Так, 
-			<i>Volcov/Norton Commander</i> в колонке <b>Name</b> выравнивают собственно имя файла/каталога по левому краю, 
+			<i>Norton/Volcov Commander</i> в колонке <b>Name</b> выравнивают собственно имя файла/каталога по левому краю, 
 			а расширение - по правому (см. <a href="#illustration-1">рисунок 1</a>). 
 			А поскольку расширения тусуются отдельно, они не сильно будут мешать восприятию рисунка.
 
 <h4 id="illustration-1">
 	Рисунок 1 - в двухпанельных файловых менеджерах DOS расширение отображается отдельно от имени
 </h4>
-<img src="illustrations/dos-commanders-names-and-extenstions.png">
-			
+<img 
+src="illustrations/dos-commanders-names-and-extenstions.png"
+width="320px">
+		
 		<p id="note-about-extensions-in-DOS">
 			Если задавать расширение с помощью только цифр, то получится 1000 уникальных комбинаций. Но в расширении 
 			можно использовать не только цифры.  Можно взять цифры, буквы, символ почеркивания и т.д. А затем создавать 
@@ -139,14 +141,18 @@
 			<a href="#illustration-4">рисунке 4</a>.
 
 <h4 id="illustration-4">Рисунок 4 - отображение листинга каталога командой ls с параметрами по-умочанию</h4>
-<img src="illustrations/ls-with-default-parameters.png">
+<img 
+src="illustrations/ls-with-default-parameters.png"
+width="720px">
 			
 		<p>
 			С помощью параметра <em>-1</em> (он же <em>--format=single-column</em>) можно вывести содержимое в один
 			столбец, как показано на <a href="#illustration-5">рисунке 5</a>.
 
 <h4 id="illustration-5">Рисунок 5 - отображение листинга командой ls в один столбец</h4>
-<img src="illustrations/ls-with-format-parameter.png">
+<img 
+src="illustrations/ls-with-format-parameter.png"
+width="480px">
 
 		<p>
 			Этого достаточно для красивого представления рисунка в консоли.
@@ -163,7 +169,9 @@
 			возможностей для сортировки (см. <a href="#illustration-6">рисунок 6</a>).
 			
 <h4 id="illustration-6">Рисунок 6 - опции сортировки листинга каталога в Midnight Commander</h4>
-<img src="illustrations/mc-sorting-options.png">
+<img 
+src="illustrations/mc-sorting-options.png"
+width="320px">
 			
 		<p>Разберем их.
 		
@@ -352,6 +360,7 @@ $ ls -1 /tmp/tmppfn4ghv4
 $ cat a.txt | ./directoryart.py 
 /tmp/tmpcxvhw4km
 
+
 $ export LC_ALL=C
 
 
@@ -411,7 +420,7 @@ $ ls -1 -t /tmp/tmp3o7_qfoe
 		<h2>Маленькое утешение</h2>	
 			
 		<p>
-			Попробуем наш скрипт на большом ASCII-рисунке. Например, на таком (взял с сайта 
+			Попробуем наш скрипт на большом ASCII-рисунке. Например, на таком (взят с сайта 
 			<a href="http://www.chris.com">www.chris.com</a>):
 
 <h4 id="illustration-7">Рисунок 7 - большой ASCII-рисунок</h4>		
@@ -426,7 +435,9 @@ $ ls -1 -t /tmp/tmp3o7_qfoe
 			выглядит так:
 		
 <h4 id="illustration-8">Рисунок 8 - большой ASCII-рисунок, отображаемый в эмуляторе терминала</h4>
-<img src="illustrations/Lauren-Michelle-Hill_gnome-terminal.png">
+<img 
+src="illustrations/Lauren-Michelle-Hill_gnome-terminal.png"
+width="676px">
 
 		<p>
 			Интересный момент, как же так получилось, что в именах файлов встречаются слэши, ведь они недопустимы в Linux?
@@ -440,7 +451,9 @@ $ ls -1 -t /tmp/tmp3o7_qfoe
 			(странно, конечно, ведь в случае с <strong>ls</strong> опция <em>-t</em> не требовала обратного порядка...).
 		
 <h4 id="illustration-8">Рисунок 8 - большой ASCII-рисунок, отображаемый в Midnight Commander'е</h4>
-<img src="illustrations/Lauren-Michelle-Hill_mc.png">
+<img 
+src="illustrations/Lauren-Michelle-Hill_mc.png"
+width="676px">
 
 		<p>
 			Начинания с Unicode-пробелами в деле рисования с помощью каталогов разбились вдребезги о суровую реальность.
