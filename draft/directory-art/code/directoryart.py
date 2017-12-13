@@ -55,9 +55,20 @@ UNICODE_SPACES = {
 }
 
 
+FILE_NAME_FORBIDDEN_CHARACTERS_MAPPING = {
+	ord('/')	: ord('∕'), #ord('╱'), # 
+	0			: 0x0032  # plain-old space
+}
+
+
+def replace_forbidden_characters(lines): 
+	return (line.translate(FILE_NAME_FORBIDDEN_CHARACTERS_MAPPING) for line in lines)
+
+
 def load_ascii_picture():
-	lines = sys.stdin.readlines()
-	return [line[:-1] for line in lines]
+	raw_lines = sys.stdin.readlines()
+	allowed_lines = replace_forbidden_characters(raw_lines)
+	return [line[:-1] for line in allowed_lines]
 
 
 def flat_char_map(char_map):
@@ -82,11 +93,11 @@ def add_unicode_spaces(lines):
 	combinations_sorted_asc = sorted(
 		itertools.combinations(spaces_set, minimal_combination_length)
 	)
-	#print(combinations_sorted_asc)
 	lines_with_spaces = []
 	for line, combination in zip(lines, combinations_sorted_asc):
 		combination_str = ''.join(combination)
 		lines_with_spaces.append(combination_str + line)
+	print(max([len(line) for line in lines_with_spaces]))
 	return tuple(lines_with_spaces)
 
 
