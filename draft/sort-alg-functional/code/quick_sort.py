@@ -3,7 +3,13 @@
 
 def sort(input_tuple):
 	def sort_part(array, left_boundary, right_boundary):
-		pivot = array[left_boundary + (right_boundary - left_boundary) // 2]
+		def get_pivot(array, left_boundary, right_boundary):
+			return array[left_boundary + (right_boundary - left_boundary) // 2]
+		
+		def swap(array, left, right):
+			array[left], array[right] = array[right], array[left]
+		
+		pivot = get_pivot(array, left_boundary, right_boundary)
 		left = left_boundary
 		right = right_boundary
 		while left < right:
@@ -12,14 +18,14 @@ def sort(input_tuple):
 			while array[right] > pivot:
 				right -= 1
 			if left <= right:
-				array[left], array[right] = array[right], array[left]
+				swap(array, left, right)
 				left += 1
 				right -= 1
 		if right > left_boundary:
 			sort_part(array, left_boundary, right)
 		if left < right_boundary:
 			sort_part(array, left, right_boundary)
-		
+	
 	assert input_tuple
 	array = list(input_tuple)
 	sort_part(array, 0, len(array) - 1);
