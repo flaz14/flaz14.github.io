@@ -43,14 +43,22 @@ def sort(input_tuple):
 		def swap(array, left, right):
 			array[left], array[right] = array[right], array[left]
 		
+		def get_left(array, left, pivot):
+			while array[left] < pivot:
+				left += 1
+			return left
+		
+		def get_right(array, right, pivot):
+			while array[right] > pivot:
+				right -= 1
+			return right
+		
 		pivot = get_pivot(array, left_boundary, right_boundary)
 		left = left_boundary
 		right = right_boundary
 		while left < right:
-			while array[left] < pivot:
-				left += 1
-			while array[right] > pivot:
-				right -= 1
+			left = get_left(array, left, pivot)
+			right = get_right(array, right, pivot)
 			if left <= right:
 				swap(array, left, right)
 				left += 1
