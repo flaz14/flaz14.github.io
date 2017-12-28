@@ -12,9 +12,7 @@ def sort(input_tuple):
 			while array[right] > pivot:
 				right -= 1
 			if left <= right:
-				temp = array[left]
-				array[left] = array[right]
-				array[right] = temp
+				array[left], array[right] = array[right], array[left]
 				left += 1
 				right -= 1
 		if right > left_boundary:
