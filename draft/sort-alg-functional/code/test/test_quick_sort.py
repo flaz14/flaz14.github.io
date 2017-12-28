@@ -30,3 +30,10 @@ def test_two_items_in_array():
 def test_many_items_in_array():
 	sorted_array = quick_sort.sort((88, 10, 3, 8, 15, 1, 5, 4, 2, 18, 55))
 	assert (1, 2, 3, 4, 5, 8, 10, 15, 18, 55, 88) == sorted_array
+
+
+def test_all_items_are_the_same():
+	sorted_array = quick_sort.sort((9, 9, 9))
+	assert (9, 9, 9) == sorted_array
+
+
