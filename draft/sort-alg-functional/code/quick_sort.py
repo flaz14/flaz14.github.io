@@ -53,7 +53,7 @@ def sort(input_tuple):
 			sort_part(array, left_boundary, right)
 		if left < right_boundary:
 			sort_part(array, left, right_boundary)
-
+	
 	assert input_tuple
 	array = list(input_tuple)
 	sort_part(array, 0, len(array) - 1);
