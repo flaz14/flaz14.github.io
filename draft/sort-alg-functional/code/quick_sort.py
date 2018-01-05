@@ -59,6 +59,7 @@ def sort(input_tuple):
 				array[left_boundary: right + 1]
 			)
 		if left < right_boundary:
+#<<<<<<< HEAD
 			#sort_part(array, left, right_boundary)
 			right_part = sort_part(
 				array[left: right_boundary + 1]
@@ -70,6 +71,10 @@ def sort(input_tuple):
 		return array
 
 
+#=======
+			sort_part(array, left, right_boundary)
+	
+#>>>>>>> d9efebe2393bba7521f32e0239be6e55b384c927
 	assert input_tuple
 	array = list(input_tuple)
 	result = sort_part(array);
