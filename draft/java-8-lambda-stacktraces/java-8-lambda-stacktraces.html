@@ -1,0 +1,287 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Лямбда-выражения и стэктрэйсы</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/#java-8-lambda-stacktraces" title="Перейти к оглавлению">&larr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a href="http://flaz14.github.io/java-8-lambda-stacktraces/java-8-lambda-stacktraces.html">
+				Лямбда-выражения и стэктрэйсы
+			</a>
+		</h1>
+		
+		<h3>[2018, Январь]</h3>
+		
+		<h3>
+			<a 
+href="тут будет исходный код">
+				Исходный код
+			</a>
+		</h3>
+
+		<p>
+			В одной из своих предыдущих ламерских статей 
+			(<a href="http://flaz14.github.io/java-8-whats-new/java-8-whats-new-part-3.html">
+			Новое, клёвое и хреновое в Java 8. Часть 3. Лямбда-выражения</a>) я коснулся темы стэктрэйсов. Чтение 
+			стека вызовов - это, пожалуй, основное занятие Java-разработчика. Порой оно отнимает времени больше, чем
+			чтение собственно исходного кода и документации (особенно, если код запускается под управлением очередной
+			версии новороченного фреймворка). Так что красота стэктрэйсов - залог успеха :)
+			
+		<p>
+			Как уже было сказано, лямбда-выражения не во всем повторяют анонимные классы. Рассмотрим простой пример 
+			вызова лямбда-функций из разных мест программы. В 
+			<a href="#listing-1">листинге 1</a> я пронумеровал строки для ясности. Ах да, 
+			сопоставление строк из стека вызовов со строками исходного кода - это, пожалуй, самая "приятная" часть в 
+			деле разгребания логов.
+			
+<h4 id="listing-1">Листинг 1 - пример вызова лямбда-выражений из разных мест программы</h4>
+<pre>
+     1	public class TestLambdaStacktraces {
+     2		public static void main(String ignored[]) {
+     3			final SampleClass sampleObject = new SampleClass();
+     4			sampleObject.someInstanceMethod();
+     5			
+     6			System.out.println("---   Inside main method of the application - instanceFieldLambda      ----");
+     7			sampleObject.instanceFieldLambda.print();
+     8			System.out.println("---------------------------------------------------------------------------");
+     9			
+    10			System.out.println("---   Inside main method of the application - staticFieldLambda        ----");		
+    11			sampleObject.staticFieldLambda.print();
+    12			System.out.println("---------------------------------------------------------------------------");
+    13			
+    14			System.out.println("---   Inside main method of the application - localVariableLambda      ----");
+    15			final StackTracePrinter localVariableLambda = () -> {
+    16				StackTracePrinter.printNicely();
+    17			};
+    18			localVariableLambda.print();
+    19			System.out.println("---------------------------------------------------------------------------");
+    20		}
+    21	}
+    22	
+    23	class SampleClass {
+    24		public final StackTracePrinter instanceFieldLambda = () -> {
+    25			StackTracePrinter.printNicely();
+    26		};
+    27		
+    28		public static final StackTracePrinter staticFieldLambda = () -> {
+    29			StackTracePrinter.printNicely();
+    30		};
+    31		
+    32		public SampleClass() {
+    33			System.out.println("---   Inside constructor of the enclosing class - instanceFieldLambda   ---");
+    34			instanceFieldLambda.print();
+    35			System.out.println("---------------------------------------------------------------------------");
+    36			
+    37			System.out.println("---   Inside constructor of the enclosing class - staticFieldLambda     ---");
+    38			staticFieldLambda.print();
+    39			System.out.println("---------------------------------------------------------------------------");
+    40			
+    41			System.out.println("---   Inside constructor of the enclosing class - localVariableLambda   ---");
+    42			final StackTracePrinter localVariableLambda = () -> { 
+    43				StackTracePrinter.printNicely();
+    44			};
+    45			localVariableLambda.print();
+    46			System.out.println("---------------------------------------------------------------------------");
+    47		}
+    48		
+    49		public void someInstanceMethod() {
+    50			System.out.println("---   Inside instance method of the enclosing class - instanceFieldLambda -");
+    51			instanceFieldLambda.print();
+    52			System.out.println("---------------------------------------------------------------------------");
+    53			
+    54			System.out.println("---   Inside instance method of the enclosing class - staticFieldLambda ---");
+    55			staticFieldLambda.print();
+    56			System.out.println("---------------------------------------------------------------------------");
+    57			
+    58			System.out.println("---   Inside instance method of the enclosing class - localVariableLambda -");
+    59			final StackTracePrinter localVariableLambda = () -> { 
+    60				StackTracePrinter.printNicely();
+    61			};
+    62			localVariableLambda.print();
+    63			System.out.println("---------------------------------------------------------------------------");
+    64		}
+    65		
+    66		public static void someStaticMethod() {
+    67			System.out.println("---   Inside static method of the enclosing class - staticFieldLambda   ---");
+    68			staticFieldLambda.print();
+    69			System.out.println("---------------------------------------------------------------------------");
+    70			
+    71			System.out.println("---   Inside static method of the enclosing class - localVariableLambda ---");
+    72			final StackTracePrinter localVariableLambda = () -> { 
+    73				StackTracePrinter.printNicely();
+    74			};
+    75			localVariableLambda.print();
+    76			System.out.println("---------------------------------------------------------------------------");	
+    77		}
+    78	}
+    79	
+    80	@FunctionalInterface
+    81	interface StackTracePrinter {
+    82		void print();
+    83		
+    84		static void printNicely() {
+    85			final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
+    86			java.util.stream.Stream.
+    87				of(stacktrace).
+    88				forEach(System.out::println);
+    89		}
+    90	}
+</pre>
+			
+		<p>
+			Запустим программу и получим распечатку стэка вызовов.
+			
+<h4 id="listing-2">Листинг 2 - распечатка стэка вызовов</h4>
+<pre>
+---   Inside constructor of the enclosing class - instanceFieldLambda   ---
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
+SampleClass.lambda$new$0(TestLambdaStacktraces.java:25)
+SampleClass.<init>(TestLambdaStacktraces.java:34)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:3)
+---------------------------------------------------------------------------
+---   Inside constructor of the enclosing class - staticFieldLambda     ---
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
+SampleClass.lambda$static$1(TestLambdaStacktraces.java:29)
+SampleClass.<init>(TestLambdaStacktraces.java:38)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:3)
+---------------------------------------------------------------------------
+---   Inside constructor of the enclosing class - localVariableLambda   ---
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
+SampleClass.lambda$new$2(TestLambdaStacktraces.java:43)
+SampleClass.<init>(TestLambdaStacktraces.java:45)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:3)
+---------------------------------------------------------------------------
+---   Inside instance method of the enclosing class - instanceFieldLambda -
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
+SampleClass.lambda$new$0(TestLambdaStacktraces.java:25)
+SampleClass.someInstanceMethod(TestLambdaStacktraces.java:51)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:4)
+---------------------------------------------------------------------------
+---   Inside instance method of the enclosing class - staticFieldLambda ---
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
+SampleClass.lambda$static$1(TestLambdaStacktraces.java:29)
+SampleClass.someInstanceMethod(TestLambdaStacktraces.java:55)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:4)
+---------------------------------------------------------------------------
+---   Inside instance method of the enclosing class - localVariableLambda -
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
+SampleClass.lambda$someInstanceMethod$3(TestLambdaStacktraces.java:60)
+SampleClass.someInstanceMethod(TestLambdaStacktraces.java:62)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:4)
+---------------------------------------------------------------------------
+---   Inside main method of the application - instanceFieldLambda      ----
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
+SampleClass.lambda$new$0(TestLambdaStacktraces.java:25)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:7)
+---------------------------------------------------------------------------
+---   Inside main method of the application - staticFieldLambda        ----
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
+SampleClass.lambda$static$1(TestLambdaStacktraces.java:29)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:11)
+---------------------------------------------------------------------------
+---   Inside main method of the application - localVariableLambda      ----
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
+TestLambdaStacktraces.lambda$main$0(TestLambdaStacktraces.java:16)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:18)
+---------------------------------------------------------------------------
+</pre>
+
+		<p>
+			Строки <tt>java.lang.Thread.getStackTrace(Thread.java:1556)</tt> и 
+			<tt>StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)</tt> я оставил в 
+			<a href="#listing-2">листинге 2</a> на всякий случай, в дальшейнем я их приводить не буду, ибо ценных сведений
+			они не несут (просто я вынес распечатку стэктрэйса в обычный статический метод, чтобы не повторять в каждом
+			лямбда-выражении одно и то же).
+
+		<h2>Обращение к полю из конструктора класса</h2>
+		
+		<p>
+<pre>			
+---   Inside constructor of the enclosing class - instanceFieldLambda   ---
+SampleClass.lambda$new$0(TestLambdaStacktraces.java:25)
+SampleClass.<init>(TestLambdaStacktraces.java:34)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:3)
+---------------------------------------------------------------------------
+</pre>
+
+		<p>
+			Первым делом вызывается конструктор класса. В стеке вызовов мы видим его в форме 
+			<strong>ИмяКласса.&lt;init&gt;</strong>. Вполне понятно. Ведь в строке 34 происходит обращение к полю, 
+			содержащему лямбда-выражение. Далее, в строке 25 выполняется собственно тело лямбда-выражения. Как видим, 
+			полю, в котором хранится ссылка на лямбда-выражение, соответсвует в стэктрэйсе (кроме привычного
+			<em>lambda</em>) слово <strong>new</strong>. Хорошо это или плохо? В любом случае лучше, чем просто номер 
+			строки. С другой стороны, было бы круто видеть собственно имя поля, что-нибудь в таком роде (тем более, 
+			что поле <code>instanceFieldLambda</code> в классе <code>SampleClass</code> объявлено как <code>final</code>,
+			а значит, после присваивания полю значения с ним ничего не может случиться):
+<pre>
+SampleClass.lambda$new$instanceFieldLambda(TestLambdaStacktraces.java:25)
+</pre>
+		
+		<p>
+			В принципе, циферку <strong>0</strong> (если я правильно понимаю, она отвечает за количество созданных экземпляров
+			лямбда-выражения, т.е. играет роль счетчика) можно оставить для полноты картины:
+<pre>
+SampleClass.lambda$new$instanceFieldLambda$0(TestLambdaStacktraces.java:25)
+</pre>
+
+		<p>
+			К сожалению, этим мечтам не суждено сбыться. Насколько я знаю, 
+			
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<h2></h2>
+
+		<p>
+			
+			
+		<p>
+			
+			
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>
