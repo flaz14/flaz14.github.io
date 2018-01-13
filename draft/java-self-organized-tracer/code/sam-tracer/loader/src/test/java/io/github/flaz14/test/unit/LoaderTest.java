@@ -1,15 +1,15 @@
 package io.github.flaz14.test.unit;
 
-import io.github.flaz14.Bootstrapper;
+import io.github.flaz14.Loader;
 import org.junit.Test;
 
 /**
  *
  */
-public class BootstrapperTest {
+public class LoaderTest {
     @Test
     public void test() throws Exception {
-        new Bootstrapper();
+        new Loader();
 
     }
 }
