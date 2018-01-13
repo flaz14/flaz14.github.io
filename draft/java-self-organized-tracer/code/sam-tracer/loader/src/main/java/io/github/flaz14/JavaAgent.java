@@ -5,6 +5,7 @@ package io.github.flaz14;
  */
 public class JavaAgent {
     public static String extractedJar() {
+//        ClassLoader.
         return null;
     }
 
@@ -14,5 +15,5 @@ public class JavaAgent {
      * Actually the path is hardcoded in the corresponding POM. But at least it's hardcoded
      * one time and in one place.
      */
-    private static final String JAVA_AGENT_META_FILE = "java-agent-meta.properties";
+    private static final String JAVA_AGENT_META_FILE = "java-agent.properties";
 }

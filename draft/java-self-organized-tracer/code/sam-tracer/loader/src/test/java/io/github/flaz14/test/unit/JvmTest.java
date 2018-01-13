@@ -16,8 +16,6 @@ public class JvmTest {
         public void oracleJvm() {
             assertThat(Jvm.pid(), is(not(0)));
         }
-
-
     }
 }
 

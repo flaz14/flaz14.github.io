@@ -20,6 +20,13 @@
     <java-agent.source.path>../${java-agent.artifactId}/target</java-agent.source.path>
     <java-agent.destination.path>alienated</java-agent.destination.path>
     <java-agent.jar>${java-agent.artifactId}.jar</java-agent.jar>
+
+    <!-- It's possible to use Maven's property as reference to resources directory as described in
+     [Referencing resources directory from project object model variables]
+     (https://stackoverflow.com/a/15004792/4672928).
+     But in that approach an index is used. So it will be better to specify the resource directory
+     explicitly. -->
+    <resources-to-be-filtered>src/main/resources</resources-to-be-filtered>
   </properties>
 
   <!-- The agent's artifact is included as dependency because we need the corresponding JAR-file before
@@ -69,9 +76,10 @@
         </executions>
       </plugin>
     </plugins>
+    
     <resources>
       <resource>
-        <directory>${project.build.resources[0].directory}</directory>
+        <directory>${resources-to-be-filtered}</directory>
         <filtering>true</filtering>
       </resource>
     </resources>
