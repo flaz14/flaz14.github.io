@@ -6,16 +6,17 @@ import java.lang.instrument.Instrumentation;
  *
  */
 public class SimpleAgent {
-    public static void premain(String agentArgs, Instrumentation inst)
-    {
+    public static void premain(String agentArgs, Instrumentation instrumentation) {
         System.out.println(">>> premain()");
-        //initialize(agentArgs, inst);
+        initialize(instrumentation);
     }
 
-    public static void agentmain(String agentArgs, Instrumentation inst)
-    {
+    public static void agentmain(String agentArgs, Instrumentation instrumentation) {
         System.out.println(">>> agentmain()");
-//        initialize(agentArgs, inst);
+        initialize(instrumentation);
     }
 
+    private static void initialize(final Instrumentation instrumentation) {
+        instrumentation.addTransformer(new ClassTransformer());
+    }
 }
