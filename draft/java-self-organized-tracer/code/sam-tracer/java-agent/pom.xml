@@ -37,6 +37,12 @@
           </descriptorRefs>
           <finalName>java-agent</finalName>
           <appendAssemblyId>false</appendAssemblyId>
+          <archive>
+            <manifestEntries>
+              <PreMain-Class>io.github.flaz14.SimpleAgent</PreMain-Class>
+              <Agent-Class>io.github.flaz14.SimpleAgent</Agent-Class>
+            </manifestEntries>
+          </archive>
         </configuration>
       </plugin>
     </plugins>
