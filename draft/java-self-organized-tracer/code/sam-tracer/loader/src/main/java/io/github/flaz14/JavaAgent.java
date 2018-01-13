@@ -1,20 +1,44 @@
 package io.github.flaz14;
 
+import com.sun.tools.attach.AgentInitializationException;
+import com.sun.tools.attach.AgentLoadException;
+import com.sun.tools.attach.AttachNotSupportedException;
+import com.sun.tools.attach.VirtualMachine;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Properties;
 
 /**
  *
  */
 public class JavaAgent {
-    public static String extractedJar() {
+
+    public static void attachToJvm(final String pid) {
+        final String pathToJavaAgent = extractedJar();
+        try {
+            final VirtualMachine vm = VirtualMachine.attach(pid);
+            vm.loadAgent(pathToJavaAgent);
+            vm.detach();
+        } catch (IOException |
+                AttachNotSupportedException |
+                AgentLoadException |
+                AgentInitializationException e) {
+            final String errorMessage = String.format(
+                    "Cannot attach Java Agent [%s] to JVM instance with PID [%s]",
+                    pathToJavaAgent, pid);
+            throw new IllegalStateException(errorMessage, e);
+        }
+    }
+
+    private static String extractedJar() {
         try (final InputStream sourceJar = ClassLoader.getSystemResourceAsStream(
                 pathWithinJar())) {
             final Path targetJar = Files.createTempFile("sam-tracer-", ".jar");
-//            Files.copy(sourceJar, targetJar);
+            Files.copy(sourceJar, targetJar, StandardCopyOption.REPLACE_EXISTING);
             final String pathToExtractedJar = targetJar.toString();
             System.out.printf("Path to extracted Java Agent JAR [%s]%n", pathToExtractedJar);
             return pathToExtractedJar;

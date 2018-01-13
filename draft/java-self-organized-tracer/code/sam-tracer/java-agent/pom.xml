@@ -37,7 +37,6 @@
           </descriptorRefs>
           <finalName>java-agent</finalName>
           <appendAssemblyId>false</appendAssemblyId>
-          <classifier></classifier>
         </configuration>
       </plugin>
     </plugins>

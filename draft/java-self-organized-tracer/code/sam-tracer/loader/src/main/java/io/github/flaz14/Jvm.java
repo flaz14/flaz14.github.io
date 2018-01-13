@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  */
 public class Jvm {
 
-    public static long pid() {
+    public static String pid() {
         return prettyPid(
                 rawPid()
         );
@@ -24,14 +24,12 @@ public class Jvm {
                 getName();
     }
 
-    private static long prettyPid(final String rawPid) {
+    private static String prettyPid(final String rawPid) {
         final Matcher pidMatcher = oracleJvmNameFormat(rawPid);
         if (!pidMatcher.matches()) {
             throw new IllegalStateException(errorMessage(rawPid));
         }
-        return Long.parseLong(
-                pidMatcher.group(1)
-        );
+        return pidMatcher.group(1);
     }
 
     private static Matcher oracleJvmNameFormat(final String rawPid) {

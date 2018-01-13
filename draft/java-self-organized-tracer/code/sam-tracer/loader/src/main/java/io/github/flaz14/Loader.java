@@ -5,13 +5,11 @@ package io.github.flaz14;
  */
 public class Loader {
     static {
-//        if (isDisabled()) {
-//            System.out.println("WARNING: sam-tracer is disabled.");
-//        } else
-        {
+        if (isDisabled()) {
+            System.out.println("WARNING: sam-tracer is disabled.");
+        } else {
             System.out.println("Extracting Java Agent JAR...");
-            JavaAgent.extractedJar();
-
+            JavaAgent.attachToJvm(Jvm.pid());
         }
     }
 

@@ -1,4 +1,4 @@
-package io.github.flaz14.test.unit;
+package io.github.flaz14;
 
 import io.github.flaz14.Jvm;
 import org.junit.Test;
@@ -14,7 +14,7 @@ public class JvmTest {
     public static class Pid {
         @Test
         public void oracleJvm() {
-            assertThat(Jvm.pid(), is(not(0)));
+            assertThat(Jvm.pid(), is(not("")));
         }
     }
 }
