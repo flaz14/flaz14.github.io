@@ -17,6 +17,9 @@ public class ClassTransformer implements ClassFileTransformer {
             final byte[] classfileBuffer)
             throws IllegalClassFormatException {
         System.out.println(">>> transform()");
+
+        System.out.println(">>> className: " + classBeingRedefined.getName());
+
         return classfileBuffer;
     }
 }
