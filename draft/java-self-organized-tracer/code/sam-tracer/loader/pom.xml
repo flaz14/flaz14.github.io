@@ -52,7 +52,9 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
+        <version>2.7</version>
         <executions>
           <execution>
             <id>copy-java-agent-jar</id>
@@ -76,7 +78,7 @@
         </executions>
       </plugin>
     </plugins>
-    
+
     <resources>
       <resource>
         <directory>${resources-to-be-filtered}</directory>
