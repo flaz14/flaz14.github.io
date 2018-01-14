@@ -4,15 +4,12 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.commons.EmptyVisitor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toSet;
+import static java.util.Collections.unmodifiableSet;
 
 public class ClassExplorer {
 
@@ -51,7 +48,7 @@ public class ClassExplorer {
      * @return
      */
     public static Set<String> interfaces(final String classNameInVm, final byte[] originalClassfile) {
-        final List<String> interfaceNames = new ArrayList<>();
+        final Set<String> interfaceNames = new HashSet<>();
         final ClassReader reader = new ClassReader(originalClassfile);
         final ClassVisitor visitor = new EmptyVisitor() {
             @Override
@@ -63,10 +60,7 @@ public class ClassExplorer {
             }
         };
         reader.accept(visitor, DO_NOT_SKIP_ANYTHING);
-        return interfaceNames.stream().
-                map(ClassExplorer::humanReadableClassName).
-                collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
-
+        return unmodifiableSet(interfaceNames);
     }
 
     static String humanReadableClassName(final String classNameInJvm) {
