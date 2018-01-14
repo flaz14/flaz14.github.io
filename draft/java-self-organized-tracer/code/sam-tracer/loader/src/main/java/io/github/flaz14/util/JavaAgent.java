@@ -12,6 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Properties;
 
+import static java.lang.ClassLoader.getSystemResourceAsStream;
+
 /**
  *
  */
@@ -27,16 +29,14 @@ public class JavaAgent {
                 AttachNotSupportedException |
                 AgentLoadException |
                 AgentInitializationException e) {
-            final String errorMessage = String.format(
-                    "Cannot attach Java Agent [%s] to JVM instance with PID [%s]",
-                    pathToJavaAgent, pid);
-            throw new IllegalStateException(errorMessage, e);
+            throw Exceptions.cannotAttachJavaAgent(pathToJavaAgent, pid, e);
         }
     }
 
     private static String extractedJar() {
-        try (final InputStream sourceJar = ClassLoader.getSystemResourceAsStream(
-                pathWithinJar())) {
+        try (final InputStream sourceJar = getSystemResourceAsStream(
+                pathWithinJar()
+        )) {
             final Path targetJar = Files.createTempFile("sam-tracer-", ".jar");
             Files.copy(sourceJar, targetJar, StandardCopyOption.REPLACE_EXISTING);
             final String pathToExtractedJar = targetJar.toString();
@@ -48,7 +48,7 @@ public class JavaAgent {
     }
 
     private static String pathWithinJar() {
-        try (final InputStream propertiesFile = ClassLoader.getSystemResourceAsStream(PROPERTIES_FILE)) {
+        try (final InputStream propertiesFile = getSystemResourceAsStream(PROPERTIES_FILE)) {
             return jarProperty(propertiesFile);
         } catch (IOException e) {
             throw Exceptions.cannotReadPropertiesFile(e);
@@ -73,14 +73,24 @@ public class JavaAgent {
 
     private static class Exceptions {
         static IllegalStateException cannotReadPropertiesFile(final IOException cause) {
-            final String errorMessage = String.format("Cannot read Java Agent properties file [%s] " +
-                    "from within JAR.", PROPERTIES_FILE);
-            return new IllegalStateException(errorMessage, cause);
+            String message = String.format("Cannot read Java Agent properties file [%s] " +
+                            "from within JAR.",
+                    PROPERTIES_FILE);
+            return new IllegalStateException(message, cause);
 
         }
 
         static IllegalStateException cannotExtractJavaAgentJar(final IOException cause) {
             return new IllegalStateException("Cannot extract Java Agent JAR from this JAR", cause);
+        }
+
+        static IllegalStateException cannotAttachJavaAgent(final String pathToJavaAgent,
+                                                           final String pid,
+                                                           final Exception cause) {
+            String message = String.format(
+                    "Cannot attach Java Agent [%s] to JVM instance with PID [%s]",
+                    pathToJavaAgent, pid);
+            throw new IllegalStateException(message, cause);
         }
     }
 }
