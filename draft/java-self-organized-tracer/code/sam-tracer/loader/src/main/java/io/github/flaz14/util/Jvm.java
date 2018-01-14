@@ -11,11 +11,6 @@ public class Jvm {
      * There is no cross-platform and robust way to find a <strong>Process ID</strong> of current JVM
      * instance (until Java 9). Anyway, this approach is better than platform-specific code. But it's
      * fragile and depends on the implementation of the certain JVM.
-     * <p/>
-     * You can find more details in the answers for
-     * <a href="https://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id">
-     * How can a Java program get its own process ID?
-     * </a>
      */
     public static String pid() {
         return prettyPid(
@@ -42,10 +37,10 @@ public class Jvm {
                 getName();
     }
 
-    private static Matcher oracleJvmNameFormat(final String rawPid) {
+    private static Matcher oracleJvmNameFormat(final String vmName) {
         return Pattern.
                 compile("(\\d+)@.*").
-                matcher(rawPid);
+                matcher(vmName);
     }
 
     private static IllegalArgumentException unsupportedVmNameFormat(final String vmName) {

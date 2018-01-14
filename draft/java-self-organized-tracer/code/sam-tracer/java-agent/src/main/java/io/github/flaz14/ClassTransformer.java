@@ -43,8 +43,12 @@ public class ClassTransformer implements ClassFileTransformer {
         final ClassReader reader = new ClassReader(classfileBuffer);
         final ClassVisitor visitor = new EmptyVisitor() {
             @Override
-            public void visit(int version, int access, String name,
-                              String signature, String superName, String[] interfaces) {
+            public void visit(final int version,
+                              final int access,
+                              final String name,
+                              final String signature,
+                              final String superName,
+                              final String[] interfaces) {
                 interfaceNames.clear();
                 interfaceNames.addAll(asList(interfaces));
                 super.visit(version, access, name, signature, superName, interfaces);

@@ -6,8 +6,8 @@ import io.github.flaz14.util.Jvm;
 /**
  * An entry point to the tracer.
  * <p/>
- * If you would like to start tracing just add <strong>loader.jar</strong> to runtime classpath and load
- * this class. For example, create dummy instance:
+ * If you would like to start tracing then just add <strong>loader.jar</strong> to runtime classpath and
+ * load this class. For example, create dummy instance:
  * <p/>
  * <code>new io.github.flaz14.Loader()</code>
  * <p/>

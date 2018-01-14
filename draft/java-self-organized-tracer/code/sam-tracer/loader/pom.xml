@@ -29,7 +29,6 @@
     <resources-to-be-filtered>src/main/resources</resources-to-be-filtered>
   </properties>
 
-
   <dependencies>
     <dependency>
       <groupId>com.sun</groupId>
@@ -38,7 +37,6 @@
       <scope>system</scope>
       <systemPath>${env.JAVA_HOME}/lib/tools.jar</systemPath>
     </dependency>
-
 
     <!-- The agent's artifact is included as dependency because we need the corresponding JAR-file before
      this module will be packaged. -->

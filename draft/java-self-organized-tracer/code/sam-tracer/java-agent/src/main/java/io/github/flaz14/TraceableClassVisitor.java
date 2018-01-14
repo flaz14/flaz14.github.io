@@ -10,7 +10,6 @@ import org.objectweb.asm.Opcodes;
 import static io.github.flaz14.TraceableRestrictions.shouldBeInstrumented;
 
 public class TraceableClassVisitor extends ClassWriter {
-
     public TraceableClassVisitor(ClassReader classReader, int flags) {
         super(classReader, flags);
     }
@@ -28,7 +27,6 @@ public class TraceableClassVisitor extends ClassWriter {
 }
 
 class TraceableMethodVisitor extends MethodAdapter {
-
     public TraceableMethodVisitor(MethodVisitor mv) {
         super(mv);
     }
@@ -36,7 +34,6 @@ class TraceableMethodVisitor extends MethodAdapter {
     @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         final String incomingMethodSignature = name + desc;
-        System.out.println("Visit [" + incomingMethodSignature + "]");
         if (shouldBeInstrumented(incomingMethodSignature)) {
             insertInTrace(name);
             doOriginalCall(opcode, owner, name, desc);
