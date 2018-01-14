@@ -37,26 +37,30 @@ class TraceableMethodVisitor extends MethodAdapter {
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         final String incomingMethodSignature = name + desc;
         System.out.println("Visit [" + incomingMethodSignature + "]");
-        if (!shouldBeInstrumented(incomingMethodSignature)) {
+        if (shouldBeInstrumented(incomingMethodSignature)) {
+            insertInTrace(name);
             doOriginalCall(opcode, owner, name, desc);
-            return;
+            insertOutTrace(name);
+        } else {
+            doOriginalCall(opcode, owner, name, desc);
         }
-
-//        /* System.err.println("CALL" + name); */
-        mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-        mv.visitLdcInsn("CALL " + name);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V");
-//
-        doOriginalCall(opcode, owner, name, desc);
-//
-//        /* System.err.println("RETURN" + name);  */
-//        mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-//        mv.visitLdcInsn("RETURN " + name);
-//        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V");
-//        super.visitMethodInsn(opcode, owner, name, desc);
     }
 
     private void doOriginalCall(int opcode, String owner, String name, String desc) {
         mv.visitMethodInsn(opcode, owner, name, desc);
+    }
+
+    private void insertInTrace(final String methodName) {
+        /* System.out.println("sam-tracer: IN [" + methodName + "]"); */
+        mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+        mv.visitLdcInsn("sam-tracer: IN [" + methodName + "]");
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V");
+    }
+
+    private void insertOutTrace(final String methodName) {
+        /* System.out.println("sam-tracer: OUT [" + methodName + "]"); */
+        mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+        mv.visitLdcInsn("sam-tracer: OUT [" + methodName + "]");
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V");
     }
 }
