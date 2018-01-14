@@ -11,6 +11,7 @@ import java.security.ProtectionDomain;
 import java.util.HashSet;
 import java.util.Set;
 
+import static io.github.flaz14.TraceableRestrictions.shouldBeInstrumented;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 
@@ -24,46 +25,22 @@ public class ClassTransformer implements ClassFileTransformer {
             final ProtectionDomain protectionDomain,
             final byte[] classfileBuffer)
             throws IllegalClassFormatException {
-        System.out.println(">>> transform()!");
-        System.out.println(">>> className!");
-        System.out.println(">>> className: " + className);
-        System.out.println(">>> should be instrumented: " + shouldBeInstrumented(className, classfileBuffer));
-
-        if (shouldBeInstrumented(className, classfileBuffer))
-            return getInstrumentedClassBytes(className, classfileBuffer);
-        else
-            return classfileBuffer;
+        return shouldBeInstrumented(
+                interfaces(classfileBuffer))
+                ? instrumentedClassBytes(classfileBuffer)
+                : classfileBuffer;
     }
 
-    private byte[] getInstrumentedClassBytes(String className,
-                                             byte[] classfileBuffer) {
-        try {
-            ClassReader cr = new ClassReader(classfileBuffer);
-            TraceableVisitor analysis = new TraceableVisitor();
-            cr.accept(analysis, DO_NOT_SKIP_ANYTHING);
-            ClassWriter cw = new ClassWriter(cr, DO_NOT_SKIP_ANYTHING);
-            cr.accept(cw, DO_NOT_SKIP_ANYTHING);
-            return cw.toByteArray();
-        } catch (Throwable th) {
-            System.err.println("Caught Throwable when trying to instrument: "
-                    + className);
-            th.printStackTrace();
-            return null;
-        }
+    private byte[] instrumentedClassBytes(final byte[] classfileBuffer) {
+        final ClassReader reader = new ClassReader(classfileBuffer);
+        final ClassWriter writer = new TraceableClassVisitor(reader, DO_NOT_SKIP_ANYTHING);
+        reader.accept(writer, DO_NOT_SKIP_ANYTHING);
+        return writer.toByteArray();
     }
 
-    private static boolean shouldBeInstrumented(final String className, final byte[] classfileBuffer) {
-        final Set<String> interfaceNames = interfaces(className, classfileBuffer);
-        System.out.printf("Class [%s] implements [%s] interfaces%n", className, interfaceNames);
-        return interfaceNames.contains("io/github/flaz14/publicapi/Traceable");
-    }
-
-    /**
-     * Almost copied and pasted from intrace project TODO add link to github
-     */
-    private static Set<String> interfaces(final String classNameInVm, final byte[] originalClassfile) {
+    private static Set<String> interfaces(final byte[] classfileBuffer) {
         final Set<String> interfaceNames = new HashSet<>();
-        final ClassReader reader = new ClassReader(originalClassfile);
+        final ClassReader reader = new ClassReader(classfileBuffer);
         final ClassVisitor visitor = new EmptyVisitor() {
             @Override
             public void visit(int version, int access, String name,
@@ -78,11 +55,8 @@ public class ClassTransformer implements ClassFileTransformer {
     }
 
     /**
-     * The purpose of using zero as flags (in the source of <strong>getInterfaces</strong>
-     * original InTrace project) is mysterious.
-     * TODO put link to GitHub
-     * But according to the Javadoc of {@link org.objectweb.asm.ClassReader} zero clears
-     * all "skip" flag. This is why such long name is used here.
+     * According to {@link org.objectweb.asm.ClassReader} setting a certain flag
+     * means "to skip something". So zero (all flags are unset) has opposite meaning.
      */
     private static final int DO_NOT_SKIP_ANYTHING = 0;
 }
