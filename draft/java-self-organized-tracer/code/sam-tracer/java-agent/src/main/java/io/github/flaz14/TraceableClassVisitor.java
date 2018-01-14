@@ -37,7 +37,7 @@ class TraceableMethodVisitor extends MethodAdapter {
         final String incomingMethodSignature = name + desc;
         System.out.println("Visit [" + incomingMethodSignature + "]");
         if (!shouldBeInstrumented(incomingMethodSignature)) {
-            doCall(opcode, owner, name, desc);
+            doOriginalCall(opcode, owner, name, desc);
             return;
         }
 
@@ -46,7 +46,7 @@ class TraceableMethodVisitor extends MethodAdapter {
 //        mv.visitLdcInsn("CALL " + name);
 //        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V");
 //
-        doCall(opcode, owner, name, desc);
+        doOriginalCall(opcode, owner, name, desc);
 //
 //        /* System.err.println("RETURN" + name);  */
 //        mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
@@ -55,7 +55,7 @@ class TraceableMethodVisitor extends MethodAdapter {
 //        super.visitMethodInsn(opcode, owner, name, desc);
     }
 
-    private void doCall(int opcode, String owner, String name, String desc) {
+    private void doOriginalCall(int opcode, String owner, String name, String desc) {
         mv.visitMethodInsn(opcode, owner, name, desc);
     }
 }
