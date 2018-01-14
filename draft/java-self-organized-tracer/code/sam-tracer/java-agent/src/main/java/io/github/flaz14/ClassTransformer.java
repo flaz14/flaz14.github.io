@@ -25,22 +25,10 @@ public class ClassTransformer implements ClassFileTransformer {
         System.out.println(">>> className: " + className);
         System.out.println(">>> should be instrumented: " + shouldBeInstrumented(className, classfileBuffer));
 
-
-        byte[] newBytes;
-        try {
-            newBytes = getInstrumentedClassBytes(className,
-                    classfileBuffer);
-        } catch (RuntimeException th) {
-            // Ensure the JVM doesn't silently swallow an unchecked exception
-            th.printStackTrace();
-            throw th;
-        } catch (Error th) {
-            // Ensure the JVM doesn't silently swallow an unchecked exception
-            th.printStackTrace();
-            throw th;
-        }
-
-        return newBytes;
+        if (shouldBeInstrumented(className, classfileBuffer))
+            return getInstrumentedClassBytes(className, classfileBuffer);
+        else
+            return classfileBuffer;
     }
 
     private byte[] getInstrumentedClassBytes(String className,
@@ -50,6 +38,7 @@ public class ClassTransformer implements ClassFileTransformer {
             ClassAnalysis analysis = new ClassAnalysis();
             cr.accept(analysis, 0);
             ClassWriter cw = new ClassWriter(cr, 0);
+            cr.accept(cw, 0);
             return cw.toByteArray();
         } catch (Throwable th) {
             System.err.println("Caught Throwable when trying to instrument: "
@@ -64,6 +53,4 @@ public class ClassTransformer implements ClassFileTransformer {
         System.out.printf("Class [%s] implements [%s] interfaces%n", className, interfaceNames);
         return interfaceNames.contains("io/github/flaz14/publicapi/Traceable");
     }
-
-
 }
