@@ -33,8 +33,8 @@ public class ClassTransformer implements ClassFileTransformer {
 
     private byte[] instrumentedClassBytes(final byte[] classfileBuffer) {
         final ClassReader reader = new ClassReader(classfileBuffer);
-        final ClassWriter writer = new TraceableClassVisitor(reader, DO_NOT_SKIP_ANYTHING);
-        reader.accept(writer, DO_NOT_SKIP_ANYTHING);
+        final ClassWriter writer = new TraceableClassVisitor(reader, ClassWriter.COMPUTE_FRAMES);
+        reader.accept(writer, ClassWriter.COMPUTE_FRAMES);
         return writer.toByteArray();
     }
 
