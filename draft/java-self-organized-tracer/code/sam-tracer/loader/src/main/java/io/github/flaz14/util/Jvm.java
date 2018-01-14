@@ -6,13 +6,17 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * https://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id
- * <p/>
- * https://stackoverflow.com/questions/38482839/maven-assembly-plugin-how-to-use-appendassemblyid/38484021
- */
 public class Jvm {
-
+    /**
+     * There is no cross-platform and robust way to find a <strong>Process ID</strong> of current JVM
+     * instance (until Java 9). Anyway, this approach is better than platform-specific code. But it's
+     * fragile and depends on the implementation of the certain JVM.
+     * <p/>
+     * You can find more details in the answers for
+     * <a href="https://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id">
+     * How can a Java program get its own process ID?
+     * </a>
+     */
     public static String pid() {
         return prettyPid(
                 vmName()

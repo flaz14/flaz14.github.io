@@ -14,11 +14,7 @@ import java.util.Properties;
 
 import static java.lang.ClassLoader.getSystemResourceAsStream;
 
-/**
- *
- */
 public class JavaAgent {
-
     public static void attachToJvm(final String pid) {
         final String pathToJavaAgent = extractedJar();
         try {
@@ -29,7 +25,7 @@ public class JavaAgent {
                 AttachNotSupportedException |
                 AgentLoadException |
                 AgentInitializationException e) {
-            throw Exceptions.cannotAttachJavaAgent(pathToJavaAgent, pid, e);
+            throw OutwardException.cannotAttachJavaAgent(pathToJavaAgent, pid, e);
         }
     }
 
@@ -43,7 +39,7 @@ public class JavaAgent {
             System.out.printf("Path to extracted Java Agent JAR [%s]%n", pathToExtractedJar);
             return pathToExtractedJar;
         } catch (IOException e) {
-            throw Exceptions.cannotExtractJavaAgentJar(e);
+            throw OutwardException.cannotExtractJavaAgentJar(e);
         }
     }
 
@@ -51,7 +47,7 @@ public class JavaAgent {
         try (final InputStream propertiesFile = getSystemResourceAsStream(PROPERTIES_FILE)) {
             return jarProperty(propertiesFile);
         } catch (IOException e) {
-            throw Exceptions.cannotReadPropertiesFile(e);
+            throw OutwardException.cannotReadPropertiesFile(e);
         }
     }
 
@@ -67,17 +63,16 @@ public class JavaAgent {
      * Path to the agent's JAR is not hardcoded but will be read from the properties file
      * (the path to alienated JAR is provided by Maven via resource filtering mechanism).
      * Actually the path is hardcoded in the corresponding POM. But at least it's hardcoded
-     * one time and in one place.
+     * only once and in single place.
      */
     private static final String PROPERTIES_FILE = "java-agent.properties";
 
-    private static class Exceptions {
+    private static class OutwardException {
         static IllegalStateException cannotReadPropertiesFile(final IOException cause) {
             String message = String.format("Cannot read Java Agent properties file [%s] " +
                             "from within JAR.",
                     PROPERTIES_FILE);
             return new IllegalStateException(message, cause);
-
         }
 
         static IllegalStateException cannotExtractJavaAgentJar(final IOException cause) {

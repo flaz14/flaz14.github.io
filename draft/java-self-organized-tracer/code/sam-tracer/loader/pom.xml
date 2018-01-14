@@ -51,6 +51,8 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Perhaps, JUnit 4 is not the best choice. But JUnit 5 is not so stable as desired. So it will be
+     better to use a little bit obsolete version. -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
