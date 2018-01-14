@@ -1,4 +1,4 @@
-package io.github.flaz14;
+package io.github.flaz14.util;
 
 import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
