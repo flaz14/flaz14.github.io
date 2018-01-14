@@ -1,6 +1,9 @@
 package io.github.flaz14;
 
+import io.github.flaz14.util.ClassAnalysis;
 import io.github.flaz14.util.ClassExplorer;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -21,7 +24,39 @@ public class ClassTransformer implements ClassFileTransformer {
         System.out.println(">>> className!");
         System.out.println(">>> className: " + className);
         System.out.println(">>> should be instrumented: " + shouldBeInstrumented(className, classfileBuffer));
-        return classfileBuffer;
+
+
+        byte[] newBytes;
+        try {
+            newBytes = getInstrumentedClassBytes(className,
+                    classfileBuffer);
+        } catch (RuntimeException th) {
+            // Ensure the JVM doesn't silently swallow an unchecked exception
+            th.printStackTrace();
+            throw th;
+        } catch (Error th) {
+            // Ensure the JVM doesn't silently swallow an unchecked exception
+            th.printStackTrace();
+            throw th;
+        }
+
+        return newBytes;
+    }
+
+    private byte[] getInstrumentedClassBytes(String className,
+                                             byte[] classfileBuffer) {
+        try {
+            ClassReader cr = new ClassReader(classfileBuffer);
+            ClassAnalysis analysis = new ClassAnalysis();
+            cr.accept(analysis, 0);
+            ClassWriter cw = new ClassWriter(cr, 0);
+            return cw.toByteArray();
+        } catch (Throwable th) {
+            System.err.println("Caught Throwable when trying to instrument: "
+                    + className);
+            th.printStackTrace();
+            return null;
+        }
     }
 
     private static boolean shouldBeInstrumented(final String className, final byte[] classfileBuffer) {
@@ -29,4 +64,6 @@ public class ClassTransformer implements ClassFileTransformer {
         System.out.printf("Class [%s] implements [%s] interfaces%n", className, interfaceNames);
         return interfaceNames.contains("io/github/flaz14/publicapi/Traceable");
     }
+
+
 }
