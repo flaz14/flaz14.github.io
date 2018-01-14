@@ -13,39 +13,8 @@ import static java.util.Collections.unmodifiableSet;
 
 public class ClassExplorer {
 
-
-
-
-    /*
-    private String[] getInterfaces(String className, byte[] originalClassfile) {
-        try {
-            final String[][] interfaceNames = new String[1][];
-            ClassReader cr = new ClassReader(originalClassfile);
-            ClassVisitor cv = new EmptyVisitor() {
-                @Override
-                public void visit(int version, int access, String name,
-                                  String signature, String superName, String[] interfaces) {
-                    interfaceNames[0] = interfaces;
-                    super.visit(version, access, name, signature, superName, interfaces);
-                }
-            };
-            cr.accept(cv, 0);
-            return interfaceNames[0];
-        } catch (Throwable th) {
-            System.err.println("Caught Throwable when trying to instrument: "
-                    + className);
-            th.printStackTrace();
-            return new String[0];
-        }
-    }
-    */
-
     /**
      * Almost copied and pasted from intrace project TODO add link to github
-     *
-     * @param classNameInVm
-     * @param originalClassfile
-     * @return
      */
     public static Set<String> interfaces(final String classNameInVm, final byte[] originalClassfile) {
         final Set<String> interfaceNames = new HashSet<>();
@@ -61,16 +30,6 @@ public class ClassExplorer {
         };
         reader.accept(visitor, DO_NOT_SKIP_ANYTHING);
         return unmodifiableSet(interfaceNames);
-    }
-
-    static String humanReadableClassName(final String classNameInJvm) {
-        return Optional.ofNullable(classNameInJvm).
-                map(
-                        name -> name.replaceAll("/", ".")
-                ).
-                orElseThrow(
-                        () -> new IllegalArgumentException("classNameInVm should not be null.")
-                );
     }
 
     /**
