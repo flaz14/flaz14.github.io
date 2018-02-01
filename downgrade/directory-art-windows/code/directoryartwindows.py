@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: cp866 -*-
 
 
 import tempfile
@@ -25,6 +25,9 @@ UNICODE_SPACES = {
 	#
 	# Some spaces have been commented out due to certain circumstances.
 	#
+	# '\u0020' - This is usual space character (e.g. ASCII #32). But we exclude it! Because name of a file cannot
+	#            consist only of spaces (such name can be generated if input ASCII-picture contains empty line).
+	#
 	# '\u1680' - This one has been excluded because it displayed as a scrawl in terminal emulator. However, displaying 
 	#            of uncommon characters in a terminal is distribution-specific (e.g. it's dependent of OS, locales, 
 	#            fonts installed, etc). 
@@ -37,7 +40,7 @@ UNICODE_SPACES = {
 	#
 	# '\u3000' - This one looks too wide in terminal, e.g. this space is wider than other spaces in this group.
 	'pure' : [
-		'\u0020',
+		#'\u0020', 
 		'\u00A0',
 		# '\u1680',
 		# '\u180E',
@@ -146,7 +149,7 @@ def add_unicode_spaces(lines):
 		total_number_of_lines ** (1 / float(total_number_of_spaces))
 	)
 	combinations_sorted_asc = sorted(
-		itertools.combinations(spaces_set, minimal_combination_length)
+		itertools.product(spaces_set, repeat = minimal_combination_length)
 	)
 	lines_with_spaces = []
 	for line, combination in zip(lines, combinations_sorted_asc):
