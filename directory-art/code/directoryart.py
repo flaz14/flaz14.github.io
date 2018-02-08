@@ -127,7 +127,7 @@ def add_unicode_spaces(lines):
 		total_number_of_lines ** (1 / float(total_number_of_spaces))
 	)
 	combinations_sorted_asc = sorted(
-		itertools.combinations(spaces_set, minimal_combination_length)
+		itertools.product(spaces_set, repeat = minimal_combination_length)
 	)
 	lines_with_spaces = []
 	for line, combination in zip(lines, combinations_sorted_asc):
