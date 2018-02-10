@@ -34,11 +34,11 @@ href="тут будет исходный код">
 
 		<p>
 			В одной из своих предыдущих ламерских статей 
-			(<a href="http://flaz14.github.io/java-8-whats-new/java-8-whats-new-part-3.html">
-			Новое, клёвое и хреновое в Java 8. Часть 3. Лямбда-выражения</a>) я коснулся темы стэктрэйсов. Чтение 
+			(<a href="http://flaz14.github.io/java-8-whats-new/java-8-whats-new-part-3.html">Новое, клёвое и хреновое в 
+			Java 8. Часть 3. Лямбда-выражения</a>) я коснулся темы стэктрэйсов. Чтение 
 			стека вызовов - это, пожалуй, основное занятие Java-разработчика. Порой оно отнимает времени больше, чем
 			чтение собственно исходного кода и документации (особенно, если код запускается под управлением очередной
-			версии новороченного фреймворка). Так что красота стэктрэйсов - залог успеха :)
+			версии новороченного фреймворка). Так что красота стэктрэйсов - залог успеха.
 			
 		<p>
 			Как уже было сказано, лямбда-выражения не во всем повторяют анонимные классы. Рассмотрим простой пример 
@@ -208,66 +208,132 @@ TestLambdaStacktraces.main(TestLambdaStacktraces.java:18)
 ---------------------------------------------------------------------------
 </pre>
 
-		<p>
-			Строки <tt>java.lang.Thread.getStackTrace(Thread.java:1556)</tt> и 
-			<tt>StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)</tt> я оставил в 
-			<a href="#listing-2">листинге 2</a> на всякий случай, в дальшейнем я их приводить не буду, ибо ценных сведений
-			они не несут (просто я вынес распечатку стэктрэйса в обычный статический метод, чтобы не повторять в каждом
-			лямбда-выражении одно и то же).
-
-		<h2>Обращение к полю из конструктора класса</h2>
+		<h2 id="Inside_constructor_of_the_enclosing_class_-_instanceFieldLambda">
+			Вызов лямбда-выражения из конструктора класса через поле класса
+		</h2>
 		
 		<p>
 <pre>			
 ---   Inside constructor of the enclosing class - instanceFieldLambda   ---
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
 SampleClass.lambda$new$0(TestLambdaStacktraces.java:25)
-SampleClass.<init>(TestLambdaStacktraces.java:34)
+SampleClass.&lt;init&gt;(TestLambdaStacktraces.java:34)
 TestLambdaStacktraces.main(TestLambdaStacktraces.java:3)
 ---------------------------------------------------------------------------
 </pre>
 
 		<p>
-			Первым делом вызывается конструктор класса. В стеке вызовов мы видим его в форме 
-			<strong>ИмяКласса.&lt;init&gt;</strong>. Вполне понятно. Ведь в строке 34 происходит обращение к полю, 
-			содержащему лямбда-выражение. Далее, в строке 25 выполняется собственно тело лямбда-выражения. Как видим, 
-			полю, в котором хранится ссылка на лямбда-выражение, соответсвует в стэктрэйсе (кроме привычного
-			<em>lambda</em>) слово <strong>new</strong>. Хорошо это или плохо? В любом случае лучше, чем просто номер 
-			строки. С другой стороны, было бы круто видеть собственно имя поля, что-нибудь в таком роде (тем более, 
-			что поле <code>instanceFieldLambda</code> в классе <code>SampleClass</code> объявлено как <code>final</code>,
-			а значит, после присваивания полю значения с ним ничего не может случиться):
-<pre>
-SampleClass.lambda$new$instanceFieldLambda(TestLambdaStacktraces.java:25)
-</pre>
+			Первым делом вызывается конструктор класса. В стеке вызовов он выглядит как 
+			<strong>ИмяКласса.&lt;init&gt;</strong>. Далее, в строке 25 выполняется собственно тело лямбда-выражения. 
+			Как видим, 
+			лямбда-выражению, соответсвует в стэктрэйсе (кроме привычного
+			<em>lambda</em>) слово <strong>new</strong>. <code>new</code> в данном случае означает, что 
+			лямбда-выражение
+			было определено либо в непосредственно в конструкторе, либо в блоке инициализации, либо непосредственно
+			вместе с определением поля. А циферка <strong>0</strong> как всегда отвечает за количество созданных экземпляров
+			лямбда-выражения, т.е. играет роль счетчика.
 		
+		<h2>Вызов лямбда-выражения из конструктора класса через статическое поле</h2>
+
 		<p>
-			В принципе, циферку <strong>0</strong> (если я правильно понимаю, она отвечает за количество созданных экземпляров
-			лямбда-выражения, т.е. играет роль счетчика) можно оставить для полноты картины:
+			Этот случай ничем не отличается от предыдущего.
 <pre>
-SampleClass.lambda$new$instanceFieldLambda$0(TestLambdaStacktraces.java:25)
+---   Inside constructor of the enclosing class - staticFieldLambda     ---
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
+SampleClass.lambda$static$1(TestLambdaStacktraces.java:29)
+SampleClass.&lt;init&gt;(TestLambdaStacktraces.java:38)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:3)
+---------------------------------------------------------------------------
+</pre>
+			
+		<p>
+			Лишь вместо <code>new</code> мы видим слово <code>static</code>. Т.е. вместо
+			
+<pre>
+SampleClass.lambda$new$...
 </pre>
 
 		<p>
-			К сожалению, этим мечтам не суждено сбыться. Насколько я знаю, 
-			
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		<h2></h2>
+			получаем
+
+<pre>
+SampleClass.lambda$static$...
+</pre>
 
 		<p>
+			Т.о. слово <code>static</code> в стэктрэйсе означает, что лямбда-выражение было определено как статическая
+			переменная или в статическом блоке.
 			
-			
+		<h2>Вызов лямбда-выражения из конструктора класса через локальную переменную</h2>
+		
 		<p>
+			Стэктрэйс не отличается от рассмотренного 
+			<a href="Inside_constructor_of_the_enclosing_class_-_instanceFieldLambda">ранее</a>. 
+			Только номера строк и значения счетчика разные:
 			
+<pre>
+---   Inside constructor of the enclosing class - localVariableLambda   ---
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
+SampleClass.lambda$new$2(TestLambdaStacktraces.java:43)
+SampleClass.&lt;init&gt;(TestLambdaStacktraces.java:45)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:3)
+---------------------------------------------------------------------------
+</pre>
+
+		<h2>Вызов лямбда-выражения из метода класса через поле</h2>
+
+		<p>
+			Здесь все то же самое, что и в случае с конструктором. Только вместо <code>SampleClass.&lt;init&gt;</code> 
+			мы видим метод экземляра: <code>SampleClass.someInstanceMethod</code>.
+
+<pre>
+---   Inside instance method of the enclosing class - instanceFieldLambda -
+java.lang.Thread.getStackTrace(Thread.java:1556)
+StackTracePrinter.printNicely(TestLambdaStacktraces.java:85)
+SampleClass.lambda$new$0(TestLambdaStacktraces.java:25)
+SampleClass.someInstanceMethod(TestLambdaStacktraces.java:51)
+TestLambdaStacktraces.main(TestLambdaStacktraces.java:4)
+---------------------------------------------------------------------------
+</pre>
+
+
+		<h2>Вывод</h2>
+		
+		<p>
+			Не будем рассматривать оставшиеся случаи. Беглого взгляда на них достаточно, чтобы понять, что 
+								вызов лямбда-выражения порождает в стэктрэйсе не только номер строки исходного кода, но и вспомогательные
+					слова, если так можно выразиться. Эти вспомогательные слова дают дополнительную информацию о происхождении
+					лямбда-выражения, что несколько повышает эффективность поиска ошибки. 
+					Неважно, где лямбда-выражение было использовано (в конце концов, ссылки на то и ссылки, значений
+					они не содержат, только "адреса"). Важно то место, в котором оно было определено.
+					Правила таковы:
+			
+			<ol>
+				<li>
+					Если лямбда-выражение
+					было определено как поле экземпляра класса или в блоке инициализации или как локальная переменная в 
+					конструкторе, то в стэктрэйс добавится вспомогательное слово <strong>new</strong>.
+					
+				<li>
+					Если лямбда-выражение было определено как статическое поле класса или в статическом блоке инициализации, 
+					то в стэктрэйс добавится слово <strong>static</strong>
+					
+				<li>
+					В остальный случаях в качестве вспомогательного слова будет взято имя метода, в котором определено
+					лямбда-выражение. Например, если лямбда-выражение было определено в методе <code>main()</code>
+					класса <code>TestLambdaStacktraces</code>, то в стэктрэйсе мы увидим 
+					<code>TestLambdaStacktraces.lambda$main$...</code>. Если же выражение было определено в методе
+					<code>someInstanceMethod</code> 
+					класса <code>SampleClass</code>, то в стэке вызовов это породит строчку
+					<code>SampleClass.lambda$someInstanceMethod$...</code>
+				<li>
+			</ol>
+			
+			<p>
+				Так что лямбда-выражения в Java не такие уж тривиальные. 
 			
 		<hr>
 
