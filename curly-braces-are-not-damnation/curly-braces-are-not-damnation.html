@@ -200,16 +200,16 @@ update_places()</a>
    716	
    717		DEBUG ("Updating places sidebar");
    718	
-   719	    sidebar->updating_sidebar = TRUE;
+   719	    sidebar-&gt;updating_sidebar = TRUE;
    720	
    721		model = NULL;
    722		last_uri = NULL;
    723	
-   724		selection = gtk_tree_view_get_selection (sidebar->tree_view);
-   725		if (gtk_tree_selection_get_selected (selection, &model, &last_iter)) {
+   724		selection = gtk_tree_view_get_selection (sidebar-&gt;tree_view);
+   725		if (gtk_tree_selection_get_selected (selection, &amp;model, &amp;last_iter)) {
    726			gtk_tree_model_get (model,
-   727					    &last_iter,
-   728					    PLACES_SIDEBAR_COLUMN_URI, &last_uri, -1);
+   727					    &amp;last_iter,
+   728					    PLACES_SIDEBAR_COLUMN_URI, &amp;last_uri, -1);
    729		}
    
    ...
@@ -219,7 +219,7 @@ update_places()</a>
   1168	    restore_expand_state (sidebar);
   1169		sidebar_update_restore_selection (sidebar, location, last_uri);
   1170	
-  1171	    sidebar->updating_sidebar = FALSE;
+  1171	    sidebar-&gt;updating_sidebar = FALSE;
   1172	
   1173		g_free (location);
   1174		g_free (last_uri);
@@ -299,11 +299,12 @@ END
 						<code>double bonus = base_salary * 0.1;</code>. В C#, как сказал 
 						<a href="https://habrahabr.ru/post/258391/#comment_8432435">akastargazer</a>, 
 						<blockquote>
-							Поток управления перемешан с объявлением переменных, читать такое крайне тяжко. 
-							Конечно, можно объявить переменные раньше, одним блоком 
-							(специального места для объявления нет, поэтому объявлять можно где угодно, 
-							повышая вероятность неаккуратного использования). 
-							Но зачем, ведь язык попустительствует, надо пользоваться возможностями.
+							<p>
+								Поток управления перемешан с объявлением переменных, читать такое крайне тяжко. 
+								Конечно, можно объявить переменные раньше, одним блоком 
+								(специального места для объявления нет, поэтому объявлять можно где угодно, 
+								повышая вероятность неаккуратного использования). 
+								Но зачем, ведь язык попустительствует, надо пользоваться возможностями.
 						</blockquote>
 				
 				<li>
