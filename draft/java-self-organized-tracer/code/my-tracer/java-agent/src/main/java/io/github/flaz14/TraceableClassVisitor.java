@@ -44,7 +44,16 @@ class TraceableMethodVisitor extends MethodAdapter {
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         final String incomingMethodSignature = name + desc;
         if (shouldBeInstrumented(incomingMethodSignature) /*&&
-                shouldBeInstrumented(classfileBuffer)*/  ) {
+                shouldBeInstrumented(classfileBuffer)*/) {
+            System.out.println("Opcodes: \n" +
+                    "int INVOKEVIRTUAL = 182;  - visitMethodInsn \n" +
+                    "int INVOKESPECIAL = 183;  - \n" +
+                    "int INVOKESTATIC = 184;  - \n" +
+                    "int INVOKEINTERFACE = 185;  - \n" +
+                    "int INVOKEDYNAMIC = 186;  - ");
+            System.out.println(">>> incomingMethodSignature: [" + incomingMethodSignature + "]");
+            System.out.println(">>> opcode=[" + opcode + "]\n");
+
             insertInTrace(name);
             doOriginalCall(opcode, owner, name, desc);
             insertOutTrace(name);
