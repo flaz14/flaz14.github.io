@@ -33,7 +33,7 @@ public class JavaAgent {
         try (final InputStream sourceJar = getSystemResourceAsStream(
                 pathWithinJar()
         )) {
-            final Path targetJar = Files.createTempFile("sam-tracer-", ".jar");
+            final Path targetJar = Files.createTempFile("my-tracer-", ".jar");
             Files.copy(sourceJar, targetJar, StandardCopyOption.REPLACE_EXISTING);
             final String pathToExtractedJar = targetJar.toString();
             System.out.printf("Path to extracted Java Agent JAR [%s]%n", pathToExtractedJar);

@@ -30,7 +30,7 @@ public class Loader {
      */
     static {
         if (isDisabled()) {
-            System.out.println("WARNING: sam-tracer is disabled.");
+            System.out.println("WARNING: my-tracer is disabled.");
         } else {
             JavaAgent.attachToJvm(
                     Jvm.pid()
@@ -49,5 +49,5 @@ public class Loader {
         return Boolean.parseBoolean(rawValue);
     }
 
-    private static final String IS_DISABLED_PROPERTY = "io.github.flaz14.sam-tracer.disabled";
+    private static final String IS_DISABLED_PROPERTY = "io.github.flaz14.my-tracer.disabled";
 }

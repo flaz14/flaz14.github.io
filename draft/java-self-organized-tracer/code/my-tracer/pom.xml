@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.github.flaz14</groupId>
-  <artifactId>sam-tracer</artifactId>
+  <artifactId>my-tracer</artifactId>
   <version>1.0-SNAPSHOT</version>
   <modules>
     <module>java-agent</module>
@@ -46,7 +46,7 @@
         <version>2.18.1</version>
         <configuration>
           <systemPropertyVariables>
-            <io.github.flaz14.sam-tracer.disabled>true</io.github.flaz14.sam-tracer.disabled>
+            <io.github.flaz14.my-tracer.disabled>true</io.github.flaz14.my-tracer.disabled>
           </systemPropertyVariables>
         </configuration>
       </plugin>

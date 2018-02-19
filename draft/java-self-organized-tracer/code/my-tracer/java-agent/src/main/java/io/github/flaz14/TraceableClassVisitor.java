@@ -48,16 +48,16 @@ class TraceableMethodVisitor extends MethodAdapter {
     }
 
     private void insertInTrace(final String methodName) {
-        /* System.out.println("sam-tracer: IN [" + methodName + "]"); */
+        /* System.out.println("my-tracer: IN [" + methodName + "]"); */
         mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-        mv.visitLdcInsn("sam-tracer: IN [" + methodName + "]");
+        mv.visitLdcInsn("my-tracer: IN [" + methodName + "]");
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V");
     }
 
     private void insertOutTrace(final String methodName) {
-        /* System.out.println("sam-tracer: OUT [" + methodName + "]"); */
+        /* System.out.println("my-tracer: OUT [" + methodName + "]"); */
         mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-        mv.visitLdcInsn("sam-tracer: OUT [" + methodName + "]");
+        mv.visitLdcInsn("my-tracer: OUT [" + methodName + "]");
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V");
     }
 }
