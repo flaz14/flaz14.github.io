@@ -4,9 +4,9 @@ public class CallViaInterface {
 	public static void main(String ignoredArgs[]) throws ClassNotFoundException {
 		System.out.println("!!!CallViaInterface test!!!");
 		Class.forName("io.github.flaz14.Loader");
-		Traceable myTraceable = new MyTraceable();
-		myTraceable.processSomething("bank");
-		myTraceable.getSomething();
+		Traceable traceable = new MyTraceable();
+		traceable.processSomething("bank");
+		traceable.getSomething();
 	}
 }
 
