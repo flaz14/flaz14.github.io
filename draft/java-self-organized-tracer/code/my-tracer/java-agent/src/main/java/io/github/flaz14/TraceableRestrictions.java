@@ -29,8 +29,8 @@ public class TraceableRestrictions {
      */
     private static Set<Pattern> methodSignaturePatterns() {
         return Stream.of(
-                "doBusinessLogic\\(L.*;\\)V",
-                "calculateBusinessValue\\(\\)L.*;").
+                "processSomething\\(L.*;\\)V",
+                "getSomething\\(\\)L.*;").
                 map(Pattern::compile).
                 collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
     }

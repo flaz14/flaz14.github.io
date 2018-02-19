@@ -1,7 +1,7 @@
 package io.github.flaz14.publicapi;
 
 public interface Traceable<T> {
-    void doBusinessLogic(T t);
+    void processSomething(T t);
 
-    T calculateBusinessValue();
+    T getSomething();
 }
