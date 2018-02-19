@@ -5,11 +5,11 @@ public class CallViaClass {
 		System.out.println("!!!CallViaClass test!!!");
 		Class.forName("io.github.flaz14.Loader");
 		MyTraceable myTraceable = new MyTraceable();
+		Traceable traceable = myTraceable;
+		traceable.getSomething();
 		myTraceable.processSomething("bank");
 		myTraceable.getSomething();
 		myTraceable.processSomething("account1", "account2");
-		Traceable traceable = myTraceable;
-		traceable.getSomething();
 	}
 }
 
