@@ -7,6 +7,9 @@ public class CallViaClass {
 		MyTraceable myTraceable = new MyTraceable();
 		myTraceable.processSomething("bank");
 		myTraceable.getSomething();
+		myTraceable.processSomething("account1", "account2");
+		Traceable traceable = myTraceable;
+		traceable.getSomething();
 	}
 }
 

@@ -1,17 +1,27 @@
 package io.github.flaz14;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.commons.EmptyVisitor;
+
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toSet;
 
 public class TraceableRestrictions {
-    public static boolean shouldBeInstrumented(final Set<String> interfaceNames) {
-        return interfaceNames.contains(INTERFACE_NAME);
+    public static boolean shouldBeInstrumented(final byte[] classfileBuffer) {
+        Set<String> interfaces = interfaces(classfileBuffer);
+        System.out.println(">>> interfaces: [" + interfaces + "]");
+        return interfaces.
+                contains(INTERFACE_NAME);
     }
 
     public static boolean shouldBeInstrumented(final String methodSignature) {
@@ -19,6 +29,26 @@ public class TraceableRestrictions {
                 stream().
                 map(pattern -> pattern.matcher(methodSignature)).
                 anyMatch(Matcher::matches);
+    }
+
+    private static Set<String> interfaces(final byte[] classfileBuffer) {
+        final Set<String> interfaceNames = new HashSet<>();
+        final ClassReader reader = new ClassReader(classfileBuffer);
+        final ClassVisitor visitor = new EmptyVisitor() {
+            @Override
+            public void visit(final int version,
+                              final int access,
+                              final String name,
+                              final String signature,
+                              final String superName,
+                              final String[] interfaces) {
+                //interfaceNames.clear();
+                interfaceNames.addAll(asList(interfaces));
+                super.visit(version, access, name, signature, superName, interfaces);
+            }
+        };
+        reader.accept(visitor, ClassTransformer.DO_NOT_SKIP_ANYTHING);
+        return unmodifiableSet(interfaceNames);
     }
 
     /**

@@ -10,8 +10,12 @@ import org.objectweb.asm.Opcodes;
 import static io.github.flaz14.TraceableRestrictions.shouldBeInstrumented;
 
 public class TraceableClassVisitor extends ClassWriter {
+
+    private final byte[] classfileBuffer;
+
     public TraceableClassVisitor(ClassReader classReader, int flags) {
         super(classReader, flags);
+        classfileBuffer = classReader.b;
     }
 
     @Override
@@ -21,20 +25,26 @@ public class TraceableClassVisitor extends ClassWriter {
                                      final String signature,
                                      final String[] exceptions) {
         return new TraceableMethodVisitor(
-                super.visitMethod(access, name, desc, signature, exceptions)
+                super.visitMethod(access, name, desc, signature, exceptions),
+                classfileBuffer
         );
     }
 }
 
 class TraceableMethodVisitor extends MethodAdapter {
-    public TraceableMethodVisitor(MethodVisitor mv) {
+
+    private final byte[] classfileBuffer;
+
+    public TraceableMethodVisitor(MethodVisitor mv, byte[] classfileBuffer) {
         super(mv);
+        this.classfileBuffer = classfileBuffer;
     }
 
     @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         final String incomingMethodSignature = name + desc;
-        if (shouldBeInstrumented(incomingMethodSignature)) {
+        if (shouldBeInstrumented(incomingMethodSignature) /*&&
+                shouldBeInstrumented(classfileBuffer)*/  ) {
             insertInTrace(name);
             doOriginalCall(opcode, owner, name, desc);
             insertOutTrace(name);
