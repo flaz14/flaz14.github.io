@@ -15,7 +15,6 @@ def get_package_names():
 	apt_cache_search_command = [
 		'apt-cache',
 		'pkgnames'
-		#--all-names
 	]
 	raw_output = subprocess.check_output(
 		apt_cache_search_command,
@@ -37,14 +36,6 @@ def get_package_versions(package_names):
 	for name in package_names:
 		apt_cache_showpkg_command = [
 			'apt-cache',
-			#'--no-pre-depends', 
-			'--no-depends',
-			'--no-recommends',
-			'--no-suggests',
-			'--no-conflicts',
-			'--no-breaks',
-			'--no-replaces',
-			'--no-enhances',
 			'showpkg',
 			name
 		]
@@ -57,7 +48,19 @@ def get_package_versions(package_names):
 			default_encoding()
 		)
 		print(decoded_output)
-		line_by_line_output = decoded_output.splitlines()
+		print('*************************************')
+		versions_text_all = decoded_output.split('\n\n\n')[0]
+		print(versions_text_all)
+		print('*************************************')
+		versions_text = versions_text_all.split('\n\n')
+		print(versions_text)
+		print('*************************************')
+		first_version_text = versions_text[0].splitlines()[2]
+		second_version_text = versions_text[1].splitlines()[0]
+		print(first_version_text)
+		print(second_version_text)
+		print('*************************************')
+		#line_by_line_output = decoded_output.splitlines()
 		#print(line_by_line_output)
 		#parse_package_versions(line_by_line_output)
 		
