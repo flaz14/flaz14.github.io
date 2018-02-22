@@ -5,19 +5,113 @@
 
 import subprocess
 import sys
+import json
 
 
 def default_encoding():
 	return 'utf-8'
 
 
-def get_package_names():
-	apt_cache_search_command = [
+def apt_cache_showpkg_command(package_name):
+	return [
+		'apt-cache',
+		'showpkg',
+		package_name
+	]
+
+
+def apt_cache_search_command():
+	return [
 		'apt-cache',
 		'pkgnames'
 	]
+
+
+def versions(versions_strings):
+	"""
+	Version is the very first word in the string, e.g. the sequence of letters and digits before first space.
+	"""
+	result = []
+	for string in versions_strings:
+		result.append(
+			string.split(' ')[0]
+		)
+	return result
+
+
+def top_version_string(versions_sections):
+	"""
+	At the very top section there are 
+	
+	`Package: account-plugin-yahoojp" string followed by `Versions: string. Real version is located in the third string.
+	"""
+	return versions_sections[0].splitlines()[2]
+
+
+def remaining_versions_strings(versions_sections):
+	remaining_sections = versions_sections[1:]
+	result = []
+	for section in remaining_sections:
+		result.append(
+			section.splitlines()[0]
+		)
+	return result
+
+
+def versions_strings(versions_text):
+	"""
+		Each versions is separated from the following version by empty line. So in order to extract lonely strings that 
+		contain versions we need split versions text by two new line characters.
+		
+		TODO explain more
+	"""
+	versions_sections = versions_text.split('\n\n')
+	return	[top_version_string(versions_sections)] +\
+			remaining_versions_strings(versions_sections)
+
+
+def versions_text(package_name):
+	"""
+		Typical output of `apt-cache showpkg' command includes a lot of text.
+		
+		At the very beginning there is the name of the package. Package's versions are listed below. Then two empty 
+		lines reside. And after the empty lines other information is listed.
+		
+		Those two empty lines is a good marker of ending of the 'versions' sections. Actually, we need to split the 
+		initial output by three new line characters.
+	"""
+	return str(
+		subprocess.check_output(
+			apt_cache_showpkg_command(package_name),
+			stdin = subprocess.DEVNULL
+		),
+		default_encoding()
+	).split('\n\n\n')[0]
+
+
+def package_versions(package_name):
+	return versions(
+		versions_strings(
+			versions_text(package_name)
+		)
+	)
+
+
+def all_packages_versions(package_names):
+	result = []
+	for package_name in package_names:
+		result.append( 
+			{
+				'name' : package_name,
+				'versions' : package_versions(package_name)
+			}
+		)
+	return result
+
+
+def all_packages_names():
 	raw_output = subprocess.check_output(
-		apt_cache_search_command,
+		apt_cache_search_command(),
 		stdin = subprocess.DEVNULL
 	)
 	decoded_output = str(
@@ -28,120 +122,14 @@ def get_package_names():
 	return line_by_line_output
 
 
-def extract_versions(versions_strings):
-	"""
-	Version is the very first word in the string, e.g. the sequence of letters and digits before first space.
-	"""
-	for string in versions_strings:
-		yield string.split(' ')[0]
-
-
-def extract_top_version_string(versions_sections):
-	"""
-	At the very top section there are 
-	
-	`Package: account-plugin-yahoojp" string followed by `Versions: string. Real version is located in the third string.
-	"""
-	return versions_sections[0].splitlines()[2]
-
-
-def extract_remaining_versions_strings(versions_sections):
-	remaining_sections = versions_sections[1:]
-	for section in remaining_sections:
-		version_string = section.splitlines()[0]
-		yield version_string
-
-
-def extract_versions_strings(versions_text):
-	"""
-		Each versions is separated from the following version by empty line. So in order to extract lonely strings that 
-		contain versions we need split versions text by two new line characters.
-		
-		TODO explain more
-	"""
-	versions_sections = versions_text.split('\n\n')
-	return	[extract_top_version_string(versions_sections)] +\
-			list(extract_remaining_versions_strings(versions_sections))
-
-
-def extract_versions_text(apt_cache_showpkg_output):
-	"""
-		Typical output of `apt-cache showpkg' command includes a lot of text.
-		
-		At the very beginning there is the name of the package. Package's versions are listed below. Then two empty 
-		lines reside. And after the empty lines other information is listed.
-		
-		Those two empty lines is a good marker of ending of the 'versions' sections. Actually, we need to split the 
-		initial output by three new line characters.
-	"""
-	versions_text = apt_cache_showpkg_output.split('\n\n\n')
-	return versions_text[0]
-
-
-def get_package_versions(package_names):
-	for name in package_names:
-		apt_cache_showpkg_command = [
-			'apt-cache',
-			'showpkg',
-			name
-		]
-		raw_output = subprocess.check_output(
-			apt_cache_showpkg_command,
-			stdin = subprocess.DEVNULL
-		)
-		decoded_output = str(
-			raw_output, 
-			default_encoding()
-		)
-		
-		#print(decoded_output)
-		#print('*************************************')
-		versions = list(
-			extract_versions(
-				versions_strings = extract_versions_strings(
-					extract_versions_text(decoded_output)
-				)	
+def main():
+	print(
+		json.dumps(
+			all_packages_versions(
+				all_packages_names()
 			)
 		)
-		#print(versions)
-		package_versions = { 
-			'name' : name,
-			'versions' : versions
-		}
-		yield package_versions
-
-
-'''
-Package: account-plugin-yahoojp
-Versions: 
-3.8.6-0ubuntu9.2 (/var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty-updates_universe_binary-amd64_Packages)
- Description Language: 
-                 File: /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty-updates_universe_binary-amd64_Packages
-                  MD5: 5b9e183dfbe3fc188956eef1beaa6f59
- Description Language: en
-                 File: /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty-updates_universe_i18n_Translation-en
-                  MD5: 5b9e183dfbe3fc188956eef1beaa6f59
-
-3.8.6-0ubuntu9 (/var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty_universe_binary-amd64_Packages)
- Description Language: 
-                 File: /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty_universe_binary-amd64_Packages
-                  MD5: 1ecd1bf9e21c0366f391db33ef3fc1f3
- Description Language: en
-                 File: /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty_universe_i18n_Translation-en
-                  MD5: 1ecd1bf9e21c0366f391db33ef3fc1f3
-
-'''
-
-
-
-def main():
-	for p in get_package_versions(get_package_names()): print(p)
-	#package_versions = list(
-		#get_package_versions(
-			#get_package_names()
-		#)
-	#)
-	#print(package_versions)
+	)
 
 
 if __name__ == '__main__':
