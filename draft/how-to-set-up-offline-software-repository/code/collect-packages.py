@@ -93,8 +93,9 @@ def get_package_versions(package_names):
 			raw_output, 
 			default_encoding()
 		)
-		print(decoded_output)
-		print('*************************************')
+		
+		#print(decoded_output)
+		#print('*************************************')
 		versions = list(
 			extract_versions(
 				versions_strings = extract_versions_strings(
@@ -102,8 +103,12 @@ def get_package_versions(package_names):
 				)	
 			)
 		)
-		print(versions)
-
+		#print(versions)
+		package_versions = { 
+			'name' : name,
+			'versions' : versions
+		}
+		yield package_versions
 
 
 '''
@@ -130,9 +135,13 @@ Versions:
 
 
 def main():
-	get_package_versions(
-		get_package_names()
-	)
+	for p in get_package_versions(get_package_names()): print(p)
+	#package_versions = list(
+		#get_package_versions(
+			#get_package_names()
+		#)
+	#)
+	#print(package_versions)
 
 
 if __name__ == '__main__':
