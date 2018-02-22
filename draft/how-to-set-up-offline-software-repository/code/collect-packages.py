@@ -28,7 +28,43 @@ def get_package_names():
 	return line_by_line_output
 
 
-def extract_text_till_versions_ending(full_output):
+def extract_versions(versions_strings):
+	"""
+	Version is the very first word in the string, e.g. the sequence of letters and digits before first space.
+	"""
+	for string in versions_strings:
+		yield string.split(' ')[0]
+
+
+def extract_top_version_string(versions_sections):
+	"""
+	At the very top section there are 
+	
+	`Package: account-plugin-yahoojp" string followed by `Versions: string. Real version is located in the third string.
+	"""
+	return versions_sections[0].splitlines()[2]
+
+
+def extract_remaining_versions_strings(versions_sections):
+	remaining_sections = versions_sections[1:]
+	for section in remaining_sections:
+		version_string = section.splitlines()[0]
+		yield version_string
+
+
+def extract_versions_strings(versions_text):
+	"""
+		Each versions is separated from the following version by empty line. So in order to extract lonely strings that 
+		contain versions we need split versions text by two new line characters.
+		
+		TODO explain more
+	"""
+	versions_sections = versions_text.split('\n\n')
+	return	[extract_top_version_string(versions_sections)] +\
+			list(extract_remaining_versions_strings(versions_sections))
+
+
+def extract_versions_text(apt_cache_showpkg_output):
 	"""
 		Typical output of `apt-cache showpkg' command includes a lot of text.
 		
@@ -38,26 +74,8 @@ def extract_text_till_versions_ending(full_output):
 		Those two empty lines is a good marker of ending of the 'versions' sections. Actually, we need to split the 
 		initial output by three new line characters.
 	"""
-	versions_text = full_output.split('\n\n\n')
+	versions_text = apt_cache_showpkg_output.split('\n\n\n')
 	return versions_text[0]
-
-
-
-def extract_versions_strings(versions_text):
-	"""
-		Each versions is separated from the following version by empty line. So in order to extract lonely strings that 
-		contain versions we need split versions text by two new line characters.
-		TODO explain more
-	"""
-	versions_strings = versions_text.split('\n\n')
-	lonely_versions_strings = []
-	first_version_string = versions_strings[0].splitlines()[2]
-	lonely_versions_strings.append(first_version_string)
-	remaining_versions_text = versions_strings[1:]
-	for version_section in remaining_versions_text:
-		version_string = version_section.splitlines()[0]
-		lonely_versions_strings.append(version_string)
-	return lonely_versions_strings
 
 
 def get_package_versions(package_names):
@@ -77,12 +95,16 @@ def get_package_versions(package_names):
 		)
 		print(decoded_output)
 		print('*************************************')
-		versions_strings = extract_versions_strings(
-			extract_text_till_versions_ending(decoded_output)
+		versions = list(
+			extract_versions(
+				versions_strings = extract_versions_strings(
+					extract_versions_text(decoded_output)
+				)	
+			)
 		)
-		print(versions_strings)
-		
-		
+		print(versions)
+
+
 
 '''
 Package: account-plugin-yahoojp
@@ -105,15 +127,6 @@ Versions:
 
 '''
 
-def parse_package_versions(package_info):
-	relevant_info = package_info[2:]
-	print(relevant_info)
-	while relevant_info:
-		version_string = relevant_info[0]
-		
-	
-	
-	
 
 
 def main():
