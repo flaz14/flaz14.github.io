@@ -8,6 +8,21 @@ import sys
 import json
 
 
+def eprint(*args, **kwargs):
+	"""
+	This function is copied-and-pasted from 
+	[How to print to stderr in Python?](https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python).
+	"""
+	print(*args, file=sys.stderr, **kwargs)
+
+
+def logged(obj, message = None):
+	message =	'{}: [{}]'.format(message, obj) if message else \
+				'{}'.format(obj)
+	eprint(message)
+	return obj
+
+
 def default_encoding():
 	return 'utf-8'
 
@@ -100,11 +115,13 @@ def package_versions(package_name):
 def all_packages_versions(package_names):
 	result = []
 	for package_name in package_names:
-		result.append( 
-			{
-				'name' : package_name,
-				'versions' : package_versions(package_name)
-			}
+		result.append(
+			logged(
+				{
+					'name' : package_name,
+					'versions' : package_versions(package_name)
+				}
+			)
 		)
 	return result
 
