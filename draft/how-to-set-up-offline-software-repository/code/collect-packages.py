@@ -8,6 +8,14 @@ import sys
 import json
 
 
+def logging_enabled():
+	return False
+
+
+def default_encoding():
+	return 'utf-8'
+
+
 def eprint(*args, **kwargs):
 	"""
 	This function is copied-and-pasted from 
@@ -17,15 +25,35 @@ def eprint(*args, **kwargs):
 
 
 def logged(obj, message = None):
-	message =	'{}: [{}]'.format(message, obj) if message else \
-				'{}'.format(obj)
-	eprint(message)
+	if logging_enabled():
+		message =	'{}: [{}]'.format(message, obj) if message else \
+					'{}'.format(obj)
+		eprint(message)
 	return obj
 
 
-def default_encoding():
-	return 'utf-8'
+class ProgressIndicator:
+	@staticmethod
+	def milestone_percents():
+		return 1
+	
+	def __init__(self, total):
+		self.total = total
+		self.last_milestone_percents = ProgressIndicator.milestone_percents()
+	
+	def indicate(self, current, message = ''):
+		percents = int(current / self.total * 100)
+		if percents >= self.last_milestone_percents:
+			self.last_milestone_percents += ProgressIndicator.milestone_percents()
+			indicator = '{} {:4}%'.format(message, percents)
+			eprint(indicator)
 
+
+#def apt_cache_stats_command():
+#	return [
+#		'apt-cache', 
+#		'stats'
+#	]
 
 def apt_cache_showpkg_command(package_name):
 	return [
@@ -40,6 +68,23 @@ def apt_cache_search_command():
 		'apt-cache',
 		'pkgnames'
 	]
+
+
+#def total_package_names():
+	#"""
+	#Count of the packages is located in the very first line of `apt-cache stats' comand's output. Number can be easily
+	#detected because it's located right after `:'.
+	#"""
+	#return int(
+		#str(
+			#subprocess.check_output(
+				#apt_cache_stats_command(),
+				#stdin = subprocess.DEVNULL
+			#),
+			#default_encoding()
+		#).split(':')[1].
+		#split(' ')[1]
+	#)
 
 
 def versions(versions_strings):
@@ -114,7 +159,10 @@ def package_versions(package_name):
 
 def all_packages_versions(package_names):
 	result = []
-	for package_name in package_names:
+	progress_indicator = ProgressIndicator(
+		len(package_names)
+	)
+	for package_name, package_counter in zip(package_names, range(1, len(package_names) + 1)):
 		result.append(
 			logged(
 				{
@@ -123,6 +171,7 @@ def all_packages_versions(package_names):
 				}
 			)
 		)
+		progress_indicator.indicate(package_counter, 'Collecting packages...')
 	return result
 
 
@@ -140,6 +189,10 @@ def all_packages_names():
 
 
 def main():
+	#logged(
+		#total_package_names(),
+		#'Total number of packages'
+	#)
 	print(
 		json.dumps(
 			all_packages_versions(
