@@ -1,35 +1,32 @@
 public class FailureTest {
 	public static void main(String ignored[]) {
 		try( 
-			Good good = new Good(
-				new Bad()
-			) 
-		) {}
-		
-		System.out.println("---------------------");
-		
-		try (
-			Bad bad = new Bad();
-			Good good = new Good(bad);
+			Good good = new Good("one");
+			Bad bad = new Bad(
+				new Good("two")
+			)
 		) {}
 	}
 }
 
 class Good implements AutoCloseable {
+	private final String id;
 	
-	public Good(Bad bad) {
+	public Good(String id) {
+		System.out.println(">>> Good [" + id + "] <init>");
+		this.id = id; 
 	}
 	
 	@Override
-	public void close() {
-		System.out.println(">>> Good.close()");
-	}
+	public void close() { System.out.println(">>> Good [" + id + "] close()"); }
 }
 
 class Bad implements AutoCloseable {
-	@Override
-	public void close() {
-		System.out.println(">>> Bad.close()");
-		throw new IllegalStateException("Something went wrong...");
+	public Bad(Good good) {
+		System.out.println(">>> Bad.<init>");
+		throw new IllegalStateException("Something went wrong...");		
 	}
+	
+	@Override
+	public void close() { System.out.println(">>> Bad.close()"); }
 }
