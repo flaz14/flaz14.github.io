@@ -30,6 +30,7 @@ class StandaloneCloseAble extends SomeAutoCloseable {
 }
 
 interface InterfaceForAutoCloseable extends AutoCloseable { 
+	@Override
 	void close();
 }
 
