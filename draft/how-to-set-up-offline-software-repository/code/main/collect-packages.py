@@ -90,8 +90,8 @@ class AptCacheCommand:
 def all_packages_versions(package_names):
 	def versions(versions_strings):
 		"""
-			Version is the first word in the string. It's separated from the following words by space. So it's 
-			pretty easy to extract version of a package without using regular expression.
+		Version is the first word in the string. It's separated from the following words by space. So it's pretty easy 
+		to extract version of a package without using regular expression.
 		"""
 		result = []
 		for string in versions_strings:
@@ -104,8 +104,8 @@ def all_packages_versions(package_names):
 		def top_version_string(versions_sections):
 			"""
 			In order to extract top version string we need to sort out package name (it goes at the very top of 
-			`apt-cache' output) and constant `Versions:' string (it's the second line of the output). Package
-			version is located in the third line of the first section.
+			`apt-cache' output) and constant `Versions:' string (it's the second line of the output). Package version is
+			located in the third line of the first section.
 			"""
 			return versions_sections[0].splitlines()[2]
 		
@@ -122,22 +122,19 @@ def all_packages_versions(package_names):
 			return result
 	
 		"""
-		Usually, there are several versions of the same package in repository. Each version is printed by 
-		`apt-cache' at their own section (it includes additional info like hash sums). Sections are separated 
-		from each other by empty line. 
+		Usually, there are several versions of the same package in repository. Each version is printed by `apt-cache' at
+		their own section (it includes additional info like hash sums). Sections are separated from each other by empty 
+		line. 
 		
-		We need to split the text by two new line characters (one for empty line and one for the ending of the 
-		last section).
+		We need to split the text by two new line characters (one for empty line and one for the ending of the last 
+		section).
 		"""
 		versions_sections = versions_text.split('\n\n')
 		return	[top_version_string(versions_sections)] +\
 				remaining_versions_strings(versions_sections)
 
-
 	def package_versions(package_name):
 		def versions_text(package_name):
-			
-
 			"""
 			Typical output of `apt-cache showpkg' command includes a lot of text. Name of the package is printed at the
 			very beginning. After them package versions are listed. And then other information (direct dependencies,
@@ -159,7 +156,7 @@ def all_packages_versions(package_names):
 		Parsing of the output of `apt-cache showpkg' command needs a lot of work (but it's done without regular 
 		expressions!). Please look at sub-functions for details.
 		
-		The sample output is provided as `apt_cache_showpkg.log' file in `sample' directory.
+		Sample output is provided as `apt_cache_showpkg.log' file in `sample' directory.
 		"""
 		return versions(
 			versions_strings(
