@@ -7,6 +7,7 @@ import subprocess
 import sys
 import json
 
+# TODO handle virtual packages
 
 """
 This script collects names and corresponding versions of all the packages available on the system. This is done via
@@ -106,13 +107,13 @@ def all_packages_versions(package_names):
 					"""
 					In order to extract top version string we need to sort out package name (it goes at the very top of 
 					`apt-cache' output) and constant `Versions:' string (it's the second line of the output). Package
-					version is located in the third string of the first section.
+					version is located in the third line of the first section.
 					"""
 					return versions_sections[0].splitlines()[2]
 				
 				def remaining_versions_strings(versions_sections):
 					"""
-					In case of other sections (except the first one) version is located at the first string.
+					In case of other sections (except the first one) version is located at the first line.
 					"""
 					remaining_sections = versions_sections[1:]
 					result = []
@@ -141,7 +142,7 @@ def all_packages_versions(package_names):
 			
 			Text that contains the versions is separated from the rest of the output by two empty lines. So in order to 
 			extract versions-related stuff we need to split the whole output of `apt-cache showpkg' command by three new
-			line characters (two empty lines and the ending of the last version listed).
+			line characters (two for empty lines and one for the ending of the last version listed).
 			"""
 			return str(
 				subprocess.check_output(
@@ -152,10 +153,10 @@ def all_packages_versions(package_names):
 			).split('\n\n\n')[0]
 		
 		"""
-		Parsing of the output of `apt-cache showpkg' command needs a lot of work (actually, it can be done without 
-		regular expressions!). Please look at sub-functions for details.
+		Parsing of the output of `apt-cache showpkg' command needs a lot of work (but it's done without regular 
+		expressions!). Please look at sub-functions for details.
 		
-		The sample output is provided as a file in `sample' directory.
+		The sample output is provided as `apt_cache_showpkg.log' file in `sample' directory.
 		"""
 		return versions(
 			versions_strings(
@@ -167,7 +168,13 @@ def all_packages_versions(package_names):
 	progress_indicator = ProgressIndicator(
 		len(package_names)
 	)
-	for package_name, package_counter in zip(package_names, range(1, len(package_names) + 1)):
+	for package_name, package_counter in zip(
+		package_names, 
+		range(
+			1, 
+			len(package_names) + 1
+		)
+	):
 		result.append(
 			logged(
 				{
@@ -186,7 +193,7 @@ def all_packages_names():
 			AptCacheCommand.search(),
 			stdin = subprocess.DEVNULL
 		),
-		default_encoding()
+		Settings.default_encoding()
 	).splitlines()
 
 
@@ -203,4 +210,4 @@ def main():
 
 
 if __name__ == '__main__':
-	main()	
+	main()
