@@ -323,6 +323,116 @@ Exception in thread "main" java.lang.IllegalStateException: Just for illustratio
     17	}
 </pre>
 
+		<p>
+			Об этом сказано в 
+						<a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.20.3">
+				JSL</a>: 
+				
+				<cite>
+					
+						A variable declared in a resource specification is implicitly declared final (§4.12.4) if it is 
+						not explicitly declared final.</cite>
+
+		<h2>Магия null</h2>
+		
+		<p>
+			Как сказано в 
+			<a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.20.3">
+				JSL</a>: <cite>A resource is closed only if it initialized to a non-null value.</cite>
+			Согласно спецификации, программа, приведенная в <a href="#listing-6">листинге 6</a>, 
+<pre>
+yura@Aspire-ES1-521 ~/Projects/flaz14.github.io/draft/java-twr/code $ cat -n NullPointer2Test.java 
+     1	public class NullPointer2Test {
+     2		public static void main(String ignored[]) {
+     3			try(MyResource resource = getMyResource()) {
+     4			}
+     5		}
+     6		
+     7		private static MyResource getMyResource() {
+     8			return null;
+     9		}
+    10	}
+    11	
+    12	class MyResource implements AutoCloseable {
+    13		@Override
+    14		public void close() {
+    15			System.out.println(">>> MyResource.close()");
+    16		}
+    17	}
+</pre>
+		
+		<p>
+			ничего не напечатает. И это правильно. Вызов какого-либо метода на <code>null</code> не имеет смысла. Соответственно,
+			вызыв <code>close()</code> на заведомо нулевой ссылке - тоже.
+			
+		<p>
+			Рассмотрим еще один пример. Я воспроизвел его из упомянутой в начале статьи умной книжки и поместил в 
+			<a href="#listing-7">листинг 7</a>.
+			
+<h4 id="listing-7">Листинг 7 - пример неотвратимого NullPointerException'а</h4>
+<pre>
+     1	import java.io.InputStream;
+     2	import java.io.IOException;
+     3	
+     4	public class NullPointer1Test {
+     5		public static void main(String ignored[]) throws IOException {
+     6			try(InputStream i = getNullStream()) {
+     7				i.available();
+     8			}
+     9		}
+    10		
+    11		private static InputStream getNullStream() { 
+    12			return null;
+    13		}
+    14	}
+</pre>
+
+		<p>
+			В книге в комментариях к примеру сказано:
+			
+			<blockquote>
+				<p>
+					Один из аспектов конструкции TWR - появление улучшенных стектрейсов и заблокированных исключений. До
+					Java 7 информация об исключении могла быть поглощена при обработке ресурсов. Такой вариант не 
+					исключен и с TWR, поэтому стековые следы были усовершенствованы. Теперь вы можете просматривать в
+					исключениях и информацию о типах, которая ранее просто терялась.
+					
+				<p>
+					Например, рассмотрим следующий фрагмент кода, в котором нулевой <code>InputStream</code> 
+					возвращается из метода:
+					
+				<p>
+					<i>далее идет то же, что и в <a href="#listing-7">листинге 7</a></i>
+				
+				<p>
+					В результате получится улучшенный стектрейс, в котором мы увидим заблокированное исключение 
+					<code>NullPointerException</code> (сокращенно - NPE):
+					
+				<p>
+					<i>далее приведен стектрейс, но он в корне отличается от того, что реально получается в результате
+					работы тестового кода</i>	
+			</blockquote>
+			
+		<p>
+			Запустим пример и получим:
+			
+<pre>
+Exception in thread "main" java.lang.NullPointerException
+	at NullPointer1Test.main(NullPointer1Test.java:7)
+</pre>
+		
+		<p>
+			Никакого упоминания о <code>Suppressed</code> нет. И старый добрый <code>NullPointerException</code> никуда
+			не делся. Я ожидал, что нулевая ссылка на <code>i</code> будет "отловлена и подавлена" в TWR в месте создания
+			ресурса, т.е. в строчке №6. Но нет, стэктрэйс ведет в строку №7, т.е. в место, где переменная была использована.
+		
+		<p>
+			Т.о. <code>null</code>-значения в TWR вполне допустимы. То ли авторы не разобрались в теме, то ли переводчики
+			напутали... Как бы то ни было, "подавление" исключений в TWR - совсем другой случай. Рассмотрим его далее.
+			
+		<h2></h2>	
+		
+		
 		<hr>
 
 		<h1>
@@ -342,7 +452,16 @@ Exception in thread "main" java.lang.IllegalStateException: Just for illustratio
 
 
 
+-----------------------------------------------------------------------------------------------------------------------
 
+============
+yura@Aspire-ES1-521 ~/Projects/flaz14.github.io/draft/java-twr/code $ javac -version
+javac 1.8.0_111
+yura@Aspire-ES1-521 ~/Projects/flaz14.github.io/draft/java-twr/code $ java -version
+java version "1.8.0_111"
+Java(TM) SE Runtime Environment (build 1.8.0_111-b14)
+Java HotSpot(TM) Client VM (build 25.111-b14, mixed mode)
+============
 
 
 - Написать, почему я поставил @Override в интерфейсах. Конечно, глупо переопределять метод в интерфейсе. Ведь реализации

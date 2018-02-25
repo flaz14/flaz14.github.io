@@ -1,4 +1,4 @@
-public class SupressedExceptionTest {
+public class SuppressedExceptionTest {
 	public static void main(String ignored[]) {
 		try(MyResource resource = new MyResource()) {
 			throw new IllegalStateException("Exception from try-block");
