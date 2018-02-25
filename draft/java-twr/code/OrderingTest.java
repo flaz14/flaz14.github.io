@@ -1,19 +1,18 @@
 public class OrderingTest {
 	public static void main(String args[]) {
+		System.out.println("--- First - Second");
 		try ( 
 			First first = new First();
 			Second second = new Second();
 		) {}
 		
-		System.out.println("---------------------");
-		
+		System.out.println("--- Second - First");
 		try (
 			Second second = new Second();
 			First first = new First();
 		) {}
 		
-		System.out.println("---------------------");
-		
+		System.out.println("--- variable for First is missed");
 		try (
 			Second second = new Second(
 				new First()
