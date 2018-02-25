@@ -1,3 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>try-with-resources на кошках</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/#java-twr" title="Перейти к оглавлению">&larr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a href="http://flaz14.github.io/java-twr/java-twr.html">
+				try-with-resources на кошках
+			</a>
+		</h1>
+		
+		<h3>[2018, Февраль]</h3>
+		
+		<h2>Тренируйся лучше... на кошках</h2>
+
+		<p>
+			Java 8 уже прочно закрепилась в промышленном программировании. А по планете во всю шагает Java 9. Тем не 
+			менее, не пропадает ощущение, что каждая новая версия Java - это не новые возможности, а исправления 
+			недостатков предыдущей версии. В свое время так же выглядела конструкция <strong>try-with-resources</strong>
+			(далее - <strong>TWR</strong>). Я прочитал про нее в одной умной книжке
+			!!!тут будет ссылка на книгу Java 7. Новое поколение разработки!!!. Затем прочитал туториал Oracle 
+			
+			!!!тут будет ссылка на туториал от Oracle!!!. Но полностью не понял, что TWR за зверь такой. Так что ничего
+			не осталось, как учиться самому не маленьких примерах.
+
+		<h2>Переменные нужны, переменные важны</h2>
+		
+		<p>
+			Начнем с самого простого примера
+			!!!здесь будет сноска о том, зачем везде стоят номера строк: проще разбираться с ошибками компиляции 
+			и стэктрэйсами.
+			
+			
+			, который приведен в <a href="#listing-1">листинге 1</a>.
+			
+<h4 id="listing-1">Листинг 1 - пример объявления переменных</h4>
+<pre>
+     1	public class VariablesTest {
+     2		public static void main(String ignored[]) {
+     3			try( MyAutoCloseable resource = new MyAutoCloseable() ) { }
+     4			
+     5			//try( AutoCloseable resource = new MyAutoCloseable() ) { }
+     6		
+     7			//try( new MyAutoCloseable() ) { }
+     8		}
+     9	}
+    10	
+    11	class MyAutoCloseable implements AutoCloseable {
+    12		@Override
+    13		public void close() {
+    14			System.out.println(">>> close()"); 
+    15		}
+    16	}
+</pre>
+
+		<p>
+			Действительно, все просто. Программа напечатает <tt>>>> close()</tt>.
+		
+		<p>
+			Если мы расскоментируем строку №5, то получим ошибку компиляции:
+
+<pre>
+VariablesTest.java:5: error: unreported exception Exception; must be caught or declared to be thrown
+		try( AutoCloseable resource = new MyAutoCloseable() ) { }
+		                   ^
+  exception thrown from implicit call to close() on resource variable 'resource'
+1 error
+</pre>
+		
+		<p>
+			Если же расскоментировать строчку №7, то компилятор "порадует" таким известием:
+
+<pre>
+VariablesTest.java:7: error: illegal start of type
+		try( new MyAutoCloseable() ) { }
+		     ^
+VariablesTest.java:7: error: = expected
+		try( new MyAutoCloseable() ) { }
+		         ^
+</pre>
+
+		<p>
+			Таким образом, без явного объявления переменных в TWR обойтись нельзя. Тип переменной тоже имеет значение.
+			Класс <code>MyAutoCloseable</code> реализует <code>AutoCloseable</code>. Но объявление переменной с типом
+			интерфейса приводит к ошибке компиляции, посколько метод <code>close()</code> интерфейса декларирует исключение
+			<code>Exception</code>. А в методе <code>close()</code> класса <code>MyAutoCloseable</code> об исключении не
+			объявлено. В принципе, переменные в TWR вообще не нужны, если в блоках <em>try</em> и <em>finally</em> они
+			явно не используются. Яркий пример этому - цепочки вызовов вроде 
+			<code>new BufferedInputStream(new FileInputStream("some file"))</code>. Переменная, ссылающаяся на 
+			экземпляр <code>FileInputStream</code> не нужна. Почему бы тогда не реализовать TWR так, чтобы можно было
+			обходиться без переменных?...
+
+		
+
+
+
+
+
+
+
+
+		
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>
+
+
+
+
+
+
 - Написать, почему я поставил @Override в интерфейсах. Конечно, глупо переопределять метод в интерфейсе. Ведь реализации
 все равно нету. Ее необходимо предоставить в классе. Но аннотация @Override имеет смысл. Потому что поместив в нашем
 интерфейсе метод с сигнатурой <code>void close();</code> мы "поглощаем" исключение, объявленное в интерфейсе
