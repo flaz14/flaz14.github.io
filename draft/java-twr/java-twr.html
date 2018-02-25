@@ -47,7 +47,7 @@
 			
 			, который приведен в <a href="#listing-1">листинге 1</a>.
 			
-<h4 id="listing-1">Листинг 1 - пример объявления переменных</h4>
+<h4 id="listing-1">Листинг 1 - типы переменных</h4>
 <pre>
      1	public class VariablesTest {
      2		public static void main(String ignored[]) {
@@ -82,7 +82,7 @@ VariablesTest.java:5: error: unreported exception Exception; must be caught or d
 </pre>
 		
 		<p>
-			Если же расскоментировать строчку №7, то компилятор "порадует" таким известием:
+			Если же раскомментировать строчку №7, то компилятор "порадует" таким известием:
 
 <pre>
 VariablesTest.java:7: error: illegal start of type
@@ -98,17 +98,82 @@ VariablesTest.java:7: error: = expected
 			Класс <code>MyAutoCloseable</code> реализует <code>AutoCloseable</code>. Но объявление переменной с типом
 			интерфейса приводит к ошибке компиляции, посколько метод <code>close()</code> интерфейса декларирует исключение
 			<code>Exception</code>. А в методе <code>close()</code> класса <code>MyAutoCloseable</code> об исключении не
-			объявлено. В принципе, переменные в TWR вообще не нужны, если в блоках <em>try</em> и <em>finally</em> они
-			явно не используются. Яркий пример этому - цепочки вызовов вроде 
-			<code>new BufferedInputStream(new FileInputStream("some file"))</code>. Переменная, ссылающаяся на 
-			экземпляр <code>FileInputStream</code> не нужна. Почему бы тогда не реализовать TWR так, чтобы можно было
-			обходиться без переменных?...
+			объявлено.
 
 		<h2>Нет, переменные очень нужны</h2>
+		
+		<p>
+			От порядка объявления переменных в TWR зависит порядок "закрытия" ресурсов. Оно и понятно: ресурсы закрываются
+			в порядке, обратном их созданию. Это проиллюстрировано в <a href="#listing-2">листинге 2</a>.
+			
+<h4 id="#listing-2">Листинг 2 - порядок объявления переменных</h4>
+<pre>
+     1	public class OrderingTest {
+     2		public static void main(String args[]) {
+     3			System.out.println("--- First - Second");
+     4			try ( 
+     5				First first = new First();
+     6				Second second = new Second();
+     7			) {}
+     8			
+     9			System.out.println("--- Second - First");
+    10			try (
+    11				Second second = new Second();
+    12				First first = new First();
+    13			) {}
+    14			
+    15			System.out.println("--- variable for First is missed");
+    16			try (
+    17				Second second = new Second(
+    18					new First()
+    19				)
+    20			) {}
+    21		}
+    22	}
+    23	
+    24	class First implements AutoCloseable {
+    25		@Override
+    26		public void close() {
+    27			System.out.println(">>> First.close()");
+    28		}
+    29	}
+    30	
+    31	class Second implements AutoCloseable {
+    32		public Second() {}
+    33		
+    34		public Second(First first) {}
+    35		
+    36		@Override
+    37		public void close() {
+    38			System.out.println(">>> Second.close()");
+    39		}
+    40	}
+</pre>
 
-	
+		<p>
+			Программа напечатает:
 
+<pre>
+--- First - Second
+>>> Second.close()
+>>> First.close()
+--- Second - First
+>>> First.close()
+>>> Second.close()
+--- variable for First is missed
+>>> Second.close()
+</pre>
 
+		<p>
+			Обратим внимание на случай <i>--- variable for First is missed</i>. Экземпляр класса <code>First</code>
+			(созданный в строке 18) не был закрыт. А все из-за того, что мы передали его в конструктор <code>Second</code>
+			напрямую, а не завели отдельную переменную. Конечно, в реальном коде такая такая ситуация маловероятна. Т.е.
+			в методе <code>close()</code> класса <code>Second</code> должен явно вызываться одноименный метод класса 
+			<code>First</code>, и так по цепочке. Но что если метод <code>close()</code> класса <code>Second</code> 
+			выбросит исключение до того, как вызовет <code>close()</code> на экземпляре <code>First</code>? Ресурс
+			<code>First</code> останется незакрытым. Решение одно: объявлять переменные для каждого ресурса отдельно.
+
+		<h2></h2>
 
 
 
