@@ -294,8 +294,34 @@ Exception in thread "main" java.lang.IllegalStateException: Just for illustratio
 			на лямбда-выражение, метод <code>close()</code> (который будет вызван еще раз при выходе из TWR).
 			!!!
 
+		<h2>final - не нужен</h2>
+
 		<p>
-			
+			Неизменяемость нынче в моде. В Java модификатор <code>final</code> можно добавлять к чему угодно. Но в случае
+			с TWR это не имеет никакого смысла. Объявленную в TWR переменную не позволит изменить компилятор; неважно,
+			объявлена она как <code>final</code> или нет. Что и проиллюстрировано в 
+			<a href="#listing-5">листинге 5</a>
+
+<h4 id="#listing-5">Листинг 5 - пример использования final</h4>
+<pre>
+     1	public class FinalModifierTest {
+     2		public static void main(String ignored[]) {
+     3			try( final MyAutoCloseable my = new MyAutoCloseable() ) {}
+     4			
+     5			// Compile-time error: auto-closeable resource my may not be assigned
+     6			/* 
+     7			try( MyAutoCloseable my = new MyAutoCloseable() ) {
+     8				my = null;
+     9			}
+    10			*/
+    11		}
+    12	}
+    13	
+    14	class MyAutoCloseable implements AutoCloseable {
+    15		@Override
+    16		public void close() {}
+    17	}
+</pre>
 
 		<hr>
 
