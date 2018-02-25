@@ -430,7 +430,37 @@ Exception in thread "main" java.lang.NullPointerException
 			Т.о. <code>null</code>-значения в TWR вполне допустимы. То ли авторы не разобрались в теме, то ли переводчики
 			напутали... Как бы то ни было, "подавление" исключений в TWR - совсем другой случай. Рассмотрим его далее.
 			
-		<h2></h2>	
+		<h2>Suppressed exceptions</h2>
+		
+		<p>
+			"Подавление" исключений	имеет смысл лишь в том случае, когда исключений возникает несколько. 
+			Легче всего разобраться на примере. Об этом уже 
+			рассказано в официальной статье от Oracle: 
+			<a href="https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html#suppressed-exceptions">
+			The try-with-resources Statement</a>.
+			Но пример там выбран не сильно удачный. Он великоват, уловить суть непросто. Я сделал свой пример совсем маленьким.
+			Он приведен в <a href="#listing-8">листинге 8</a>.
+
+<h2 id="#listing-8">Листинг 8 - пример "подавляемого" исключения</h2>			
+<pre>
+     1	public class SuppressedExceptionTest {
+     2		public static void main(String ignored[]) {
+     3			try(MyResource resource = new MyResource()) {
+     4				throw new IllegalStateException("Exception from try-block");
+     5			} finally {
+     6				System.out.println(">>> finally-block");
+     7			}
+     8		}
+     9	}
+    10	
+    11	class MyResource implements AutoCloseable {
+    12		@Override
+    13		public void close() {
+    14			System.out.println(">>> MyResource.close()");
+    15			throw new IllegalStateException("Exception from MyResource.close()");
+    16		}
+    17	}
+</pre>
 		
 		
 		<hr>
