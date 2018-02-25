@@ -47,7 +47,7 @@
 			
 			, который приведен в <a href="#listing-1">листинге 1</a>.
 			
-<h4 id="listing-1">Листинг 1 - типы переменных</h4>
+<h4 id="listing-1">Листинг 1 - типы переменных имеют значение</h4>
 <pre>
      1	public class VariablesTest {
      2		public static void main(String ignored[]) {
@@ -100,13 +100,13 @@ VariablesTest.java:7: error: = expected
 			<code>Exception</code>. А в методе <code>close()</code> класса <code>MyAutoCloseable</code> об исключении не
 			объявлено.
 
-		<h2>Нет, переменные очень нужны</h2>
+		<h2>Переменные ОЧЕНЬ нужны</h2>
 		
 		<p>
 			От порядка объявления переменных в TWR зависит порядок "закрытия" ресурсов. Оно и понятно: ресурсы закрываются
 			в порядке, обратном их созданию. Это проиллюстрировано в <a href="#listing-2">листинге 2</a>.
 			
-<h4 id="#listing-2">Листинг 2 - порядок объявления переменных</h4>
+<h4 id="#listing-2">Листинг 2 - порядок объявления переменных имеет значение</h4>
 <pre>
      1	public class OrderingTest {
      2		public static void main(String args[]) {
@@ -173,11 +173,67 @@ VariablesTest.java:7: error: = expected
 			выбросит исключение до того, как вызовет <code>close()</code> на экземпляре <code>First</code>? Ресурс
 			<code>First</code> останется незакрытым. Решение одно: объявлять переменные для каждого ресурса отдельно.
 
-		<h2></h2>
+		<h2>Полиморфизм в действии</h2>
 
+		<p>
+			Несмотря на то, что тип переменной в TWR имеет значение для компилятора в плане обрабатываемых исключений,
+			полифорфизм никуда не исчез. В примере, приведенном в <a href="#listing-3">листинге 3</a>, рассмотрены три 
+			случая: анонимный класс, "отдельностоящий" класс, который непосредственно реализует <code>AutoCloseable</code>,
+			и класс, который реализует <code>AutoCloseable</code> через интерфейс-посредник (я сделал его специально
+			для того, чтобы убрать надоедливый <code>IOException</code>, тянущийся из <code>AutoCloseable</code>).
+		
+<h4 id="listing-3">Листинг 3 - пример полифорфизма в TWR</h4>
+<pre>
+     1	public class PolymorphismTest {
+     2		public static void main(String ignored[]) {
+     3			try (
+     4				SomeAutoCloseable resource = new SomeAutoCloseable() {
+     5					@Override
+     6					public void close() { System.out.println(">>> Anonymous close()"); }
+     7				}
+     8			) {}
+     9			
+    10			try ( SomeAutoCloseable resource = new StandaloneCloseAble() ) {}
+    11			
+    12			try ( InterfaceForAutoCloseable tricky = new TrickyAutoCloseable() ) {}
+    13		}
+    14	}
+    15	
+    16	class SomeAutoCloseable implements AutoCloseable {
+    17		@Override
+    18		public void close() { System.out.println(">>> Other.close()"); }
+    19	}
+    20	
+    21	class StandaloneCloseAble extends SomeAutoCloseable {
+    22		@Override
+    23		public void close() { System.out.println(">>> Standalone close()"); }
+    24	}
+    25	
+    26	interface InterfaceForAutoCloseable extends AutoCloseable { 
+    27		@Override
+    28		void close();
+    29	}
+    30	
+    31	class TrickyAutoCloseable implements InterfaceForAutoCloseable {
+    32		@Override
+    33		public void close() { System.out.println(">>> TrickyAutoCloseable.close()"); }
+    34	}
+</pre>
 
+		<p>
+			Результаты работы программы предсказуемы, в каждой случае вызывается актуальный метод класса:
+			
+<pre>
+>>> Anonymous close()
+>>> Standalone close()
+>>> TrickyAutoCloseable.close()
+</pre>
 
-
+		<h2>Лямбда-выражения - есть!</h2>
+		
+		<p>
+			Да, в TWR можно творить, что угодно. В том числе и объявлять лямбда-выражения. Вгляните на 
+			<a href="#listing-4">листинг 4</a>. 
 		
 		<hr>
 

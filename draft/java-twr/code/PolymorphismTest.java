@@ -3,17 +3,11 @@ public class PolymorphismTest {
 		try (
 			SomeAutoCloseable resource = new SomeAutoCloseable() {
 				@Override
-				public void close() {
-					System.out.println(">>> Anonymous close()");
-				}
+				public void close() { System.out.println(">>> Anonymous close()"); }
 			}
 		) {}
 		
-		System.out.println("---------------------");
-		
 		try ( SomeAutoCloseable resource = new StandaloneCloseAble() ) {}
-		
-		System.out.println("---------------------");
 		
 		try ( InterfaceForAutoCloseable tricky = new TrickyAutoCloseable() ) {}
 	}
