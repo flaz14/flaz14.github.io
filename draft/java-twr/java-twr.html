@@ -613,9 +613,95 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from MyRes
 		... 2 more
 </pre>
 		
-		<p>
-			Напоследок, попробуем выполнить совершенно безумный пример.
+		<h2>finally "съедает" всё</h2>
 		
+		<p>
+			Напоследок, попробуем выполнить еще несколько примеров, постепенно увеличивая степень безумия и уменьшая 
+			степень практического смысла. Для начала попробуем выбросить исключение в блоке <code>finally</code> основного
+			метода, т.е. метода <code>main()</code>:
+
+<h4 id="listing-11">Листинг 11 - исключение в блоке finally съедает всех</h4>
+<pre>
+     1	public class MegaSuppressedExceptions {
+     2		public static void main(String ignored[]) {
+     3			try ( MyResource resource = new MyResource() ) {
+     4				System.out.println(">>> try-block");
+     5				throw new IllegalStateException("Exception from try-block");
+     6			} finally {
+     7				System.out.println(">>> finally-block");
+     8				throw new IllegalStateException("Exception from finally-block");
+     9			}
+    10		}
+    11	}
+    12	
+    13	class MyResource implements AutoCloseable {
+    14		@Override
+    15		public void close() {
+    16			System.out.println(">>> MyResource.close()");
+    17		}
+    18	}
+</pre>
+	
+		<p>
+			В результате увидим, что исключение, возникшее в блоке <em>try</em> было бесследно "съедно" исключением, 
+			возникшем в блоке <em>finally</em>.
+
+<pre>
+>>> try-block
+>>> MyResource.close()
+>>> finally-block
+Exception in thread "main" java.lang.IllegalStateException: Exception from finally-block
+	at MegaSuppressedExceptions.main(MegaSuppressedExceptions.java:8)
+</pre>
+
+		<p>
+			Теперь же попробуем выбросить приправить <a href="#listing-11">листинг 11</a> AutoCloseable'ом.
+
+<h4 id="listing-11">Листинг 11 - </h4>			
+<pre>
+     1	public class SuperDuperSuppressedExceptions {
+     2		public static void main(String ignored[]) {
+     3			try ( MyResource resource = new MyResource() ) {
+     4				System.out.println(">>> try-block");
+     5				throw new IllegalStateException("Exception from try-block");
+     6			} finally {
+     7				System.out.println(">>> finally-block");
+     8				throw new IllegalStateException("Exception from finally-block");
+     9			}
+    10		}
+    11	}
+    12	
+    13	class MyResource implements AutoCloseable {
+    14		@Override
+    15		public void close() {
+    16			System.out.println(">>> MyResource.close()");
+    17			throw new IllegalStateException("Exception from MyResource.close()");
+    18		}
+    19	}
+</pre>
+
+		<p>
+			Запустим и увидим:
+<pre>
+>>> try-block
+>>> MyResource.close()
+>>> finally-block
+Exception in thread "main" java.lang.IllegalStateException: Exception from finally-block
+	at SuperDuperSuppressedExceptions.main(SuperDuperSuppressedExceptions.java:8)
+</pre>
+
+		<p>
+			Печальная картина... <em>finally</em> безжалостно сожрал всех. Никаких следов о 
+			<code>IllegalStateException("Exception from try-block")</code> и 
+			<code>IllegalStateException("Exception from MyResource.close()")</code> не осталось.
+			
+		<h2>Ложка меда напоследок</h2>
+		
+		<p>
+			Ну и фиг с ним, с этим <em>finally</em>. Вреда от него не меньше, чем пользы. А может, и больше. Чтобы закончить
+			на мажорной ноте надо написать немножко безумный кода. И рекурсия тут как раз кстати. Вгляните же на
+			<a href="#listing-12">листинг 12</a>!
+			
 		
 		<h2>Читайте JLS</h2>
 		
