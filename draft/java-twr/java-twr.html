@@ -524,7 +524,104 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from try-b
 			(названный мною <em>pre-finally</em>) генерируется компилятором, то и номеров строчек исходного текста 
 			предоставить компилятор не в силах. Вот и "приписали" к <em>finally</em>.
 
-		<h2></h2>
+		<h2>Multiple suppressed exceptions</h2>
+		
+		<p>
+			А могут ли появится в стэктрэйсе несколько исключений? Да пожалуйста! Пример, приведенный в 
+			<a href="#listing-9">листинге 9</a>, отлично это демонстрирует:
+			
+<h4 id="listing-9">Листинг 9 - пример нескольких подавляемых исключений</h4>
+<pre>
+     1	public class MultipleSuppressedExceptionsTest {
+     2		public static void main(String ignored[]) {
+     3			try (
+     4				MyResource apple = new MyResource("apple");
+     5				MyResource banana = new MyResource("banana");
+     6				MyResource orange = new MyResource("orange");
+     7				MyResource cherry = new MyResource("cherry");
+     8			) { 
+     9				System.out.println(">>> try-block");
+    10				throw new IllegalStateException("Exception from try-block");
+    11			} finally {
+    12				System.out.println(">>> finally-block");
+    13			}
+    14		}
+    15	}
+    16	
+    17	class MyResource implements AutoCloseable {
+    18		private final String id;
+    19		
+    20		public MyResource(String id) { this.id = id;}
+    21		
+    22		@Override
+    23		public void close() { 
+    24			System.out.println(">>> MyResource [" + id + "] close()"); 
+    25			throw new IllegalStateException("Exception from MyResource [" + id + "]");
+    26		}
+    27	}
+</pre>
+
+		<p>
+			Запустим пример и увидим:
+<pre>
+>>> try-block
+>>> MyResource [cherry] close()
+>>> MyResource [orange] close()
+>>> MyResource [banana] close()
+>>> MyResource [apple] close()
+>>> finally-block
+Exception in thread "main" java.lang.IllegalStateException: Exception from try-block
+	at MultipleSuppressedExceptionsTest.main(MultipleSuppressedExceptionsTest.java:10)
+	Suppressed: java.lang.IllegalStateException: Exception from MyResource [cherry]
+		at MyResource.close(MultipleSuppressedExceptionsTest.java:25)
+		at MultipleSuppressedExceptionsTest.main(MultipleSuppressedExceptionsTest.java:11)
+	Suppressed: java.lang.IllegalStateException: Exception from MyResource [orange]
+		at MyResource.close(MultipleSuppressedExceptionsTest.java:25)
+		at MultipleSuppressedExceptionsTest.main(MultipleSuppressedExceptionsTest.java:11)
+	Suppressed: java.lang.IllegalStateException: Exception from MyResource [banana]
+		at MyResource.close(MultipleSuppressedExceptionsTest.java:25)
+		at MultipleSuppressedExceptionsTest.main(MultipleSuppressedExceptionsTest.java:11)
+	Suppressed: java.lang.IllegalStateException: Exception from MyResource [apple]
+		at MyResource.close(MultipleSuppressedExceptionsTest.java:25)
+		at MultipleSuppressedExceptionsTest.main(MultipleSuppressedExceptionsTest.java:11)
+</pre>
+
+		<p>
+			Все осталось на месте и ничего не потерялось. Отлично! Если же закомментировать строчку №10, то на вершине
+			стэка вызовов окажется исключение, возникшее при закрытии ресурса, который был иницилизирован последним в 
+			TWR, т.е. "вишневое" К сожалению, при таком раскладе часть информации об остальных исключениях 
+			("апельсиновое", "банановое", "яблочное") теряется: ни тебе имен методов, ни номеров строчек исходного текста.
+			Какие-то вместо них <tt>... 2 more</tt> невнятные.
+			Хорошо хоть имена классов и сообщения исключений оставили. Логично, что все они будут относится
+			к одному и тому же блоку <em>finally</em>. Но все равно не понимаю такой мелочной экономии.
+			
+<pre>
+>>> try-block
+>>> MyResource [cherry] close()
+>>> MyResource [orange] close()
+>>> MyResource [banana] close()
+>>> MyResource [apple] close()
+>>> finally-block
+Exception in thread "main" java.lang.IllegalStateException: Exception from MyResource [cherry]
+	at MyResource.close(MultipleSuppressedExceptionsTest.java:25)
+	at MultipleSuppressedExceptionsTest.main(MultipleSuppressedExceptionsTest.java:11)
+	Suppressed: java.lang.IllegalStateException: Exception from MyResource [orange]
+		... 2 more
+	Suppressed: java.lang.IllegalStateException: Exception from MyResource [banana]
+		... 2 more
+	Suppressed: java.lang.IllegalStateException: Exception from MyResource [apple]
+		... 2 more
+</pre>
+		
+		<p>
+			Напоследок, попробуем выполнить совершенно безумный пример.
+		
+		
+		<h2>Читайте JLS</h2>
+		
+		<p>
+			Умные книжки не нужны. Ламерские статьи вроде этой - тоже. В спецификации все разложено по полочкам. А вообще, 
+			
 		
 		<hr>
 
