@@ -696,7 +696,44 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from final
 			<code>IllegalStateException("Exception from try-block")</code> и 
 			<code>IllegalStateException("Exception from MyResource.close()")</code> не осталось.
 		
+<pre>
+yura@Aspire-ES1-521 ~/Projects/flaz14.github.io/draft/java-twr/code $ cat -n ExtremeSuppressedExceptions.java 
+     1	public class ExtremeSuppressedExceptions {
+     2		public static void main(String ignored[]) {
+     3			try ( MyResource resource = new MyResource() ) {
+     4				System.out.println(">>> main()");
+     5				throw new IllegalStateException("Exception from main()");
+     6			}
+     7		}
+     8	}
+     9	
+    10	class MyResource implements AutoCloseable {
+    11		@Override
+    12		public void close() {
+    13			System.out.println(">>> MyResource.close()");
+    14			try {
+    15				System.out.println(">>> try-block from MyResource");
+    16				throw new IllegalStateException("Exception from try-block from MyResource");
+    17			}
+    18			finally {
+    19				System.out.println(">>> finally-block from MyResource");
+    20				throw new IllegalStateException("Exception from finally-block from MyResource");
+    21			}
+    22		}
+    23	}
+</pre>
 
+<pre>
+>>> main()
+>>> MyResource.close()
+>>> try-block from MyResource
+>>> finally-block from MyResource
+Exception in thread "main" java.lang.IllegalStateException: Exception from main()
+	at ExtremeSuppressedExceptions.main(ExtremeSuppressedExceptions.java:5)
+	Suppressed: java.lang.IllegalStateException: Exception from finally-block from MyResource
+		at MyResource.close(ExtremeSuppressedExceptions.java:20)
+		at ExtremeSuppressedExceptions.main(ExtremeSuppressedExceptions.java:6)
+</pre>
 			
 		<h2>Ложка меда напоследок</h2>
 		
