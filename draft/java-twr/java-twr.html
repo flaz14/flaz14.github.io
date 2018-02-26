@@ -446,22 +446,83 @@ Exception in thread "main" java.lang.NullPointerException
      1	public class SuppressedExceptionTest {
      2		public static void main(String ignored[]) {
      3			try(MyResource resource = new MyResource()) {
-     4				throw new IllegalStateException("Exception from try-block");
-     5			} finally {
-     6				System.out.println(">>> finally-block");
-     7			}
-     8		}
-     9	}
-    10	
-    11	class MyResource implements AutoCloseable {
-    12		@Override
-    13		public void close() {
-    14			System.out.println(">>> MyResource.close()");
-    15			throw new IllegalStateException("Exception from MyResource.close()");
-    16		}
-    17	}
+     4				System.out.println(">>> try-block");
+     5				throw new IllegalStateException("Exception from try-block");
+     6			} finally {
+     7				System.out.println(">>> finally-block");
+     8			}
+     9		}
+    10	}
+    11	
+    12	class MyResource implements AutoCloseable {
+    13		@Override
+    14		public void close() {
+    15			System.out.println(">>> MyResource.close()");
+    16			throw new IllegalStateException("Exception from MyResource.close()");
+    17		}
+    18	}
 </pre>
 		
+		<p>
+			Тестовая программа напечатает:
+
+<pre>
+>>> try-block
+>>> MyResource.close()
+>>> finally-block
+Exception in thread "main" java.lang.IllegalStateException: Exception from try-block
+	at SuppressedExceptionTest.main(SuppressedExceptionTest.java:5)
+	Suppressed: java.lang.IllegalStateException: Exception from MyResource.close()
+		at MyResource.close(SuppressedExceptionTest.java:16)
+		at SuppressedExceptionTest.main(SuppressedExceptionTest.java:6)
+</pre>
+
+		<p>
+			Что же произошло? Первым делом выполнился блок <em>try</em>. Затем в строке №5 было выброшено исключение
+			с текстом <tt>Exception from try-block</tt>. Но это исключение не "всплыло" наверх сразу. Так и должно быть.
+			Блок <em>finally</em>
+			<em>finally</em> выполняется всегда, независимо от того, было ли в <em>try</em> выброшено исключение или же
+			возвращено значение посредством <em>return</em>. Но перед выполнением <em>finally</em> было произведено
+			автоматическое закрытие ресурса, созданного в TWR. И во время автоматического закрытия произошло еще одно 
+			исключение, с текстом <tt>Exception from MyResource.close()</tt>. Получается интересная ситуация: выброшены
+			два исключения: одно родом из блока <em>try</em>, а другое - из безымянного блока автоматического закрытия
+			(назовем его <em>pre-finally</em>). С ними надо что-то делать. Как пишут в умной книжке:
+			
+			<blockquote>
+				<p>
+					До Java 7 информация об исключении могла быть поглощена при обработке ресурсов. Такой вариант не
+					исключен и с TWR, поэтому стековые следы были усовершенствованы. Теперь вы можете просматривать в исключениях
+					информацию о типах, которая ранее просто терялась</cite>.
+			</blockquote>
+			
+		<p>
+			Да, так и есть. Первичным, если так можно выразиться, исключением был и остался 
+			<code>IllegalStateException("Exception from try-block")</code>. За вторичное исключение, которое произошло позже
+			в хронологическом порядке, принят 
+			<code>IllegalStateException("Exception from MyResource.close()")</code>
+			 (и вообще, это вторичное уже просто потому, что <em>pre-finally</em> - служебный автоматически генерируемый
+			 компилятором
+			 блок, к логике программы он не имеет непосредственного отношения, и даже не предназначен для этого).
+			Тем не менее, вторичное исключение было добавлено в стэктрэйс первичного. Номера строчек на месте. Так, 
+			на вершине стэка вызовов вторичного исключения находится строчка:
+			
+<pre>
+		at MyResource.close(SuppressedExceptionTest.java:16)
+</pre>
+
+		<p>
+			№16 ведет в строку <code>throw new IllegalStateException("Exception from MyResource.close()");</code> 
+			исходника, которая находится в методе <code>close()</code> класса <code>MyResource</code>. Ниже в стэктрэйсе
+			идет:
+			
+<pre>
+			at SuppressedExceptionTest.main(SuppressedExceptionTest.java:6)
+</pre>
+
+		<p>
+			Хм... Строка №6 - это самое начало блока <em>finally</em>. Поскольку блок автоматического закрытия ресурсов
+			(названный мною <em>pre-finally</em>) генерируется компилятором, то и номеров строчек исходного текста 
+			предоставить компилятор не в силах. Вот и "приписали" к <em>finally</em>.
 		
 		<hr>
 
