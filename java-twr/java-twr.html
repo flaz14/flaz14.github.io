@@ -275,18 +275,18 @@ Exception in thread "main" java.lang.IllegalStateException: Just for illustratio
 
 		<p>
 			Стэктрэйс меня не огорчил, но и не порадовал. Раз уж лямбда-выражение определено в TWR, я ожидал увидеть 
-			в его имени в стэктрэйсе что-нибудь наподобие 
-			<code>LambdaTest.lambda$main$&lt;twr&gt;2$1(LambdaTest.java:16)</code>.	Т.е. я ожидал увидеть подсказку, что
-			лямбда выражение было определено не просто в методе <code>main()</code>, а именно внутри TWR 
-			(который выполнился вторым по счету; хотя и без циферки было бы неплохо).
+			в стэктрэйсе что-нибудь наподобие <code>LambdaTest.lambda$main$&lt;twr&gt;2$1(LambdaTest.java:16)</code>. 
+			Т.е. я ожидал увидеть подсказку, что лямбда-выражение было определено не просто в методе 
+			<code>main()</code>, а именно внутри TWR (который выполнился вторым по счету; хотя и без циферки было бы 
+			неплохо).
 		
 		<h2>final не нужен</h2>
 
 		<p>
 			Неизменяемость нынче в моде. В Java модификатор <strong>final</strong> можно добавлять к чему угодно. Но в 
-			случае с TWR это не имеет никакого смысла. Объявленную в TWR переменную не позволит изменить компилятор; 
+			случае с TWR это не имеет никакого смысла. Объявленную в TWR переменную не позволит изменить компилятор, 
 			неважно, объявлена она как <code>final</code> или нет. Что и проиллюстрировано в 
-			<a href="#listing-5">листинге 5</a>
+			<a href="#listing-5">листинге 5</a>.
 
 <h4 id="listing-5">Листинг 5 - пример использования final</h4>
 <pre>
@@ -341,7 +341,7 @@ Exception in thread "main" java.lang.IllegalStateException: Just for illustratio
     12	class MyResource implements AutoCloseable {
     13		@Override
     14		public void close() {
-    15			System.out.println(">>> MyResource.close()");
+    15			System.out.println("&gt;&gt;&gt; MyResource.close()");
     16		}
     17	}
 </pre>
@@ -402,8 +402,8 @@ Exception in thread "main" java.lang.NullPointerException
 </pre>
 		
 		<p>
-			Никакого упоминания о <code>Suppressed</code> нет. Старый добрый <code>NullPointerException</code> никуда
-			не делся. Я ожидал, что нулевая ссылка на <code>i</code> будет "отловлена и подавлена" в TWR в месте 
+			Никакого упоминания о <strong>Suppressed</strong> нет. Старый добрый <code>NullPointerException</code> 
+			никуда не делся. Я ожидал, что нулевая ссылка на <code>i</code> будет "отловлена и подавлена" в TWR в месте 
 			создания ресурса, т.е. в строке <b>№6</b> <a href="#listing-7">листинга 7</a>. Но нет, стэктрэйс ведет в 
 			строку <b>№7</b>, т.е. в блок <em>try</em>, где переменная <code>i</code> была использована.
 		
@@ -420,7 +420,7 @@ Exception in thread "main" java.lang.NullPointerException
 			<a href="https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html#suppressed-exceptions">
 			The try-with-resources Statement</a>.
 			Но пример там выбран не сильно удачный. Он великоват, уловить суть непросто. Я сделал свой пример совсем 
-			маленьким. Он приведен в <a href="#listing-8">листинге 8</a>.
+			маленьким.
 
 <h2 id="listing-8">Листинг 8 - пример подавляемого исключения</h2>			
 <pre>
@@ -487,8 +487,8 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from try-b
 
 		<p>
 			<b>№16</b> ведет в строку <code>throw new IllegalStateException("Exception from MyResource.close()");</code> 
-			исходника, которая находится в методе <code>close()</code> класса <code>MyResource</code>. Ниже в стэктрэйсе
-			идет:
+			<a href="#listing-8">листинга 8</a>, которая находится в методе <code>close()</code> класса 
+			<code>MyResource</code>. Ниже в стэктрэйсе идет:
 
 <pre>
 			at SuppressedExceptionTest.main(SuppressedExceptionTest.java:6)
@@ -515,10 +515,10 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from try-b
      6				MyResource orange = new MyResource("orange");
      7				MyResource cherry = new MyResource("cherry");
      8			) { 
-     9				System.out.println(">>> try-block");
+     9				System.out.println("&gt;&gt;&gt; try-block");
     10				throw new IllegalStateException("Exception from try-block");
     11			} finally {
-    12				System.out.println(">>> finally-block");
+    12				System.out.println("&gt;&gt;&gt; finally-block");
     13			}
     14		}
     15	}
@@ -530,7 +530,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from try-b
     21		
     22		@Override
     23		public void close() { 
-    24			System.out.println(">>> MyResource [" + id + "] close()"); 
+    24			System.out.println("&gt;&gt;&gt; MyResource [" + id + "] close()"); 
     25			throw new IllegalStateException("Exception from MyResource [" + id + "]");
     26		}
     27	}
@@ -539,12 +539,12 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from try-b
 		<p>
 			Запустим пример и увидим:
 <pre>
->>> try-block
->>> MyResource [cherry] close()
->>> MyResource [orange] close()
->>> MyResource [banana] close()
->>> MyResource [apple] close()
->>> finally-block
+&gt;&gt;&gt; try-block
+&gt;&gt;&gt; MyResource [cherry] close()
+&gt;&gt;&gt; MyResource [orange] close()
+&gt;&gt;&gt; MyResource [banana] close()
+&gt;&gt;&gt; MyResource [apple] close()
+&gt;&gt;&gt; finally-block
 Exception in thread "main" java.lang.IllegalStateException: Exception from try-block
 	at MultipleSuppressedExceptionsTest.main(MultipleSuppressedExceptionsTest.java:10)
 	Suppressed: java.lang.IllegalStateException: Exception from MyResource [cherry]
@@ -562,21 +562,21 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from try-b
 </pre>
 
 		<p>
-			Все осталось на месте и ничего не потерялось. Отлично! Если же закомментировать строчку №10, то на вершине
-			стэка вызовов окажется исключение, возникшее при закрытии ресурса, который был иницилизирован последним в 
-			TWR, т.е. "вишневое" К сожалению, при таком раскладе часть информации об остальных исключениях 
-			("апельсиновое", "банановое", "яблочное") теряется: ни тебе имен методов, ни номеров строчек исходного текста.
-			Какие-то вместо них <tt>... 2 more</tt> невнятные.
-			Хорошо хоть имена классов и сообщения исключений оставили. Логично, что все исключения относятся
-			к одному и тому же блоку <em>finally</em>. Но все равно не понимаю такой мелочной экономии.
-			
+			Все осталось на месте и ничего не потерялось. Отлично! Если же закомментировать строчку <b>№10</b>, то на 
+			вершине	стэка вызовов окажется исключение, возникшее при закрытии ресурса, который был иницилизирован 
+			последним в TWR, т.е. "вишневое". К сожалению, при таком раскладе часть информации об остальных исключениях 
+			("апельсиновое", "банановое", "яблочное") теряется: ни тебе имен методов, ни тебе номеров строчек исходного 
+			текста.	Какие-то вместо них <i>... 2 more</i> невнятные. Хорошо хоть имена классов и сообщения исключений 
+			оставили. Логично, что все исключения относятся	к одному и тому же TWR. Но все равно не понимаю такой 
+			мелочной экономии.
+
 <pre>
->>> try-block
->>> MyResource [cherry] close()
->>> MyResource [orange] close()
->>> MyResource [banana] close()
->>> MyResource [apple] close()
->>> finally-block
+&gt;&gt;&gt; try-block
+&gt;&gt;&gt; MyResource [cherry] close()
+&gt;&gt;&gt; MyResource [orange] close()
+&gt;&gt;&gt; MyResource [banana] close()
+&gt;&gt;&gt; MyResource [apple] close()
+&gt;&gt;&gt; finally-block
 Exception in thread "main" java.lang.IllegalStateException: Exception from MyResource [cherry]
 	at MyResource.close(MultipleSuppressedExceptionsTest.java:25)
 	at MultipleSuppressedExceptionsTest.main(MultipleSuppressedExceptionsTest.java:11)
@@ -592,7 +592,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from MyRes
 		
 		<p>
 			Напоследок, попробуем выполнить еще несколько примеров, постепенно увеличивая степень безумия и уменьшая 
-			степень практического смысла. Для начала попробуем выбросить исключение в блоке <code>finally</code> основного
+			степень практического смысла. Для начала попробуем выбросить исключение в блоке <em>finally</em> основного
 			метода, т.е. метода <code>main()</code>:
 
 <h4 id="listing-11">Листинг 11 - finally "съедает" try</h4>
@@ -600,10 +600,10 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from MyRes
      1	public class MegaSuppressedExceptions {
      2		public static void main(String ignored[]) {
      3			try ( MyResource resource = new MyResource() ) {
-     4				System.out.println(">>> try-block");
+     4				System.out.println("&gt;&gt;&gt; try-block");
      5				throw new IllegalStateException("Exception from try-block");
      6			} finally {
-     7				System.out.println(">>> finally-block");
+     7				System.out.println("&gt;&gt;&gt; finally-block");
      8				throw new IllegalStateException("Exception from finally-block");
      9			}
     10		}
@@ -612,19 +612,19 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from MyRes
     13	class MyResource implements AutoCloseable {
     14		@Override
     15		public void close() {
-    16			System.out.println(">>> MyResource.close()");
+    16			System.out.println("&gt;&gt;&gt; MyResource.close()");
     17		}
     18	}
 </pre>
 	
 		<p>
-			В результате увидим, что исключение, возникшее в блоке <em>try</em> было бесследно "съедно" исключением, 
-			возникшем в блоке <em>finally</em>.
+			В результате увидим, что исключение, возникшее в блоке <em>try</em>, было бесследно "съедено" исключением, 
+			возникшем в блоке <em>finally</em>:
 
 <pre>
->>> try-block
->>> MyResource.close()
->>> finally-block
+&gt;&gt;&gt; try-block
+&gt;&gt;&gt; MyResource.close()
+&gt;&gt;&gt; finally-block
 Exception in thread "main" java.lang.IllegalStateException: Exception from finally-block
 	at MegaSuppressedExceptions.main(MegaSuppressedExceptions.java:8)
 </pre>
@@ -637,10 +637,10 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from final
      1	public class SuperDuperSuppressedExceptions {
      2		public static void main(String ignored[]) {
      3			try ( MyResource resource = new MyResource() ) {
-     4				System.out.println(">>> try-block");
+     4				System.out.println("&gt;&gt;&gt; try-block");
      5				throw new IllegalStateException("Exception from try-block");
      6			} finally {
-     7				System.out.println(">>> finally-block");
+     7				System.out.println("&gt;&gt;&gt; finally-block");
      8				throw new IllegalStateException("Exception from finally-block");
      9			}
     10		}
@@ -649,7 +649,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from final
     13	class MyResource implements AutoCloseable {
     14		@Override
     15		public void close() {
-    16			System.out.println(">>> MyResource.close()");
+    16			System.out.println("&gt;&gt;&gt; MyResource.close()");
     17			throw new IllegalStateException("Exception from MyResource.close()");
     18		}
     19	}
@@ -658,18 +658,17 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from final
 		<p>
 			Запустим и увидим:
 <pre>
->>> try-block
->>> MyResource.close()
->>> finally-block
+&gt;&gt;&gt; try-block
+&gt;&gt;&gt; MyResource.close()
+&gt;&gt;&gt; finally-block
 Exception in thread "main" java.lang.IllegalStateException: Exception from finally-block
 	at SuperDuperSuppressedExceptions.main(SuperDuperSuppressedExceptions.java:8)
 </pre>
 
 		<p>
-			Печальная картина... Хорошо хоть, что автоматическое закрытие ресурсов выполнилось.
-			В остальном же <em>finally</em> безжалостно сожрал всех. Никаких следов о 
-			<code>IllegalStateException("Exception from try-block")</code> и 
-			<code>IllegalStateException("Exception from MyResource.close()")</code> не осталось.
+			Печальная картина... Хорошо хоть, что автоматическое закрытие ресурсов выполнилось. В остальном же 
+			<em>finally</em> безжалостно сожрал всех. Никаких следов о <i>Exception from try-block</i> и 
+			<i>Exception from MyResource.close()</i> не осталось.
 		
 		<p>
 			А теперь попробуем выбросить исключение в блоке <em>finally</em> метода <code>close()</code>.
@@ -679,7 +678,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from final
      1	public class ExtremeSuppressedExceptions {
      2		public static void main(String ignored[]) {
      3			try ( MyResource resource = new MyResource() ) {
-     4				System.out.println(">>> main()");
+     4				System.out.println("&gt;&gt;&gt; main()");
      5				throw new IllegalStateException("Exception from main()");
      6			}
      7		}
@@ -688,13 +687,13 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from final
     10	class MyResource implements AutoCloseable {
     11		@Override
     12		public void close() {
-    13			System.out.println(">>> MyResource.close()");
+    13			System.out.println("&gt;&gt;&gt; MyResource.close()");
     14			try {
-    15				System.out.println(">>> try-block from MyResource");
+    15				System.out.println("&gt;&gt;&gt; try-block from MyResource");
     16				throw new IllegalStateException("Exception from try-block from MyResource");
     17			}
     18			finally {
-    19				System.out.println(">>> finally-block from MyResource");
+    19				System.out.println("&gt;&gt;&gt; finally-block from MyResource");
     20				throw new IllegalStateException("Exception from finally-block from MyResource");
     21			}
     22		}
@@ -702,10 +701,10 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from final
 </pre>
 
 <pre>
->>> main()
->>> MyResource.close()
->>> try-block from MyResource
->>> finally-block from MyResource
+&gt;&gt;&gt; main()
+&gt;&gt;&gt; MyResource.close()
+&gt;&gt;&gt; try-block from MyResource
+&gt;&gt;&gt; finally-block from MyResource
 Exception in thread "main" java.lang.IllegalStateException: Exception from main()
 	at ExtremeSuppressedExceptions.main(ExtremeSuppressedExceptions.java:5)
 	Suppressed: java.lang.IllegalStateException: Exception from finally-block from MyResource
@@ -714,27 +713,27 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
 </pre>
 
 		<p>
-			Как видим, исключение, выброшенное в блоке <em>try</em> метода <code>close()</code> было "съедено" исключением,
-			выброшенным в блоке <em>finally</em> метода <code>close()</code>. А последнее, в свою очередь, было подавлено
-			исключением, выброшенным в блоке <em>try</em> метода <code>main()</code>.
+			Как видим, исключение, выброшенное в блоке <em>try</em> метода <code>close()</code> было "съедено" 
+			исключением, выброшенным в блоке <em>finally</em> метода <code>close()</code>. А последнее, в свою очередь, 
+			было подавлено исключением, выброшенным в блоке <em>try</em> метода <code>main()</code>.
 			
 		<h2>Ложка меда напоследок</h2>
 		
 		<p>
-			Ну и фиг с ним, с этим <em>finally</em>. Вреда от него не меньше, чем пользы. А может, и больше. Чтобы закончить
-			на мажорной ноте, надо написать немножко поистине безумного кода. И рекурсия будет кстати. Вгляните-ка на
-			<a href="#listing-13">листинг 13</a>!
+			Ну и фиг с ним, с этим <em>finally</em>. Вреда от него не меньше, чем пользы. А может, и больше. Чтобы 
+			закончить на мажорной ноте, надо написать немножко поистине безумного кода (рекурсия будет кстати). 
+			Вгляните-ка на <a href="#listing-13">листинг 13</a>!
 			
 <h4 id="listing-13">Листинг 13 - безумный пример использования TWR</h4>
 <pre>
      1	public class CrazyTwr {
      2		public static void main(String ignored[]) {
-     3			System.out.println(">>> main()");
+     3			System.out.println("&gt;&gt;&gt; main()");
      4			try ( MyResource resource = new MyResource() ) {
-     5				System.out.println(">>> try-block from main()");
+     5				System.out.println("&gt;&gt;&gt; try-block from main()");
      6				throw new IllegalStateException("Exception from main()");
      7			} finally {
-     8				System.out.println(">>> finally-block from main()");
+     8				System.out.println("&gt;&gt;&gt; finally-block from main()");
      9			}
     10		}
     11	}
@@ -742,12 +741,12 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
     13	class MyResource implements AutoCloseable {
     14		@Override
     15		public void close() {
-    16			System.out.println(">>> MyResource.close()");
+    16			System.out.println("&gt;&gt;&gt; MyResource.close()");
     17			try ( MyResource resource = new MyResource() ) {
-    18				System.out.println(">>> try-block from MyResource");
+    18				System.out.println("&gt;&gt;&gt; try-block from MyResource");
     19				throw new IllegalStateException("Exception from MyResource.close()");
     20			} finally {
-    21				System.out.println(">>> finally-block from MyResource");
+    21				System.out.println("&gt;&gt;&gt; finally-block from MyResource");
     22			}
     23		}
     24	}
@@ -759,25 +758,24 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
 			(объем файла - 6 Мебайт, на столько хватило стэка в моем компьютере). Ниже находится
 			краткое содержание:
 <pre>
->>> main()
->>> try-block from main()
->>> MyResource.close()
->>> try-block from MyResource
->>> MyResource.close()
->>> try-block from MyResource
->>> MyResource.close()
->>> try-block from MyResource
->>> MyResource.close()
->>> try-block from MyResource
->>> MyResource.close()
+&gt;&gt;&gt; main()
+&gt;&gt;&gt; try-block from main()
+&gt;&gt;&gt; MyResource.close()
+&gt;&gt;&gt; try-block from MyResource
+&gt;&gt;&gt; MyResource.close()
+&gt;&gt;&gt; try-block from MyResource
+&gt;&gt;&gt; MyResource.close()
+&gt;&gt;&gt; try-block from MyResource
+&gt;&gt;&gt; MyResource.close()
+&gt;&gt;&gt; try-block from MyResource
 ...
->>> MyResource.close()>>> finally-block from MyResource
->>> finally-block from MyResource
->>> finally-block from MyResource
->>> finally-block from MyResource
->>> finally-block from MyResource
+&gt;&gt;&gt; MyResource.close()&gt;&gt;&gt; finally-block from MyResource
+&gt;&gt;&gt; finally-block from MyResource
+&gt;&gt;&gt; finally-block from MyResource
+&gt;&gt;&gt; finally-block from MyResource
+&gt;&gt;&gt; finally-block from MyResource
 ...
->>> finally-block from main()
+&gt;&gt;&gt; finally-block from main()
 Exception in thread "main" java.lang.IllegalStateException: Exception from main()
         at CrazyTwr.main(CrazyTwr.java:6)
         Suppressed: java.lang.IllegalStateException: Exception from MyResource.close()
@@ -799,9 +797,9 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
 		<h2>Читайте JLS! Нет, лучше ничего не читайте...</h2>
 		
 		<p>
-			Умные книжки не нужны. Ламерские статьи вроде этой - тоже. Ведь в спецификации все разложено по полочкам. А вообще,
-			спецификация ничего не даст. Нужно пробовать писать и ломать программы самому. Тогда даже в несвежих фичах
-			языка обязательно откроется что-то новое.
+			Умные книжки не нужны. Ламерские статьи вроде этой - тоже. Ведь в спецификации все разложено по полочкам. А 
+			вообще, спецификация ничего не дает сама по себе. Нужно пробовать писать и ломать программы самостоятельно. 
+			Тогда даже в несвежих фичах	языка обязательно откроется что-то новое.
 		
         <p>
 			__________
@@ -851,7 +849,6 @@ Java HotSpot(TM) Client VM (build 25.111-b14, mixed mode)
 						исключения). Или же полностью избавиться от него. Этим я и воспользовался, чтобы убрать 
 						надоедливый <code>Exception</code>, тянущийся из <code>AutoCloseable</code>.
 			</ol>
-			
 		
 		<hr>
 
