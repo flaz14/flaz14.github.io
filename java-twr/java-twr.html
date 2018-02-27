@@ -28,33 +28,19 @@
 		<h2>Тренируйся лучше... на кошках</h2>
 
 		<p>
-			Java 8 уже прочно закрепилась в промышленном программировании. А по планете во всю шагает Java 9. Тем не 
-			менее, не пропадает ощущение, что каждая новая версия Java - это не новые возможности, а исправления 
-			недостатков предыдущей версии. Я прочитал про конструкцию <strong>try-with-resources</strong> 
-			((далее по тексту - <strong>TWR</strong>))
-			в одной умной книжке
-			<sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup> 
-			 
-			 
+			Java 8 уже прочно закрепилась в мире промышленного программирования. А по планете во всю шагает Java 9. Тем 
+			не менее, не пропадает ощущение, что каждая новая версия Java - это не новые возможности, а исправления 
+			недостатков предыдущей версии. Я прочитал про конструкцию <strong>try-with-resources</strong> (далее по 
+			тексту - <strong>TWR</strong> в одной умной книжке
+			<sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>. 
 			Затем прочитал туториал Oracle <sup id="footnote-2-top"><a href="#footnote-2-bottom">[2]</a></sup>. 
-			Но полностью не понял, что TWR за зверь такой. Так что ничего
-			не оставалось, как учиться самому на маленьких примерах.
-			Все примеры запускались на Java 8:
-
-<pre>
-$ javac -version
-javac 1.8.0_111
-
-$ java -version
-java version "1.8.0_111"
-Java(TM) SE Runtime Environment (build 1.8.0_111-b14)
-Java HotSpot(TM) Client VM (build 25.111-b14, mixed mode)
-</pre>			
+			Но полностью не понял, что TWR за зверь такой. Так что ничего не оставалось, как учиться самому на маленьких
+			примерах <sup id="footnote-3-top"><a href="#footnote-3-bottom">[3]</a></sup>. 	
 
 		<h2>Переменные нужны, переменные важны</h2>
 		
 		<p>
-			Начнем с самого простого примера <sup id="footnote-3-top"><a href="#footnote-3-bottom">[3]</a>.
+			Начнем с самого простого примера <sup id="footnote-4-top"><a href="#footnote-4-bottom">[4]</a>.
 
 <h4 id="listing-1">Листинг 1 - типы переменных имеют значение</h4>
 <pre>
@@ -71,14 +57,14 @@ Java HotSpot(TM) Client VM (build 25.111-b14, mixed mode)
     11	class MyAutoCloseable implements AutoCloseable {
     12		@Override
     13		public void close() {
-    14			System.out.println(">>> close()"); 
+    14			System.out.println("&gt;&gt;&gt; close()"); 
     15		}
     16	}
 </pre>
 
 		<p>
-			Действительно, все просто. Программа напечатает <tt>>>> close()</tt>. Если мы расскоментируем строку №5, то 
-			получим ошибку во время компиляции:
+			Действительно, все просто. Программа напечатает <tt>&gt;&gt;&gt; close()</tt>. Если мы расскоментируем 
+			строку <b>№5</b>, то получим ошибку во время компиляции:
 
 <pre>
 VariablesTest.java:5: error: unreported exception Exception; must be caught or declared to be thrown
@@ -89,7 +75,7 @@ VariablesTest.java:5: error: unreported exception Exception; must be caught or d
 </pre>
 		
 		<p>
-			Если же раскомментировать строчку №7, то компилятор "порадует" таким известием:
+			Если же раскомментируем строчку <b>№7</b>, то компилятор "порадует" таким известием:
 
 <pre>
 VariablesTest.java:7: error: illegal start of type
@@ -101,20 +87,19 @@ VariablesTest.java:7: error: = expected
 </pre>
 
 		<p>
-			Без явного объявления переменных в TWR обойтись нельзя. Тип переменной тоже имеет значение.
-			Класс <code>MyAutoCloseable</code> реализует <code>AutoCloseable</code>. Но объявление переменной с типом
-			интерфейса приводит к ошибке компиляции, посколько метод <code>close()</code> интерфейса декларирует исключение
-			<code>Exception</code>. А в методе <code>close()</code> класса <code>MyAutoCloseable</code> 
-			об исключении не сказано.
+			Без явного объявления переменных в TWR обойтись нельзя. Тип переменной тоже имеет значение. Класс 
+			<code>MyAutoCloseable</code> реализует <code>AutoCloseable</code>. Но объявление переменной с типом 
+			интерфейса приводит к ошибке компиляции, посколько метод <code>close()</code> интерфейса декларирует 
+			исключение <code>Exception</code>. А в методе <code>close()</code> класса <code>MyAutoCloseable</code> об 
+			исключении не сказано.
 
 		<h2>Переменные ОЧЕНЬ нужны</h2>
 		
 		<p>
 			От порядка объявления переменных в TWR зависит порядок закрытия ресурсов. Оно и понятно: ресурсы должны 
-			освобождаться
-			в порядке, обратном их созданию. Это проиллюстрировано в <a href="#listing-2">листинге 2</a>.
+			освобождаться в порядке, обратном их созданию. Это проиллюстрировано в <a href="#listing-2">листинге 2</a>.
 			
-<h4 id="#listing-2">Листинг 2 - порядок объявления переменных имеет значение</h4>
+<h4 id="listing-2">Листинг 2 - порядок объявления переменных имеет значение</h4>
 <pre>
      1	public class OrderingTest {
      2		public static void main(String args[]) {
@@ -142,7 +127,7 @@ VariablesTest.java:7: error: = expected
     24	class First implements AutoCloseable {
     25		@Override
     26		public void close() {
-    27			System.out.println(">>> First.close()");
+    27			System.out.println("&gt;&gt;&gt; First.close()");
     28		}
     29	}
     30	
@@ -153,7 +138,7 @@ VariablesTest.java:7: error: = expected
     35		
     36		@Override
     37		public void close() {
-    38			System.out.println(">>> Second.close()");
+    38			System.out.println("&gt;&gt;&gt; Second.close()");
     39		}
     40	}
 </pre>
@@ -163,34 +148,33 @@ VariablesTest.java:7: error: = expected
 
 <pre>
 --- First - Second
->>> Second.close()
->>> First.close()
+&gt;&gt;&gt; Second.close()
+&gt;&gt;&gt; First.close()
 --- Second - First
->>> First.close()
->>> Second.close()
+&gt;&gt;&gt; First.close()
+&gt;&gt;&gt; Second.close()
 --- variable for First is missed
->>> Second.close()
+&gt;&gt;&gt; Second.close()
 </pre>
 
 		<p>
 			Обратим внимание на случай <i>--- variable for First is missed</i>. Экземпляр класса <code>First</code>
-			(созданный в строке №18) не был закрыт. А все из-за того, что мы не завели для него отдельную переменную,
-			а передали его в конструктор <code>Second</code>
-			напрямую. Конечно, в реальном коде такая такая ситуация маловероятна. Т.е.
-			в методе <code>close()</code> "промышленного" варианта класса <code>Second</code> должен явно вызываться 
-			одноименный метод класса 
-			<code>First</code>, и так далее по цепочке. Но что если метод <code>close()</code> класса <code>Second</code> 
-			выбросит исключение до того, как вызовет <code>close()</code> на экземпляре <code>First</code>? Ресурс
-			<code>First</code> останется незакрытым. Решение одно: объявлять переменные для каждого ресурса отдельно.
+			(созданный в строке <b>№18</b>) не был закрыт. А все из-за того, что мы не завели для него отдельную 
+			переменную,	а передали его в конструктор <code>Second</code> напрямую. Конечно, в реальном коде такая 
+			ситуация маловероятна. Т.е.	в методе <code>close()</code> промышленного варианта класса <code>Second</code> 
+			должен явно вызываться 	одноименный метод класса <code>First</code>, и так далее по цепочке. Но что если 
+			метод <code>close()</code> класса <code>Second</code> выбросит исключение до того, как вызовет 
+			<code>close()</code> на экземпляре <code>First</code>? Ресурс <code>First</code> останется незакрытым. 
+			Решение одно: объявлять переменные для каждого ресурса отдельно.
 
 		<h2>Полиморфизм в действии</h2>
 
 		<p>
 			Несмотря на то, что тип переменной в TWR имеет значение для компилятора в плане обрабатываемых исключений,
-			полифорфизм никуда не исчез. В примере, приведенном в <a href="#listing-3">листинге 3</a>, рассмотрены три 
-			случая: анонимный класс, "отдельностоящий" класс, который непосредственно реализует <code>AutoCloseable</code>,
-			и класс, который реализует <code>AutoCloseable</code> через интерфейс-посредник
-			<sup id="footnote-4-top"><a href="#footnote-4-bottom">[3]</a>.
+			полиморфизм никуда не исчез. В примере, приведенном в <a href="#listing-3">листинге 3</a>, рассмотрены три 
+			случая: анонимный класс, "отдельностоящий" класс, который непосредственно реализует 
+			<code>AutoCloseable</code>,	и класс, который реализует <code>AutoCloseable</code> через интерфейс-посредник
+			<sup id="footnote-5-top"><a href="#footnote-5-bottom">[5]</a>.
 		
 <h4 id="listing-3">Листинг 3 - пример полифорфизма в TWR</h4>
 <pre>
@@ -199,7 +183,7 @@ VariablesTest.java:7: error: = expected
      3			try (
      4				SomeAutoCloseable resource = new SomeAutoCloseable() {
      5					@Override
-     6					public void close() { System.out.println(">>> Anonymous close()"); }
+     6					public void close() { System.out.println("&gt;&gt;&gt; Anonymous close()"); }
      7				}
      8			) {}
      9			
@@ -211,12 +195,12 @@ VariablesTest.java:7: error: = expected
     15	
     16	class SomeAutoCloseable implements AutoCloseable {
     17		@Override
-    18		public void close() { System.out.println(">>> Other.close()"); }
+    18		public void close() { System.out.println("&gt;&gt;&gt; Other.close()"); }
     19	}
     20	
     21	class StandaloneCloseAble extends SomeAutoCloseable {
     22		@Override
-    23		public void close() { System.out.println(">>> Standalone close()"); }
+    23		public void close() { System.out.println("&gt;&gt;&gt; Standalone close()"); }
     24	}
     25	
     26	interface InterfaceForAutoCloseable extends AutoCloseable { 
@@ -226,17 +210,17 @@ VariablesTest.java:7: error: = expected
     30	
     31	class TrickyAutoCloseable implements InterfaceForAutoCloseable {
     32		@Override
-    33		public void close() { System.out.println(">>> TrickyAutoCloseable.close()"); }
+    33		public void close() { System.out.println("&gt;&gt;&gt; TrickyAutoCloseable.close()"); }
     34	}
 </pre>
 
 		<p>
-			Результаты работы программы предсказуемы. Всегда вызывается актуальный метод класса:
-			
+			Результат работы программы предсказуем. Всегда вызывается актуальный метод класса:
+
 <pre>
->>> Anonymous close()
->>> Standalone close()
->>> TrickyAutoCloseable.close()
+&gt;&gt;&gt; Anonymous close()
+&gt;&gt;&gt; Standalone close()
+&gt;&gt;&gt; TrickyAutoCloseable.close()
 </pre>
 
 		<h2>Лямбда-выражения!</h2>
@@ -252,7 +236,7 @@ VariablesTest.java:7: error: = expected
      3			System.out.println("--- Lambda #1 ---");
      4			try (
      5				MyAutoCloseable resource = () -> {
-     6					System.out.println(">>> Lambda #1 close()");
+     6					System.out.println("&gt;&gt;&gt; Lambda #1 close()");
      7				}
      8			) {}
      9			System.out.println("-----------------");
@@ -260,7 +244,7 @@ VariablesTest.java:7: error: = expected
     11			System.out.println("--- Lambda #2 ---");
     12			try (
     13				MyAutoCloseable resource = () -> {
-    14					System.out.println(">>> Lambda #2 close()");
+    14					System.out.println("&gt;&gt;&gt; Lambda #2 close()");
     15					System.out.println("Stacktrace:");
     16					throw new IllegalStateException("Just for illustration");
     17				}
@@ -279,10 +263,10 @@ VariablesTest.java:7: error: = expected
 
 <pre>
 --- Lambda #1 ---
->>> Lambda #1 close()
+&gt;&gt;&gt; Lambda #1 close()
 -----------------
 --- Lambda #2 ---
->>> Lambda #2 close()
+&gt;&gt;&gt; Lambda #2 close()
 Stacktrace:
 Exception in thread "main" java.lang.IllegalStateException: Just for illustration
 	at LambdaTest.lambda$main$1(LambdaTest.java:16)
@@ -291,19 +275,20 @@ Exception in thread "main" java.lang.IllegalStateException: Just for illustratio
 
 		<p>
 			Стэктрэйс меня не огорчил, но и не порадовал. Раз уж лямбда-выражение определено в TWR, я ожидал увидеть 
-			в его имени в стэктрэйсе что-нибудь наподобие <code>LambdaTest.lambda$main$<twr>2$1(LambdaTest.java:16)</code>.
-			Т.е. я ожидал увидеть подсказку, что лямбда выражение было определено не просто в методе <code>main()</code>,
-			а именно внутри TWR (который выполнился вторым по счету; хотя и без циферки было бы неплохо).
-			
+			в его имени в стэктрэйсе что-нибудь наподобие 
+			<code>LambdaTest.lambda$main$&lt;twr&gt;2$1(LambdaTest.java:16)</code>.	Т.е. я ожидал увидеть подсказку, что
+			лямбда выражение было определено не просто в методе <code>main()</code>, а именно внутри TWR 
+			(который выполнился вторым по счету; хотя и без циферки было бы неплохо).
+		
 		<h2>final не нужен</h2>
 
 		<p>
-			Неизменяемость нынче в моде. В Java модификатор <code>final</code> можно добавлять к чему угодно. Но в случае
-			с TWR это не имеет никакого смысла. Объявленную в TWR переменную не позволит изменить компилятор; неважно,
-			объявлена она как <code>final</code> или нет. Что и проиллюстрировано в 
+			Неизменяемость нынче в моде. В Java модификатор <strong>final</strong> можно добавлять к чему угодно. Но в 
+			случае с TWR это не имеет никакого смысла. Объявленную в TWR переменную не позволит изменить компилятор; 
+			неважно, объявлена она как <code>final</code> или нет. Что и проиллюстрировано в 
 			<a href="#listing-5">листинге 5</a>
 
-<h4 id="#listing-5">Листинг 5 - пример использования final</h4>
+<h4 id="listing-5">Листинг 5 - пример использования final</h4>
 <pre>
      1	public class FinalModifierTest {
      2		public static void main(String ignored[]) {
@@ -326,7 +311,7 @@ Exception in thread "main" java.lang.IllegalStateException: Just for illustratio
 
 		<p>
 			Об этом сказано в 
-			<a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.20.3">JSL</a>: 
+			<a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.20.3">JLS</a>: 
 			<cite>A variable declared in a resource specification is implicitly declared final (§4.12.4) if it is not 
 			explicitly declared final.</cite>
 
@@ -334,11 +319,12 @@ Exception in thread "main" java.lang.IllegalStateException: Just for illustratio
 		
 		<p>
 			Как сказано в 
-			<a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.20.3">JSL</a>: 
+			<a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.20.3">JLS</a>: 
 			<cite>A resource is closed only if it initialized to a non-null value.</cite>
 			Согласно спецификации, программа, приведенная в <a href="#listing-6">листинге 6</a>, ничего не напечатает.
-			И это правильно. Вызов какого-либо метода на <code>null</code> не имеет смысла. 
-			Вызыв <code>close()</code> на заведомо нулевой ссылке - тоже.
+			И это правильно. Вызов какого-либо метода на <code>null</code> не имеет смысла. Вызов <code>close()</code> 
+			на заведомо нулевой ссылке - тоже.
+
 <h4 id="listing-6">Листинг 6 - null игнорируется во время автоматического закрытия ресурсов</h4>
 <pre>
      1	public class NullPointer2Test {
@@ -359,7 +345,7 @@ Exception in thread "main" java.lang.IllegalStateException: Just for illustratio
     16		}
     17	}
 </pre>
-			
+	
 		<p>
 			Рассмотрим еще один пример. Я воспроизвел его из упомянутой в начале статьи умной книжки и поместил в 
 			<a href="#listing-7">листинг 7</a>.
@@ -384,7 +370,6 @@ Exception in thread "main" java.lang.IllegalStateException: Just for illustratio
 
 		<p>
 			В книге в комментариях к примеру сказано:
-			
 			<blockquote>
 				<p>
 					Один из аспектов конструкции TWR - появление улучшенных стектрейсов и заблокированных исключений. До
@@ -417,37 +402,35 @@ Exception in thread "main" java.lang.NullPointerException
 </pre>
 		
 		<p>
-			Никакого упоминания о <code>Suppressed</code> нет. И старый добрый <code>NullPointerException</code> никуда
-			не делся. Я ожидал, что нулевая ссылка на <code>i</code> будет "отловлена и подавлена" в TWR в месте создания
-			ресурса, т.е. в строке №6 исходника. Но нет, стэктрэйс ведет в строку №7, т.е. в место, где переменная была 
-			использована.
+			Никакого упоминания о <code>Suppressed</code> нет. Старый добрый <code>NullPointerException</code> никуда
+			не делся. Я ожидал, что нулевая ссылка на <code>i</code> будет "отловлена и подавлена" в TWR в месте 
+			создания ресурса, т.е. в строке <b>№6</b> <a href="#listing-7">листинга 7</a>. Но нет, стэктрэйс ведет в 
+			строку <b>№7</b>, т.е. в блок <em>try</em>, где переменная <code>i</code> была использована.
 		
 		<p>
-			Т.о. <code>null</code>-значения в TWR вполне допустимы. То ли авторы не разобрались в теме, то ли переводчики
-			напутали... Как бы то ни было, "подавление" исключений в TWR - совсем другой случай. Рассмотрим его в 
-			следующем разделе.
+			Т.о. <code>null</code>-значения в TWR вполне допустимы. То ли авторы не разобрались в теме, то ли 
+			переводчики	напутали... Как бы то ни было, "подавление" исключений в TWR - совсем другой случай. Рассмотрим 
+			его в следующем разделе.
 			
 		<h2>Suppressed exceptions</h2>
 		
 		<p>
-			"Подавление" исключений	имеет смысл лишь тогда, когда исключений возникает несколько. 
-			Легче всего разобраться на примере. Об этом уже 
-			рассказано в официальной статье от Oracle: 
+			"Подавление" исключений	имеет смысл лишь тогда, когда исключений возникает несколько. Легче всего 
+			разобраться на примере. Об этом уже рассказано в официальной статье от Oracle: 
 			<a href="https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html#suppressed-exceptions">
 			The try-with-resources Statement</a>.
-			Но пример там выбран не сильно удачный. Он великоват, уловить суть непросто. 
-			Я сделал свой пример совсем маленьким.
-			Он приведен в <a href="#listing-8">листинге 8</a>.
+			Но пример там выбран не сильно удачный. Он великоват, уловить суть непросто. Я сделал свой пример совсем 
+			маленьким. Он приведен в <a href="#listing-8">листинге 8</a>.
 
-<h2 id="#listing-8">Листинг 8 - пример "подавляемого" исключения</h2>			
+<h2 id="listing-8">Листинг 8 - пример подавляемого исключения</h2>			
 <pre>
      1	public class SuppressedExceptionTest {
      2		public static void main(String ignored[]) {
      3			try(MyResource resource = new MyResource()) {
-     4				System.out.println(">>> try-block");
+     4				System.out.println("&gt;&gt;&gt; try-block");
      5				throw new IllegalStateException("Exception from try-block");
      6			} finally {
-     7				System.out.println(">>> finally-block");
+     7				System.out.println("&gt;&gt;&gt; finally-block");
      8			}
      9		}
     10	}
@@ -455,7 +438,7 @@ Exception in thread "main" java.lang.NullPointerException
     12	class MyResource implements AutoCloseable {
     13		@Override
     14		public void close() {
-    15			System.out.println(">>> MyResource.close()");
+    15			System.out.println("&gt;&gt;&gt; MyResource.close()");
     16			throw new IllegalStateException("Exception from MyResource.close()");
     17		}
     18	}
@@ -465,9 +448,9 @@ Exception in thread "main" java.lang.NullPointerException
 			Тестовая программа напечатает:
 
 <pre>
->>> try-block
->>> MyResource.close()
->>> finally-block
+&gt;&gt;&gt; try-block
+&gt;&gt;&gt; MyResource.close()
+&gt;&gt;&gt; finally-block
 Exception in thread "main" java.lang.IllegalStateException: Exception from try-block
 	at SuppressedExceptionTest.main(SuppressedExceptionTest.java:5)
 	Suppressed: java.lang.IllegalStateException: Exception from MyResource.close()
@@ -476,52 +459,45 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from try-b
 </pre>
 
 		<p>
-			Что же произошло? Первым делом выполнился блок <em>try</em>. Затем в строке №5 было выброшено исключение
-			с текстом <tt>Exception from try-block</tt>. Но это исключение не "всплыло" наверх сразу. 
-			Блок <em>finally</em>
+			Что же произошло? Первым делом выполнился блок <em>try</em>. Затем в строке <b>№5</b> было выброшено 
+			исключение с текстом <i>Exception from try-block</i>. Но это исключение не "всплыло" наверх сразу. Блок 
 			<em>finally</em> выполняется всегда, независимо от того, было ли в <em>try</em> выброшено исключение или же
 			возвращено значение посредством <em>return</em>. Но перед выполнением <em>finally</em> было произведено
 			автоматическое закрытие ресурса, созданного в TWR. И во время автоматического закрытия произошло еще одно 
-			исключение, с текстом <tt>Exception from MyResource.close()</tt>. Получается интересная ситуация: выброшены
+			исключение, с текстом <i>Exception from MyResource.close()</i>. Получается интересная ситуация: выброшены
 			два исключения: одно родом из блока <em>try</em>, а другое - из безымянного блока автоматического закрытия
 			(назовем его <em>pre-finally</em>). С ними надо что-то делать. Приведем повторно цитату из умной книжки:
-			
 			<blockquote>
 				<p>
 					До Java 7 информация об исключении могла быть поглощена при обработке ресурсов. Такой вариант не
 					исключен и с TWR, поэтому стековые следы были усовершенствованы. Теперь вы можете просматривать в 
-					исключениях
-					информацию о типах, которая ранее просто терялась</cite>.
+					исключениях	информацию о типах, которая ранее просто терялась.
 			</blockquote>
-			
+		
 		<p>
 			Да, так и есть. Первичным, если так можно выразиться, исключением был и остался 
-			<code>IllegalStateException("Exception from try-block")</code>. За вторичное исключение, которое произошло позже
-			в хронологическом порядке, принят 
-			<code>IllegalStateException("Exception from MyResource.close()")</code>
-			 (и вообще, это вторичное уже просто потому, что <em>pre-finally</em> - служебный автоматически генерируемый
-			 компилятором
-			 блок, к логике программы он не имеет непосредственного отношения, и даже не предназначен для этого).
-			Тем не менее, вторичное исключение было добавлено в стэктрэйс выше первичного. Так, 
-			на вершине стэка вызовов вторичного исключения находится строчка:
-			
+			<i>Exception from try-block</i>. За вторичное исключение, которое произошло позже в хронологическом порядке,
+			принят <i>Exception from MyResource.close()</i> (и вообще, это исключение вторично уже просто потому, что 
+			<em>pre-finally</em> - служебный автоматически генерируемый компилятором блок, не имеющий непосредственного
+			отношения к логике программы). На вершине стэка вызовов находится строчка:
+
 <pre>
 		at MyResource.close(SuppressedExceptionTest.java:16)
 </pre>
 
 		<p>
-			№16 ведет в строку <code>throw new IllegalStateException("Exception from MyResource.close()");</code> 
+			<b>№16</b> ведет в строку <code>throw new IllegalStateException("Exception from MyResource.close()");</code> 
 			исходника, которая находится в методе <code>close()</code> класса <code>MyResource</code>. Ниже в стэктрэйсе
 			идет:
-			
+
 <pre>
 			at SuppressedExceptionTest.main(SuppressedExceptionTest.java:6)
 </pre>
 
 		<p>
-			Хм... Строка №6 - это самое начало блока <em>finally</em>. Поскольку блок автоматического закрытия ресурсов
-			(названный мною <em>pre-finally</em>) генерируется компилятором, то и номеров строчек исходного текста 
-			предоставить компилятор не в силах. Вот и "приписали" <em>pre-finally</em> к <em>finally</em>.
+			Хм... Строка <b>№6</b> - это самое начало блока <em>finally</em>. Поскольку блок автоматического закрытия 
+			ресурсов (названный мною <em>pre-finally</em>) генерируется компилятором, то и номеров строчек исходного 
+			текста предоставить компилятор не в силах. Вот и "приписали" <em>pre-finally</em> к <em>finally</em>.
 
 		<h2>Multiple suppressed exceptions</h2>
 		
@@ -847,12 +823,26 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
 				<li id="footnote-3-bottom">
 					<p>
 						<a href="#footnote-3-top" title="Перейти к основному тексту">&uarr;</a> 
-						Несмотря на то, что примеры небольшие, везда стоят номера строк. Так намного удобнее 
-						разбираться со стэктрэйсами.
+						Все примеры запускались на Java 8:
+<pre>
+$ javac -version
+javac 1.8.0_111
+
+$ java -version
+java version "1.8.0_111"
+Java(TM) SE Runtime Environment (build 1.8.0_111-b14)
+Java HotSpot(TM) Client VM (build 25.111-b14, mixed mode)
+</pre>	
 
 				<li id="footnote-4-bottom">
 					<p>
 						<a href="#footnote-4-top" title="Перейти к основному тексту">&uarr;</a> 
+						Несмотря на то, что примеры небольшие, везда стоят номера строк. Так намного удобнее 
+						разбираться со стэктрэйсами.
+
+				<li id="footnote-5-bottom">
+					<p>
+						<a href="#footnote-5-top" title="Перейти к основному тексту">&uarr;</a> 
 						Указывать в интерфейсах <code>@Override</code> не смысла. В конце-концов, в интерфейсе мы ничего
 						переопределить не можем, поскольку в интерфейсах априори отсутствует реализация (оставим в 
 						стороне методы по-умолчанию). Но при объявлении метода, который присутствует в суперинтерфейсе, 
