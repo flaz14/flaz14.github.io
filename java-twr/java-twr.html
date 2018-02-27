@@ -595,7 +595,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from MyRes
 			степень практического смысла. Для начала попробуем выбросить исключение в блоке <em>finally</em> основного
 			метода, т.е. метода <code>main()</code>:
 
-<h4 id="listing-11">Листинг 11 - finally "съедает" try</h4>
+<h4 id="listing-10">Листинг 10 - finally "съедает" try</h4>
 <pre>
      1	public class MegaSuppressedExceptions {
      2		public static void main(String ignored[]) {
@@ -630,7 +630,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from final
 </pre>
 
 		<p>
-			Приправим предыдущий пример AutoCloseable'ом.
+			Приправим <a href="#listing-10">предыдущий пример</a> AutoCloseable'ом.
 
 <h4 id="listing-11">Листинг 11 - finally "съедает" Suppressed exception</h4>			
 <pre>
