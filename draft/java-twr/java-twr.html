@@ -774,13 +774,49 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
 			Полный вывод программы приведен в отдельном файле!!!тут будет ссылка!!! (на сколько хватило стэка). Ниже находится
 			краткое содержание:
 <pre>
-
+>>> main()
+>>> try-block from main()
+>>> MyResource.close()
+>>> try-block from MyResource
+>>> MyResource.close()
+>>> try-block from MyResource
+>>> MyResource.close()
+>>> try-block from MyResource
+>>> MyResource.close()
+>>> try-block from MyResource
+>>> MyResource.close()
+...
+>>> MyResource.close()>>> finally-block from MyResource
+>>> finally-block from MyResource
+>>> finally-block from MyResource
+>>> finally-block from MyResource
+>>> finally-block from MyResource
+...
+>>> finally-block from main()
+Exception in thread "main" java.lang.IllegalStateException: Exception from main()
+        at CrazyTwr.main(CrazyTwr.java:6)
+        Suppressed: java.lang.IllegalStateException: Exception from MyResource.close()
+                at MyResource.close(CrazyTwr.java:19)
+                at CrazyTwr.main(CrazyTwr.java:7)
+                Suppressed: java.lang.IllegalStateException: Exception from MyResource.close()
+                        at MyResource.close(CrazyTwr.java:19)
+                        at MyResource.close(CrazyTwr.java:20)
+                        ... 1 more
+                        Suppressed: java.lang.IllegalStateException: Exception from MyResource.close()
+                                at MyResource.close(CrazyTwr.java:19)
+                                at MyResource.close(CrazyTwr.java:20)
+...
 </pre>
+
+		<p>
+			Комментарии, как говорится, излишни. Но "лесенка" красивая получилась :)
 		
-		<h2>Читайте JLS! Нет, лучше ничего не читайте.</h2>
+		<h2>Читайте JLS! Нет, лучше ничего не читайте...</h2>
 		
 		<p>
-			Умные книжки не нужны. Ламерские статьи вроде этой - тоже. В спецификации все разложено по полочкам. А вообще, 
+			Умные книжки не нужны. Ламерские статьи вроде этой - тоже. В спецификации все разложено по полочкам. А вообще,
+			спецификация ничего не даст. Нужно пробовать писать и ломать программы самому. И тогда даже в несвежих фичи
+			языка обязательно откроется что-то новое.
 			
 		
 		<hr>
