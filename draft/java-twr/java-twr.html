@@ -39,6 +39,17 @@
 			Затем прочитал туториал Oracle <sup id="footnote-2-top"><a href="#footnote-2-bottom">[2]</a></sup>. 
 			Но полностью не понял, что TWR за зверь такой. Так что ничего
 			не оставалось, как учиться самому на маленьких примерах.
+			Все примеры запускались на Java 8:
+
+<pre>
+$ javac -version
+javac 1.8.0_111
+
+$ java -version
+java version "1.8.0_111"
+Java(TM) SE Runtime Environment (build 1.8.0_111-b14)
+Java HotSpot(TM) Client VM (build 25.111-b14, mixed mode)
+</pre>			
 
 		<h2>Переменные нужны, переменные важны</h2>
 		
@@ -608,7 +619,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from MyRes
 			степень практического смысла. Для начала попробуем выбросить исключение в блоке <code>finally</code> основного
 			метода, т.е. метода <code>main()</code>:
 
-<h4 id="listing-11">Листинг 11 - исключение, выброшенное в блоке finally, съедает всех</h4>
+<h4 id="listing-11">Листинг 11 - finally "съедает" try</h4>
 <pre>
      1	public class MegaSuppressedExceptions {
      2		public static void main(String ignored[]) {
@@ -643,9 +654,9 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from final
 </pre>
 
 		<p>
-			Теперь же попробуем приправить предыдущий пример AutoCloseable'ом.
+			Приправим предыдущий пример AutoCloseable'ом.
 
-<h4 id="listing-11">Листинг 11 - </h4>			
+<h4 id="listing-11">Листинг 11 - finally "съедает" Suppressed exception</h4>			
 <pre>
      1	public class SuperDuperSuppressedExceptions {
      2		public static void main(String ignored[]) {
@@ -687,7 +698,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from final
 		<p>
 			А теперь попробуем выбросить исключение в блоке <em>finally</em> метода <code>close()</code>.
 
-<h4 id="listing-12"></h4>
+<h4 id="listing-12">Листинг 12 - finally "съедает" try и в AutoCloseable</h4>
 <pre>
      1	public class ExtremeSuppressedExceptions {
      2		public static void main(String ignored[]) {
@@ -725,12 +736,17 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
 		at MyResource.close(ExtremeSuppressedExceptions.java:20)
 		at ExtremeSuppressedExceptions.main(ExtremeSuppressedExceptions.java:6)
 </pre>
+
+		<p>
+			Как видим, исключение, выброшенное в блоке <em>try</em> метода <code>close()</code> было "съедено" исключением,
+			выброшенным в блоке <em>finally</em> метода <code>close()</code>. А последнее, в свою очередь, было подавлено
+			исключением, выброшенным в блоке <em>try</em> метода <code>main()</code>.
 			
 		<h2>Ложка меда напоследок</h2>
 		
 		<p>
 			Ну и фиг с ним, с этим <em>finally</em>. Вреда от него не меньше, чем пользы. А может, и больше. Чтобы закончить
-			на мажорной ноте надо написать немножко безумный кода. И рекурсия тут как раз кстати. Вгляните-ка на
+			на мажорной ноте, надо написать немножко поистине безумного кода. И рекурсия будет кстати. Вгляните-ка на
 			<a href="#listing-13">листинг 13</a>!
 			
 <h4 id="listing-13">Листинг 13 - безумный пример использования TWR</h4>
@@ -762,7 +778,9 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
 </pre>
 
 		<p>
-			Полный вывод программы приведен в отдельном файле!!!тут будет ссылка!!! (на сколько хватило стэка). Ниже находится
+			Полный вывод программы приведен в отдельном файле 
+			<a href="!!!тут будет ссылка">CrazyTwr.txt</a> 
+			(объем файла - 6 Мебайт, на столько хватило стэка в моем компьютере). Ниже находится
 			краткое содержание:
 <pre>
 >>> main()
@@ -805,10 +823,9 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
 		<h2>Читайте JLS! Нет, лучше ничего не читайте...</h2>
 		
 		<p>
-			Умные книжки не нужны. Ламерские статьи вроде этой - тоже. В спецификации все разложено по полочкам. А вообще,
-			спецификация ничего не даст. Нужно пробовать писать и ломать программы самому. И тогда даже в несвежих фичи
+			Умные книжки не нужны. Ламерские статьи вроде этой - тоже. Ведь в спецификации все разложено по полочкам. А вообще,
+			спецификация ничего не даст. Нужно пробовать писать и ломать программы самому. Тогда даже в несвежих фичах
 			языка обязательно откроется что-то новое.
-			
 		
         <p>
 			__________
@@ -862,23 +879,3 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
 		</h1>
 	</body>
 </html>
-
-
-
------------------------------------------------------------------------------------------------------------------------
-
-============
-yura@Aspire-ES1-521 ~/Projects/flaz14.github.io/draft/java-twr/code $ javac -version
-javac 1.8.0_111
-yura@Aspire-ES1-521 ~/Projects/flaz14.github.io/draft/java-twr/code $ java -version
-java version "1.8.0_111"
-Java(TM) SE Runtime Environment (build 1.8.0_111-b14)
-Java HotSpot(TM) Client VM (build 25.111-b14, mixed mode)
-============
-
-
-
-
-И теперь, указывая в блоке TWR тип переменной как наш интерфейс, мы можем сделать вид, что никакого исключения не ожидается. 
-И писать таким образом лямбда-выражения. Хотя в документации к AutoCloseable рекомендуется объявлять более конкретный тип 
-исключения в реализации, если, конечно, реализация может выбрасывать проверяемое исключение.
