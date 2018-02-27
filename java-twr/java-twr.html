@@ -25,22 +25,27 @@
 		
 		<h3>[2018, Февраль]</h3>
 		
+		<h3>
+			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/java-twr/code">Исходный код</a>
+		</h3>
+		
 		<h2>Тренируйся лучше... на кошках</h2>
 
 		<p>
 			Java 8 уже прочно закрепилась в мире промышленного программирования. А по планете во всю шагает Java 9. Тем 
 			не менее, не пропадает ощущение, что каждая новая версия Java - это не новые возможности, а исправления 
 			недостатков предыдущей версии. Я прочитал про конструкцию <strong>try-with-resources</strong> (далее по 
-			тексту - <strong>TWR</strong> в одной умной книжке
+			тексту - <strong>TWR</strong>) в одной умной книжке
 			<sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>. 
 			Затем прочитал туториал Oracle <sup id="footnote-2-top"><a href="#footnote-2-bottom">[2]</a></sup>. 
 			Но полностью не понял, что TWR за зверь такой. Так что ничего не оставалось, как учиться самому на маленьких
-			примерах <sup id="footnote-3-top"><a href="#footnote-3-bottom">[3]</a></sup>. 	
+			примерах <sup id="footnote-3-top"><a href="#footnote-3-bottom">[3]</a></sup> 
+			<sup id="footnote-4-top"><a href="#footnote-4-bottom">[4]</a></sup>.
 
 		<h2>Переменные нужны, переменные важны</h2>
 		
 		<p>
-			Начнем с самого простого примера <sup id="footnote-4-top"><a href="#footnote-4-bottom">[4]</a></sup>.
+			Начнем с самого простого примера.
 
 <h4 id="listing-1">Листинг 1 - типы переменных имеют значение</h4>
 <pre>
@@ -171,8 +176,8 @@ VariablesTest.java:7: error: = expected
 
 		<p>
 			Несмотря на то, что тип переменной в TWR имеет значение для компилятора в плане обрабатываемых исключений,
-			полиморфизм никуда не исчез. В примере, приведенном в <a href="#listing-3">листинге 3</a>, рассмотрены три 
-			случая: анонимный класс, "отдельностоящий" класс, который непосредственно реализует 
+			полиморфизм никуда не исчезает. В примере, приведенном в <a href="#listing-3">листинге 3</a>, рассмотрены 
+			три случая: анонимный класс, "отдельностоящий" класс, который непосредственно реализует 
 			<code>AutoCloseable</code>,	и класс, который реализует <code>AutoCloseable</code> через интерфейс-посредник
 			<sup id="footnote-5-top"><a href="#footnote-5-bottom">[5]</a></sup>.
 		
@@ -235,7 +240,7 @@ VariablesTest.java:7: error: = expected
      2		public static void main(String ignored[]) {
      3			System.out.println("--- Lambda #1 ---");
      4			try (
-     5				MyAutoCloseable resource = () -> {
+     5				MyAutoCloseable resource = () -&gt; {
      6					System.out.println("&gt;&gt;&gt; Lambda #1 close()");
      7				}
      8			) {}
@@ -422,7 +427,7 @@ Exception in thread "main" java.lang.NullPointerException
 			Но пример там выбран не сильно удачный. Он великоват, уловить суть непросто. Я сделал свой пример совсем 
 			маленьким.
 
-<h2 id="listing-8">Листинг 8 - пример подавляемого исключения</h2>			
+<h4 id="listing-8">Листинг 8 - пример подавляемого исключения</h4>			
 <pre>
      1	public class SuppressedExceptionTest {
      2		public static void main(String ignored[]) {
@@ -496,7 +501,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from try-b
 
 		<p>
 			Хм... Строка <b>№6</b> - это самое начало блока <em>finally</em>. Поскольку блок автоматического закрытия 
-			ресурсов (названный мною <em>pre-finally</em>) генерируется компилятором, то и номеров строчек исходного 
+			ресурсов (названный мною <em>pre-finally</em>) генерируется компилятором, то и номера строчек исходного 
 			текста предоставить компилятор не в силах. Вот и "приписали" <em>pre-finally</em> к <em>finally</em>.
 
 		<h2>Multiple suppressed exceptions</h2>
@@ -667,7 +672,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from final
 
 		<p>
 			Печальная картина... Хорошо хоть, что автоматическое закрытие ресурсов выполнилось. В остальном же 
-			<em>finally</em> безжалостно сожрал всех. Никаких следов о <i>Exception from try-block</i> и 
+			<em>finally</em> безжалостно сожрал всех. Никаких следов об <i>Exception from try-block</i> и 
 			<i>Exception from MyResource.close()</i> не осталось.
 		
 		<p>
@@ -815,7 +820,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
 					<p>
 						<a href="#footnote-2-top" title="Перейти к основному тексту">&uarr;</a> 
 						<a href="https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">
-							The try-with-resources Statement
+							The Java Tutorials &gt; Essential Classes &gt; Exceptions &gt; The try-with-resources Statement
 						</a>
 						
 				<li id="footnote-3-bottom">
@@ -841,10 +846,10 @@ Java HotSpot(TM) Client VM (build 25.111-b14, mixed mode)
 				<li id="footnote-5-bottom">
 					<p>
 						<a href="#footnote-5-top" title="Перейти к основному тексту">&uarr;</a> 
-						Указывать в интерфейсах <code>@Override</code> не смысла. В конце-концов, в интерфейсе мы ничего
-						переопределить не можем, поскольку в интерфейсах априори отсутствует реализация (оставим в 
+						Указывать <code>@Override</code> в интерфейсе нет нужды. В конце концов, в интерфейсе мы ничего
+						переопределить не можем, поскольку в интерфейсе априори отсутствует реализация (оставим в 
 						стороне методы по-умолчанию). Но при объявлении метода, который присутствует в суперинтерфейсе, 
-						можно немного переопределить родительский метод. А именно: можно изменить тип выбрасываемого 
+						можно-таки переопределить родительский метод. А именно: можно изменить тип выбрасываемого 
 						исключение (устоявшаяся практика - объявлять в интерфейсе-наследнике более конкретный тип
 						исключения). Или же полностью избавиться от него. Этим я и воспользовался, чтобы убрать 
 						надоедливый <code>Exception</code>, тянущийся из <code>AutoCloseable</code>.
