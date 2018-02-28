@@ -181,7 +181,7 @@ VariablesTest.java:7: error: = expected
 			<code>AutoCloseable</code>,	и класс, который реализует <code>AutoCloseable</code> через интерфейс-посредник
 			<sup id="footnote-5-top"><a href="#footnote-5-bottom">[5]</a></sup>.
 		
-<h4 id="listing-3">Листинг 3 - пример полифорфизма в TWR</h4>
+<h4 id="listing-3">Листинг 3 - пример полиморфизма в TWR</h4>
 <pre>
      1	public class PolymorphismTest {
      2		public static void main(String ignored[]) {
@@ -248,7 +248,7 @@ VariablesTest.java:7: error: = expected
     10	
     11			System.out.println("--- Lambda #2 ---");
     12			try (
-    13				MyAutoCloseable resource = () -> {
+    13				MyAutoCloseable resource = () -&gt; {
     14					System.out.println("&gt;&gt;&gt; Lambda #2 close()");
     15					System.out.println("Stacktrace:");
     16					throw new IllegalStateException("Just for illustration");
@@ -280,10 +280,10 @@ Exception in thread "main" java.lang.IllegalStateException: Just for illustratio
 
 		<p>
 			Стэктрэйс меня не огорчил, но и не порадовал. Раз уж лямбда-выражение определено в TWR, я ожидал увидеть 
-			в стэктрэйсе что-нибудь наподобие <code>LambdaTest.lambda$main$&lt;twr&gt;2$1(LambdaTest.java:16)</code>. 
+			в стэктрэйсе что-нибудь наподобие <code>LambdaTest.lambda$main$&lt;twr&gt;$2$1(LambdaTest.java:16)</code>. 
 			Т.е. я ожидал увидеть подсказку, что лямбда-выражение было определено не просто в методе 
-			<code>main()</code>, а именно внутри TWR (который выполнился вторым по счету; хотя и без циферки было бы 
-			неплохо).
+			<code>main()</code>, а именно внутри TWR (который выполнился вторым по счету; хотя и без циферки <b>2</b>
+			было бы неплохо).
 		
 		<h2>final не нужен</h2>
 
@@ -596,7 +596,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from MyRes
 		<h2>finally "съедает" всё</h2>
 		
 		<p>
-			Напоследок, попробуем выполнить еще несколько примеров, постепенно увеличивая степень безумия и уменьшая 
+			Напоследок попробуем выполнить еще несколько примеров, постепенно увеличивая степень безумия и уменьшая 
 			степень практического смысла. Для начала попробуем выбросить исключение в блоке <em>finally</em> основного
 			метода, т.е. метода <code>main()</code>:
 
@@ -760,7 +760,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
 		<p>
 			Полный вывод программы приведен в отдельном файле 
 			<a href="https://github.com/flaz14/flaz14.github.io/blob/master/java-twr/sample/CrazyTwr.txt">CrazyTwr.txt</a> 
-			(объем файла - 6 Мебайт, на столько хватило стэка в моем компьютере). Ниже находится краткое содержание:
+			(объем файла - 6 мегабайт, на столько хватило стэка в моем компьютере). Ниже находится краткое содержание:
 
 <pre>
 &gt;&gt;&gt; main()
@@ -813,7 +813,7 @@ Exception in thread "main" java.lang.IllegalStateException: Exception from main(
 					<p>
 						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
 						<a href="https://www.ozon.ru/context/detail/id/24133566/">
-							Бенджамин Эванс, Мартин Вербург "Java. Новое поколение разработки"
+							Бенджамин Эванс, Мартин Вербург: "Java. Новое поколение разработки"
 						</a>
 
 				<li id="footnote-2-bottom">
