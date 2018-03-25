@@ -1,0 +1,221 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Три способа вычисления факториала на Java</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/#java-factorial" title="Перейти к оглавлению">&larr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a href="http://flaz14.github.io/java-factorial/java-factorial.html">
+				Три способа вычисления факториала на Java
+			</a>
+		</h1>
+		
+		<h3>[2018, Март]</h3>
+
+		<p>
+			В Java 8 появилась возможность добавлять методы к существующим интерфейсам и не "ломать" и при этом классы, 
+			которые реализуют эти интерфейсы. Об особенностях <strong>default</strong>-медотов, приносимых ими 
+			преимуществах, а также мнимом множественном наследовании в Java 8 уже писали:
+			
+			<ul>
+				<li>
+					<a href="https://www.programcreek.com/2014/12/default-methods-in-java-8-and-multiple-inheritance/">
+						Default Methods in Java 8 and Multiple Inheritance
+					</a>
+					
+				<li>
+					<a href="https://netjs.blogspot.com.by/2015/05/interface-default-methods-in-java-8.html">
+						Interface default methods in Java 8
+					</a>
+					
+				<li>
+					<a href="https://netjs.blogspot.com.by/2017/06/why-no-multiple-inheritance-in-java-diamond-problem.html">
+						Why no multiple inheritance in Java
+					</a>
+			</ul>
+		
+		<p>
+			Мне к сказанному в вышеперечисленных статьях добавить нечего. Но хотелось бы обратить внимание на один 
+			примечательный факт.
+			
+		<p>
+			Рассмотрим простой пример:
+<pre>
+public class TestInterface {
+	public static void main(String args[]) {
+		new Son().hello();
+	}
+}
+
+interface Mom {
+	default void hello() {
+		System.out.println("I am Mom.");
+	}
+}
+
+interface Dad {
+	default void hello() {
+		System.out.println("I am Dad.");
+	}
+}
+
+class Son implements Mom, Dad {
+	@Override
+	public void hello() {
+		Mom.super.hello();
+		Dad.super.hello();
+		System.out.println(Mom.class);
+		System.out.println(Dad.class);
+		System.out.println(Mom.super.getClass());
+		System.out.println(Dad.super.getClass());
+	}
+}
+</pre>
+		
+		<p>
+			Программа напечатает (я пронумеровал строки в выводе для удобства):
+<pre>
+     1	I am Mom.
+     2	I am Dad.
+     3	interface Mom
+     4	interface Dad
+     5	class Son
+     6	class Son
+</pre>
+		
+		<p>
+			С первыми двумя строчками все понятно. Третья и четвертая соответствуют интерфейсам, что тоже неудивительно.
+			Но вот пятая и шестая строчки сбили меня с толку. Я ожидал увидеть <tt>interface Mom</tt> и 
+			<tt>interface Dad</tt> в силу наличия ключевого слова <strong>super</strong>.
+			
+		<p>
+			Попробуем проделать то же самое, но только с абстрактным классом:
+<pre>
+public class TestAbstractClass {
+	public static void main(String args[]) {
+		new Child().hello();
+	}
+}
+
+abstract class Parent {
+	protected void hello() {
+		System.out.println("I am Parent.");
+	}
+}
+
+class Child extends Parent {
+	@Override
+	public void hello() {
+		super.hello();
+		System.out.println("I am Child.");
+		System.out.println(this.getClass());
+		System.out.println(super.getClass());
+	}
+}
+</pre>
+
+		<p>
+			И получим:
+<pre>
+     1	I am Parent.
+     2	I am Child.
+     3	class Child
+     4	class Child
+</pre>
+		
+		<p>
+			Как же объяснить содержимое строки 4 в данном случае? Все просто: полиморфизм в действии. Поэтому все 
+			"служебные" ссылки, такие как <strong>super</strong> и <strong>this</strong> указывают на актуальный класс
+			объекта.
+			
+		<p>
+			Напоследок добавим к интерфейсам абстрактный класс:
+<pre>
+public class TestInterface {
+	public static void main(String args[]) {
+		new Son().hello();
+	}
+}
+
+interface Mom {
+	default void hello() {
+		System.out.println("I am Mom.");
+	}
+}
+
+interface Dad {
+	default void hello() {
+		System.out.println("I am Dad.");
+	}
+}
+
+abstract class Brother {
+	protected void hello() {
+		System.out.println("I am Brother.");
+	}
+}
+
+class Son extends Brother implements Mom, Dad {
+	@Override
+	public void hello() {
+		Mom.super.hello();
+		Dad.super.hello();
+		super.hello();
+		System.out.println(Mom.class);
+		System.out.println(Dad.class);
+		System.out.println(Brother.class);
+		System.out.println(Mom.super.getClass());
+		System.out.println(Dad.super.getClass());
+		System.out.println(super.getClass());
+	}
+}
+</pre>
+
+		<p>
+			И увидим все ту же картину:
+<pre>
+     1	I am Mom.
+     2	I am Dad.
+     3	I am Brother.
+     4	interface Mom
+     5	interface Dad
+     6	class Brother
+     7	class Son
+     8	class Son
+     9	class Son
+</pre>
+
+		<p>
+			Остается только разобраться со "служебными" ссылками. Можно ли их сравнивать с помощью оператора 
+			<strong>==</strong>? Можно ли их присваивать полям класса (как это проделывается с "обычным" 
+			<code>this</code>)? Скорее всего, получим ошибки компиляции (интересно, какие именно)...
+			
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>
