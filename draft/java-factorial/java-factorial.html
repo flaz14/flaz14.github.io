@@ -24,193 +24,187 @@
 		</h1>
 		
 		<h3>[2018, Март]</h3>
+		
+		<h3>
+			<a href="ссылка">Исходный код</a>
+		</h3>
+
+		<h2>Hello, World!</h2>
 
 		<p>
+			Задача на вычисление факториала - это что-то вроде "Hello, World!", только из мира математики. Есть три способа
+			ее решения на Java: рекурсия, цикл и... снова рекурсия. 
 			
-			Проверок на нуль, отрицательные числа и выход из допустимого диапазона int в примерах кода нет.
-			
-			
-			
-			При использовании TWR получается смесь рекурсии и цикла.
-			
-			
-			В Java 8 появилась возможность добавлять методы к существующим интерфейсам и не "ломать" и при этом классы, 
-			которые реализуют эти интерфейсы. Об особенностях <strong>default</strong>-медотов, приносимых ими 
-			преимуществах, а также мнимом множественном наследовании в Java 8 уже писали:
-			
-			<ul>
-				<li>
-					<a href="https://www.programcreek.com/2014/12/default-methods-in-java-8-and-multiple-inheritance/">
-						Default Methods in Java 8 and Multiple Inheritance
-					</a>
-					
-				<li>
-					<a href="https://netjs.blogspot.com.by/2015/05/interface-default-methods-in-java-8.html">
-						Interface default methods in Java 8
-					</a>
-					
-				<li>
-					<a href="https://netjs.blogspot.com.by/2017/06/why-no-multiple-inheritance-in-java-diamond-problem.html">
-						Why no multiple inheritance in Java
-					</a>
-			</ul>
+		<p>
+			В примерах нет никаких проверок на отрицательные значения,
+			нуль, выход за диапазон типа <code>int</code>. Но это не так важно для этой ламерской заметки.
+		
+		<h2>Рекурсия</h2>	
 		
 		<p>
-			Мне к сказанному в вышеперечисленных статьях добавить нечего. Но хотелось бы обратить внимание на один 
-			примечательный факт.
+			Тут все просто: этот способ все уже тыщу раз видели.
+
+<h4 id="#listing-1">Листинг 1 - вычисление факториала рекурсивным способом</h4>
+<code>
+public class FactorialRecursion {
+	public static void main(String ignored[]) {
+		System.out.println(
+			String.format("%3s: %15s\n", "n", "factorial(n)") + 
+			String.format("%3d: %15d\n", 1, factorial(1)) + 
+			String.format("%3d: %15d\n", 2, factorial(2)) +
+			String.format("%3d: %15d\n", 3, factorial(3)) + 
+			String.format("%3d: %15d\n", 4, factorial(4)) + 
+			String.format("%3d: %15d\n", 5, factorial(5)) + 
+			""
+		);
+	}
+	
+	private static int factorial(int n) {
+		if (n == 1) return 1;
+		return n * factorial(n - 1);
+	}
+}
+</code>
 			
 		<p>
-			Рассмотрим простой пример:
-<pre>
-public class TestInterface {
-	public static void main(String args[]) {
-		new Son().hello();
-	}
-}
+			Запустим и получим:
 
-interface Mom {
-	default void hello() {
-		System.out.println("I am Mom.");
-	}
-}
+<code>
+$ javac FactorialRecursion.java && java FactorialRecursion
+  n:    factorial(n)
+  1:               1
+  2:               2
+  3:               6
+  4:              24
+  5:             120
+</code>
 
-interface Dad {
-	default void hello() {
-		System.out.println("I am Dad.");
-	}
-}
-
-class Son implements Mom, Dad {
-	@Override
-	public void hello() {
-		Mom.super.hello();
-		Dad.super.hello();
-		System.out.println(Mom.class);
-		System.out.println(Dad.class);
-		System.out.println(Mom.super.getClass());
-		System.out.println(Dad.super.getClass());
-	}
-}
-</pre>
+		<h2>Цикл</h2>
 		
 		<p>
-			Программа напечатает (я пронумеровал строки в выводе для удобства):
-<pre>
-     1	I am Mom.
-     2	I am Dad.
-     3	interface Mom
-     4	interface Dad
-     5	class Son
-     6	class Son
-</pre>
+			Использование цикла не намного сложнее рекурсии. А может, даже проще для восприятия.
+			
+<h4 id="listing-2">Листинг 2 - вычисление факториала с помощью цикла</h4>
+<code>
+public class FactorialLoop {
+	public static void main(String ignored[]) {
+		System.out.println(
+			String.format("%3s: %15s\n", "n", "factorial(n)") + 
+			String.format("%3d: %15d\n", 1, factorial(1)) + 
+			String.format("%3d: %15d\n", 2, factorial(2)) +
+			String.format("%3d: %15d\n", 3, factorial(3)) + 
+			String.format("%3d: %15d\n", 4, factorial(4)) + 
+			String.format("%3d: %15d\n", 5, factorial(5)) + 
+			""
+		);
+	}
+	
+	private static int factorial(int n) {
+		int result = 1;
+		for(int i = 1; i <=n; i++) {
+			result *= i;
+		}
+		return result;
+	}
+}
+</code>
+
+		<p>
+			Программа напечатает то же, что и предыдущая:
+<code>
+$ javac FactorialLoop.java && java FactorialLoop 
+  n:    factorial(n)
+  1:               1
+  2:               2
+  3:               6
+  4:              24
+  5:             120
+</code>
+
+		<h2>Снова рекурсия!</h2>
 		
 		<p>
-			С первыми двумя строчками все понятно. Третья и четвертая соответствуют интерфейсам, что тоже неудивительно.
-			Но вот пятая и шестая строчки сбили меня с толку. Я ожидал увидеть <tt>interface Mom</tt> и 
-			<tt>interface Dad</tt> в силу наличия ключевого слова <strong>super</strong>.
+			Возможно, в JDK есть классы, которые позволяют "прятать" рекурсию. Т.е. предоставляют удобный интерфейс в
+			декларативном стиле. То же самое наверняка можно сделать с помощью потоков Java 8. Но есть и более хардкорный способ.
 			
 		<p>
-			Попробуем проделать то же самое, но только с абстрактным классом:
-<pre>
-public class TestAbstractClass {
-	public static void main(String args[]) {
-		new Child().hello();
+			Конструкция try-with-resources (далее по тексту TWR) - именно то, что нужно. Ведь если в метод <code>close()</code> ресурса поместить
+			блок <em>try</em>, в котором инициализируется ресурс того же класса, то при неявном вызове первого <code>close()</code>, 
+			создастся еще один ресурс, который при закрытии создаст еще один и т.д. Т.о. рекурсия у нас есть.
+			
+		<p>
+			К сожалению, этого недостаточно. Суть рекурсии в том, что из нее можно вернуть значение. Именно эта особенность и 
+			позволяет писать код вроде <code>return n * factorial(n - 1)</code>. Но из метода <code>close()</code> вернуть значение
+			нельзя. Обратиться к переменной ресурса после его автоматического закрытия тоже не получится, т.е. нельзя в блоке
+			<em>finally</em> ссылаться на 
+			на переменную, определенную в TWR. Так что ничего не остается, как использовать массив из одного элемента, чтобы 
+			вернуть результат вычисления во внешний мир. 
+			
+		<p>
+			Так что "чистой" рекурсии добиться сложно. Получается смесь рекурсии
+			и цикла: методы <code>close()</code> вызываются рекурсивно, но внутри этих методов происходит последовательное умножение
+			на n - 1 (первоначальное значение в массиве-оболочке равно единице), как в цикле.
+			
+<h4 id="listing-3">Листинг 3 - вычисление факториала с помощью TWR</h4>
+<code>
+public class FactorialTwr {
+	public static void main(String ignored[]) {
+		System.out.println(
+			String.format("%3s: %15s\n", "n", "factorial(n)") + 
+			String.format("%3d: %15d\n", 1, factorial(1)) + 
+			String.format("%3d: %15d\n", 2, factorial(2)) +
+			String.format("%3d: %15d\n", 3, factorial(3)) + 
+			String.format("%3d: %15d\n", 4, factorial(4)) + 
+			String.format("%3d: %15d\n", 5, factorial(5)) + 
+			""
+		);
+	}
+	
+	private static int factorial(int n) {
+		int[] resultPlaceholder = new int[] {1};
+		try (FactorialAutoCloseable calculator = new FactorialAutoCloseable(n, resultPlaceholder)) { }
+		return resultPlaceholder[0];
+	}
+	
+	private static class FactorialAutoCloseable implements AutoCloseable {
+		private int n;
+		private int[] resultPlaceholder;
+		
+		public FactorialAutoCloseable(int n, int[] resultPlaceholder) {
+			this.n = n;
+			this.resultPlaceholder = resultPlaceholder;
+		}
+		
+		@Override
+		public void close() {
+			if (n == 1) return;
+			resultPlaceholder[0] *= n; 
+			try(FactorialAutoCloseable calculator = new FactorialAutoCloseable(n - 1, resultPlaceholder)) { } 
+		}
 	}
 }
-
-abstract class Parent {
-	protected void hello() {
-		System.out.println("I am Parent.");
-	}
-}
-
-class Child extends Parent {
-	@Override
-	public void hello() {
-		super.hello();
-		System.out.println("I am Child.");
-		System.out.println(this.getClass());
-		System.out.println(super.getClass());
-	}
-}
-</pre>
+</code>
 
 		<p>
-			И получим:
-<pre>
-     1	I am Parent.
-     2	I am Child.
-     3	class Child
-     4	class Child
-</pre>
+			Запустим и убедимся, что факториал вычисляется правильно:
+
+<code>
+$ javac FactorialTwr.java && java FactorialTwr 
+  n:    factorial(n)
+  1:               1
+  2:               2
+  3:               6
+  4:              24
+  5:             120
+</code>
+
+		<h2>Good bye, World!</h2>
 		
 		<p>
-			Как же объяснить содержимое строки 4 в данном случае? Все просто: полиморфизм в действии. Поэтому все 
-			"служебные" ссылки, такие как <strong>super</strong> и <strong>this</strong> указывают на актуальный класс
-			объекта.
-			
-		<p>
-			Напоследок добавим к интерфейсам абстрактный класс:
-<pre>
-public class TestInterface {
-	public static void main(String args[]) {
-		new Son().hello();
-	}
-}
-
-interface Mom {
-	default void hello() {
-		System.out.println("I am Mom.");
-	}
-}
-
-interface Dad {
-	default void hello() {
-		System.out.println("I am Dad.");
-	}
-}
-
-abstract class Brother {
-	protected void hello() {
-		System.out.println("I am Brother.");
-	}
-}
-
-class Son extends Brother implements Mom, Dad {
-	@Override
-	public void hello() {
-		Mom.super.hello();
-		Dad.super.hello();
-		super.hello();
-		System.out.println(Mom.class);
-		System.out.println(Dad.class);
-		System.out.println(Brother.class);
-		System.out.println(Mom.super.getClass());
-		System.out.println(Dad.super.getClass());
-		System.out.println(super.getClass());
-	}
-}
-</pre>
-
-		<p>
-			И увидим все ту же картину:
-<pre>
-     1	I am Mom.
-     2	I am Dad.
-     3	I am Brother.
-     4	interface Mom
-     5	interface Dad
-     6	class Brother
-     7	class Son
-     8	class Son
-     9	class Son
-</pre>
-
-		<p>
-			Остается только разобраться со "служебными" ссылками. Можно ли их сравнивать с помощью оператора 
-			<strong>==</strong>? Можно ли их присваивать полям класса (как это проделывается с "обычным" 
-			<code>this</code>)? Скорее всего, получим ошибки компиляции (интересно, какие именно)...
-			
+			Практического смысла в использовании TWR для рекурсивных вычислений нет. Но все равно интересно использовать 
+			языковые конструкции не по назначению. Java - не такой уж скучный язык программирования, каким кажется на
+			первый взгляд.	
+		
 		<hr>
 
 		<h1>
