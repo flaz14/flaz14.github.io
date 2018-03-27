@@ -183,6 +183,7 @@ def all_packages_versions(package_names):
 			)
 		result[package_name] = package_versions(package_name)
 		progress_indicator.indicate(package_counter, 'Collecting packages...')
+		break # TODO it's for debuggin, please remove later
 	return result
 
 
@@ -202,10 +203,11 @@ def sorted_packages(packages):
 		versions = sorted(packages[name])
 		result.append(
 			{
-				'name' : package_name,
+				'name' : name,
 				'versions' : versions
 			}
 		)
+	return result
 
 
 def print_packages(packages):
