@@ -5,7 +5,7 @@
 
 import subprocess
 import sys
-import json
+import collections
 
 # TODO handle virtual packages
 
@@ -164,10 +164,10 @@ def all_packages_versions(package_names):
 			)
 		)	
 	
-	result = []
 	progress_indicator = ProgressIndicator(
 		len(package_names)
 	)
+	result = {}
 	for package_name, package_counter in zip(
 		package_names, 
 		range(
@@ -175,14 +175,13 @@ def all_packages_versions(package_names):
 			len(package_names) + 1
 		)
 	):
-		result.append(
-			logged(
+		logged(
 				{
 					'name' : package_name,
 					'versions' : package_versions(package_name)
 				}
 			)
-		)
+		result[package_name] = package_versions(package_name)
 		progress_indicator.indicate(package_counter, 'Collecting packages...')
 	return result
 
@@ -197,14 +196,32 @@ def all_packages_names():
 	).splitlines()
 
 
+def sorted_packages(packages):
+	result = []
+	for name in sorted(packages.keys()):
+		versions = sorted(packages[name])
+		result.append(
+			{
+				'name' : package_name,
+				'versions' : versions
+			}
+		)
+
+
+def print_packages(packages):
+	for package in packages:
+		for version in package['versions']:
+			print(
+				'{} {}'.format(package['name'], version)
+			)
+
+
 def main():
-	print(
-		json.dumps(
+	print_packages(
+		sorted_packages(
 			all_packages_versions(
 				all_packages_names()
-			),
-			indent = 4,
-			sort_keys = True
+			)
 		)
 	)
 
