@@ -18,6 +18,7 @@ public class CustomPermissions {
 		Set<PosixFilePermission> actualPermissions = Files.getFileAttributeView(target, PosixFileAttributeView.class).
 			readAttributes().
 			permissions();
-		System.out.println(new TreeSet<PosixFilePermission>(actualPermissions));
+		Set<PosixFilePermission> prettyPermissions = new TreeSet<PosixFilePermission>(actualPermissions);
+		System.out.println(prettyPermissions);
 	}
 }

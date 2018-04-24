@@ -14,6 +14,7 @@ public class DefaultPermissions {
 		Set<PosixFilePermission> permissions = Files.getFileAttributeView(target, PosixFileAttributeView.class).
 			readAttributes().
 			permissions();
-		System.out.println(new TreeSet<PosixFilePermission>(permissions));
+		Set<PosixFilePermission> prettyPermissions = new TreeSet<PosixFilePermission>(permissions);
+		System.out.println(prettyPermissions);
 	}
 }

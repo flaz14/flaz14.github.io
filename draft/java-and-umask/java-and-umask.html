@@ -32,16 +32,104 @@
 			href="http://flaz14.github.io/wonderful-zip/wonderful-zip.html">Чудесный ZIP</a> и 
 			<a href="http://flaz14.github.io/umask-in-linuxmint/umask-in-linuxmint.html">
 			Что не так с umask в LinuxMint?</a>) затрагивалась тема назначения "правильных" разрешений на доступ к 
-			файлам. И все равно она не дает мне покоя. В этот раз посмотрим, насколько хороша Java в области работы 
+			файлам в Linux. И все равно она не дает мне покоя. В этот раз посмотрим, насколько хороша Java в области работы 
 			с аттрибутами файлов.
 
 		<h2></h2>
 
 		<p>
 			Набросаем простую программу, которая создает файл с правами доступа по-умолчанию.
+
+<h4 id="listing-1">Листинг 1 - создание файла с битами доступа по-умолчанию</h4>
+<pre>
+
+</pre>
+
+		<p>
+			Для начала посмотрим на значение umask:
+
+<pre>
+$ umask 
+0002
+</pre>
+
+		<p>
+			Запустим программу, приведенную в листинге 1 (а заодно, прочитаем биты доступа посредством комадной строки)
+			и получим в результате:
+<pre>
+yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ javac DefaultPermissions.java && java DefaultPermissions && ls -alh test.txt 
+[OWNER_READ, OWNER_WRITE, GROUP_READ, GROUP_WRITE, OTHERS_READ]
+-rw-rw-r-- 1 yura yura 0 Apr 24 13:40 test.txt
+</pre>
+
+		<p>
+			Биты доступа получились такими, какими мы их ждали. umask дает пользователю и группе все права, а остальным не дает 
+			лишь записывать в файл. Но по-умолчанию ни одна (по крайней мере, известная) программа не назначает при создании 
+			файла права на выполнение. Вот мы и видим, что пользователю и группе разрешено чтение и запись, а всем остальным - только чтение.
+			Изменим теперь umask и попробуем еще раз:
+
+<pre>
+yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ umask 0741
+
+yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ javac DefaultPermissions.java && java DefaultPermissions && ls -alh test.txt 
+[GROUP_WRITE, OTHERS_READ, OTHERS_WRITE]
+-----w-rw- 1 yura yura 0 Apr 24 13:39 test.txt
+</pre>
+
+		<p>
+			Этот случай посложнее. Пользователю здесь запрещено все. Группе запрещено чтение, но поскольку право на выполнение
+			не назначается "автоматически", тут тоже все в порядке. Остальным же запрещено выполнение (но право на выполнение и 
+			так не назначается).
+
+		<p>
+			Пока что все складывается отлично. Есть надежда, что Java уважает umask.
+
+		<p>
+			Теперь попробуем назначать биты доступа самостоятельно, т.е. из программы, написанной на Java. 
 			
-			
-			
+<h4 id="listing-2">Листинг 2 - создание файла с желаемыми битами доступа</h4>
+<pre>
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.FileAttribute;
+import java.util.Set;
+import java.util.TreeSet;
+import java.io.IOException;
+
+public class CustomPermissions {
+	public static void main(String args[]) throws IOException {
+		Path target = Paths.get("test.txt");
+		Set<PosixFilePermission> desiredPermissions = PosixFilePermissions.fromString("rw-rw----");
+		FileAttribute<Set<PosixFilePermission>> attribute = PosixFilePermissions.asFileAttribute(desiredPermissions);
+		Files.createFile(target, attribute); 
+		Set<PosixFilePermission> actualPermissions = Files.getFileAttributeView(target, PosixFileAttributeView.class).
+			readAttributes().
+			permissions();
+		Set<PosixFilePermission> prettyPermissions = new TreeSet<PosixFilePermission>(actualPermissions);
+		System.out.println(prettyPermissions);
+	}
+}
+</pre>
+
+		<p>
+			Установим экзотическое значение umask и проверим действительные права доступа.
+
+<pre>
+yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ umask 0741
+
+yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ javac CustomPermissions.java && java CustomPermissions && ls -alh test.txt
+[GROUP_WRITE]
+-----w---- 1 yura yura 0 Apr 24 13:54 test.txt
+</pre>
+
+		<p>
+			После свистопляски с битами только право осталось только у группы и только на запись. В Java-коде мы задавали
+			права <tt>rw-rw----</tt>, т.е. <tt>660</tt>. umask равнялась <tt>741</tt> (о первой циферке забудем на время - это
+			отдельная тема), т.е. <tt>rwxr----x</tt>. Теперь считаем: 741 - 660 = 1
 			
 			Пожалуй, любой популярный дистрибутив GNU/Linux преподносится как система "на все случаи жизни". 
 			Применительно к LinuxMint это действительно так: драйверы, кодеки и т.п. проприетарные компоненты есть в 
