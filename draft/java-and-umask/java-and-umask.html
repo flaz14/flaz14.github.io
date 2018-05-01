@@ -38,11 +38,29 @@
 		<h2></h2>
 
 		<p>
-			Набросаем простую программу, которая создает файл с правами доступа по-умолчанию.
+			Набросаем простую программу, которая создает файл с правами доступа по-умолчанию:
 
-<h4 id="listing-1">Листинг 1 - создание файла с битами доступа по-умолчанию</h4>
 <pre>
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Set;
+import java.util.TreeSet;
+import java.io.IOException;
 
+public class DefaultPermissions {
+	public static void main(String args[]) throws IOException {
+		Path target = Paths.get("test.txt");
+		Files.createFile(target);
+		Set<PosixFilePermission> permissions = Files.getFileAttributeView(target, PosixFileAttributeView.class).
+			readAttributes().
+			permissions();
+		Set<PosixFilePermission> prettyPermissions = new TreeSet<PosixFilePermission>(permissions);
+		System.out.println(prettyPermissions);
+	}
+}
 </pre>
 
 		<p>
@@ -54,10 +72,10 @@ $ umask
 </pre>
 
 		<p>
-			Запустим программу, приведенную в листинге 1 (а заодно, прочитаем биты доступа посредством комадной строки)
+			Запустим программу (заодно прочитаем биты доступа посредством комадной строки)
 			и получим в результате:
 <pre>
-yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ javac DefaultPermissions.java && java DefaultPermissions && ls -alh test.txt 
+$ javac DefaultPermissions.java && java DefaultPermissions && ls -alh test.txt 
 [OWNER_READ, OWNER_WRITE, GROUP_READ, GROUP_WRITE, OTHERS_READ]
 -rw-rw-r-- 1 yura yura 0 Apr 24 13:40 test.txt
 </pre>
@@ -69,9 +87,9 @@ yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ javac Defau
 			Изменим теперь umask и попробуем еще раз:
 
 <pre>
-yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ umask 0741
+$ umask 0741
 
-yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ javac DefaultPermissions.java && java DefaultPermissions && ls -alh test.txt 
+$ javac DefaultPermissions.java && java DefaultPermissions && ls -alh test.txt 
 [GROUP_WRITE, OTHERS_READ, OTHERS_WRITE]
 -----w-rw- 1 yura yura 0 Apr 24 13:39 test.txt
 </pre>
@@ -85,9 +103,8 @@ yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ javac Defau
 			Пока что все складывается отлично. Есть надежда, что Java уважает umask.
 
 		<p>
-			Теперь попробуем назначать биты доступа самостоятельно, т.е. из программы, написанной на Java. 
+			Теперь попробуем назначать биты доступа самостоятельно: 
 			
-<h4 id="listing-2">Листинг 2 - создание файла с желаемыми битами доступа</h4>
 <pre>
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -119,9 +136,9 @@ public class CustomPermissions {
 			Установим экзотическое значение umask и проверим действительные права доступа.
 
 <pre>
-yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ umask 0741
+$ umask 0741
 
-yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ javac CustomPermissions.java && java CustomPermissions && ls -alh test.txt
+$ javac CustomPermissions.java && java CustomPermissions && ls -alh test.txt
 [GROUP_WRITE]
 -----w---- 1 yura yura 0 Apr 24 13:54 test.txt
 </pre>
@@ -129,206 +146,55 @@ yura@Desktop ~/Projects/flaz14.github.io/draft/java-and-umask/code $ javac Custo
 		<p>
 			После свистопляски с битами только право осталось только у группы и только на запись. В Java-коде мы задавали
 			права <tt>rw-rw----</tt>, т.е. <tt>660</tt>. umask равнялась <tt>741</tt> (о первой циферке забудем на время - это
-			отдельная тема), т.е. <tt>rwxr----x</tt>. Теперь считаем: 741 - 660 = 1
-			
-			Пожалуй, любой популярный дистрибутив GNU/Linux преподносится как система "на все случаи жизни". 
-			Применительно к LinuxMint это действительно так: драйверы, кодеки и т.п. проприетарные компоненты есть в 
-			комплекте. Но с точки зрения безопасной работы (чтобы не выстрелить себе в ногу) эти умолчания никуда не 
-			годятся <sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>.
-			
-		<h2>Что происходит?</h2>
-
-		<p>
-			Нет нужды рассказывать здесь подробно о том, что такое <strong>umask</strong> в мире Unix-систем. И нет 
-			смысла пускаться в разговоры о том, в каких конфигурационных файлах и скриптах задается <i>umask</i>, как на
-			маску влияют команды <em>su</em>, <em>sudo</em>, <em>login</em> и т.д. Пункт назначения - это файл 
-			<strong>.profile</strong>, находящийся в домашней директории пользователя. Именно он будет принят во 
-			внимание. Правда, есть еще <i>.bashrc</i> и ему подобные. Но они имеют силу только в командной строке и не 
-			вляют на программы, которые запускаются, к примеру, с ярлыка на рабочем столе. Т.о. чтобы гарантированно 
-			изменить значение <i>umask</i> нужно править <i>~/.profile</i>. Посмотрим, что интересного там уже имеется:
-<pre>
-$ less ~/.profile
-...
-# the default umask is set in /etc/profile; for setting the umask
-# for ssh logins, install and configure the libpam-umask package.
-#umask 022
-...
-</pre>
-
-		<p>
-			Комментарий исчерпывающий. Посмотрим в <i>/etc/profile</i>:
-<pre>
-$ less /etc/profile
-...
-# The default umask is now handled by pam_umask.
-# See pam_umask(8) and /etc/login.defs.
-...
-</pre>
-
-		<p>
-			Тааак... Похоже, что за <i>umask</i> в современных дистрибутивах отвечает 
-			<a href="http://www.linux-pam.org/">PAM</a>:
-<pre>
-$ less /etc/login.defs
-...
-# UMASK is the default umask value for pam_umask and is used by
-# useradd and newusers to set the mode of the new home directories.
-# 022 is the "historical" value in Debian for UMASK
-# 027, or even 077, could be considered better for privacy
-# There is no One True Answer here : each sysadmin must make up his/her
-# mind.
-...
-</pre>			
-
-		<p>
-			Т.о. по-умолчанию используется значение <b>022</b>. Выглядит неутешительно. Получается, что каждый файл, 
-			созданный данным пользователем, будет виден, т.е. доступен для чтения всем остальным пользователям. Причем 
-			не только реальным (т.е. другим людям, работающим за одним компьютером), но и фиктивным, таким как 
-			<em>nobody</em>. Какой толк от такой защиты? Да, модифицировать файлы пользователя нельзя, но их можно 
-			читать!
-
-		<h2>Копаем</h2>
-
-		<p>
-			Раскомментируем в <i>~/.profile</i> заветную строчку и изменим <i>umask</i> на <b>027</b> (т.е. запретим 
-			доступ к файлам всем, кроме пользователя и его группы). Выйдем из системы и зайдем снова (или даже 
-			перезагрузимся,	чтобы наверняка применились изменения).
-
-		<p>
-			Естественно, нужно будет изменить права на все файлы и каталоги, которые принадлежат пользователю. Т.е. 
-			убрать права для "остальных", т.е. для всех, кроме владельца и группы. В данном случае лучше воспользоваться
-			т.н. символическим режимом команды <strong>chown</strong>. Действительно, нам нужно только убрать некоторые 
-			биты доступа, остальные же трогать не нужно (например, если файл был исполняемым, то его надо оставить 
-			исполняемым для владельца и группы, а для всех остальных пользователей право на выполнение необходимо 
-			убрать). Еще призовем на помощь <strong>find</strong> (не могу не упомянуть о прекраснейшем туториале
-			<a href="http://web.archive.org/web/20131227122752/http://content.hccfl.edu/pollock/Unix/FindCmd.htm">
-			A Unix/Linux “find” Command Tutorial</a> - по оригинальной ссылке статья более не доступна, к 
-			сожалению), чтобы ни один файл пользователя не остался без внимания 
-			<sup id="footnote-2-top"><a href="#footnote-2-bottom">[2]</a></sup>
-			<sup id="footnote-3-top"><a href="#footnote-3-bottom">[3]</a></sup>: 
-<pre>
-find / -user user -exec chmod o-rwx '{}' \; 2>/dev/null
-</pre>	
-
-		<p>
-			Уфф, сейчас вроде бы все хорошо. Но мы забыли одну маленькую деталь. После изменения <i>umask</i> в системе 
-			начнет твориться вакханалия. Новые программы не будут запускаться, модули Python, установленные через Pip, 
-			невозможно будет подключить с своему скрипту. И т.д и т.п. Вы спросите, откуда ноги растут? Ответ простой: 
-			<strong>sudo</strong>. Ведь при установке программ используется <i>sudo</i>.
-
-		<p>
-			Проведем небольшой эксперимент. Создадим в <i>/tmp</i> простой скрипт с именем <i>test_umask.sh</i>	
-			следующего содержания (не забывая сделать его исполняемым):
-<pre>
-#!/usr/bin/env bash
-
-echo "[$(umask)]"
-</pre>
-
-		<p>
-			И проверим:
-<pre>
-$ /tmp/test_umask.sh
-[0027]
-</pre>		
-
-		<p>
-			Как ожидалось, мы видим заданное нами значение. Попробуем запустить тот же скрипт от имени 
-			суперпользователя:
-<pre>
-$ sudo su
-# /tmp/test_umask.sh 
-[0022]
-</pre>
-
-		<p>
-			Как видим, у суперпользователя осталось правильное значение <i>umask</i>. Так и должно быть, ведь мы не 
-			трогали	<i>.profile</i> суперпользователя. Посмотрим же, как поведет себя <i>sudo</i>:
-<pre>
-$ sudo /tmp/test_umask.sh
-[0027]
-</pre>
-
-		<p>
-			Копнем глубже. Изменим <i>umask</i> на что-нибудь действительно безумное (все равно изменение коснется 
-			только текущего эмулятора терминала) и проверим <i>sudo</i> еще раз:
-<pre>
-$ umask 555
-$ sudo /tmp/test_umask.sh 
-[0577]
-$ umask 500
-$ sudo /tmp/test_umask.sh 
-[0522]
-</pre>
-
-		<p>
-			Вот оно что! <i>sudo</i> принимает во внимание <i>umask</i> запустившего команду пользователя. Т.е. делает 
-			побитовое OR "исторической" маски (<strong>022</strong>) с маской запустившего <i>sudo</i> пользователя. 
-			Причина появляющихся после изменения <i>umask</i> глюков очевидна. Например, исполняемые файлы программ 
-			принадлежат <strong>root</strong>, но при этом они должны оставаться доступными для чтения и выполнения 
-			всем пользователям системы (иначе как обычные пользователи могли бы работать с программами). Наша же 
-			"безопасная" маска запрещает доступ другим пользователям, только <i>root</i> может работать с приложениями.
+			отдельная тема), т.е. <tt>rwxr----x</tt>. Теперь считаем: 
 		
-		<h2>И наставляем PAM на путь истинный</h2>
-		
-		<p>
-			Для исправления ситуации лучше всего вообще "выкосить" <i>sudo</i> :) Или же поиграть с ключами командной 
-			строки, т.е. добиться реального "сброса" значения <i>umask</i>, если программа выполняется через 
-			<i>sudo</i>. Но правильным является подход, описанный в ответе на вопрос 
-			<a href="https://unix.stackexchange.com/questions/265497/set-sudo-umask-apart-from-the-user-calling-it">
-			Set sudo umask apart from the user calling it</a>. Остается только залезть в файл <i>/etc/sudoers</i> 
-			(естественно, посредством <em>visudo</em>), добавить пару строчек (не забывая про подробный комментарий) - и 
-			дело в шляпе:
-<pre>
-# We specify umask explicitly in order to make `root` account
-# working as usual even while user's umask pretends to be
-# "secure", e.g. 027 (for more details please look at topic:
-# [Set sudo umask apart from the user calling it]
-# (https://unix.stackexchange.com/questions/265497/set-sudo-umask-apart-from-the-user-calling-it).
-Defaults umask=0022
-Defaults umask_override
-</pre>			
-
-		<p>
-			Проверим (для чистоты эксперимента закроем текущий эмулятор терминала и откроем новый):
-<pre>
-$ sudo /tmp/test_umask.sh
-[0022]
-</pre>
-
-		<p>
-			Вот теперь можно вздохнуть спокойно.
+			<table>
+			<caption>Представление битов доступа</caption>
+				<tr>
+					<th>
+					
+					<th>
+						Восьмеричное
+					<th>
+						Двоичное
+					<th>
+						Символьное
+					
+				<tr>
+					<td>
+						umask
+					
+					<td>
+						<tt>741</tt>
+					<td>
+						<tt>111 100 001</tt>
+					<td>
+						<tt>rwx r-- --x</tt>
+					
+				<tr>
+					<td>
+						Java
+					<td>
+						<tt>660</tt>
+					<td>
+						<tt>110 110 000</tt>
+					<td>
+						<tt>rw- rw- ---</tt>
+				
+				<tr>
+					<td>
+						Итог
+					<td>
+						<tt>020</tt>
+					<td>
+						<tt>000 010 000</tt>
+					<td>
+						<tt>--- -w- ---</tt>
+			</table>
 			
-        <p>
-			__________
-			<ol>
-				<li id="footnote-1-bottom">
-					<p>
-						<a href="#footnote-1-top" title="Перейти к основному тексту">&uarr;</a> 
-						Я не уверен, что это "косяк" LinuxMint. LinuxMint основан на Ubuntu, а Ubuntu - на Debian. Все 
-						вышеназванные дистрибутивы устроены одинаково.
-						
-				<li id="footnote-2-bottom">
-					<p>
-						<a href="#footnote-2-top" title="Перейти к основному тексту">&uarr;</a> 
-						Особого смысла поиск принадлежащих пользователю файлов не имеет. Принадлежащие пользователю 
-						файлы хранятся в домашнем каталоге. За его пределами встретить пользовательские файлы 
-						маловероятно, разве что в <i>/tmp</i> и <i>/var</i>.
-						
-				<li id="footnote-3-bottom">
-					<p>
-						<a href="#footnote-3-top" title="Перейти к основному тексту">&uarr;</a> 
-						Предупреждение: некоторые файлы, которые находятся в домашнем каталоге пользователя, ему не
-						принадлежат, а принадлежат суперпользователю. Так и будет, если запускать программы с 
-						графическим интерфейсом с помощью <em>su</em> или <em>sudo</em>. Для этих целей нужно 
-						использовать <em>gksu</em> и <em>gksudo</em> (или их KDE-собратьев <em>kdesu</em> и 
-						<em>kdesudo</em>). Подробности есть в
-						<a href="https://help.ubuntu.com/community/RootSudo#Graphical_sudo">Ubuntu Wiki</a>. Стоит также
-						отметить, что некоторые "неграфические" программы (например, Midnight Commander) грешат тем, что
-						оставляют принадлежащие суперпользователю файлы	в домашнем каталоге обычного пользователя, 
-						будучи запущенными через <em>sudo</em>.
-			</ol>
-
+		<p>
+			Как видим, все сходится. Java уважает umask. Так что респект Java!
+		
 		<hr>
 
 		<h1>
