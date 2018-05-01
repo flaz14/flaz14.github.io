@@ -24,18 +24,14 @@
 		</h1>
 
 		<h3>[2018, Апрель]</h3>
-		
-		<h2></h2>
-		
+			
 		<p>
 			В предыдущих ламерских заметках (<a 
 			href="http://flaz14.github.io/wonderful-zip/wonderful-zip.html">Чудесный ZIP</a> и 
 			<a href="http://flaz14.github.io/umask-in-linuxmint/umask-in-linuxmint.html">
 			Что не так с umask в LinuxMint?</a>) затрагивалась тема назначения "правильных" разрешений на доступ к 
-			файлам в Linux. И все равно она не дает мне покоя. В этот раз посмотрим, насколько хороша Java в области работы 
-			с аттрибутами файлов.
-
-		<h2></h2>
+			файлам в Linux. И все равно она не дает мне покоя. В этот раз посмотрим, насколько хороша Java в области 
+			работы с аттрибутами файлов.
 
 		<p>
 			Набросаем простую программу, которая создает файл с правами доступа по-умолчанию:
@@ -54,10 +50,10 @@ public class DefaultPermissions {
 	public static void main(String args[]) throws IOException {
 		Path target = Paths.get("test.txt");
 		Files.createFile(target);
-		Set<PosixFilePermission> permissions = Files.getFileAttributeView(target, PosixFileAttributeView.class).
+		Set&lt;PosixFilePermission&gt; permissions = Files.getFileAttributeView(target, PosixFileAttributeView.class).
 			readAttributes().
 			permissions();
-		Set<PosixFilePermission> prettyPermissions = new TreeSet<PosixFilePermission>(permissions);
+		Set&lt;PosixFilePermission&gt; prettyPermissions = new TreeSet&lt;PosixFilePermission&gt;(permissions);
 		System.out.println(prettyPermissions);
 	}
 }
@@ -72,35 +68,31 @@ $ umask
 </pre>
 
 		<p>
-			Запустим программу (заодно прочитаем биты доступа посредством комадной строки)
-			и получим в результате:
+			Запустим программу (заодно прочитаем биты доступа посредством комадной строки):
 <pre>
-$ javac DefaultPermissions.java && java DefaultPermissions && ls -alh test.txt 
+$ javac DefaultPermissions.java &amp;&amp; java DefaultPermissions &amp;&amp; ls -alh test.txt 
 [OWNER_READ, OWNER_WRITE, GROUP_READ, GROUP_WRITE, OTHERS_READ]
 -rw-rw-r-- 1 yura yura 0 Apr 24 13:40 test.txt
 </pre>
 
 		<p>
-			Биты доступа получились такими, какими мы их ждали. umask дает пользователю и группе все права, а остальным не дает 
-			лишь записывать в файл. Но по-умолчанию ни одна (по крайней мере, известная) программа не назначает при создании 
-			файла права на выполнение. Вот мы и видим, что пользователю и группе разрешено чтение и запись, а всем остальным - только чтение.
-			Изменим теперь umask и попробуем еще раз:
+			Значение <i>umask</i> 002 (о первой циферке забудем на время - это отдельная тема) дает 
+			пользователю и группе все права, а остальным не дает право на запись в файл. Но по-умолчанию ни одна (по 
+			крайней мере, известная) программа не назначает право на выполнение при создании файла. Вот мы и видим, что 
+			пользователю и группе разрешено чтение и запись, а всем остальным - только чтение. Изменим теперь 
+			<i>umask</i> и попробуем еще раз:
 
 <pre>
 $ umask 0741
 
-$ javac DefaultPermissions.java && java DefaultPermissions && ls -alh test.txt 
+$ javac DefaultPermissions.java &amp;&amp; java DefaultPermissions &amp;&amp; ls -alh test.txt 
 [GROUP_WRITE, OTHERS_READ, OTHERS_WRITE]
 -----w-rw- 1 yura yura 0 Apr 24 13:39 test.txt
 </pre>
 
 		<p>
-			Этот случай посложнее. Пользователю здесь запрещено все. Группе запрещено чтение, но поскольку право на выполнение
-			не назначается "автоматически", тут тоже все в порядке. Остальным же запрещено выполнение (но право на выполнение и 
-			так не назначается).
-
-		<p>
-			Пока что все складывается отлично. Есть надежда, что Java уважает umask.
+			Этот случай посложнее. Пользователю здесь запрещено все, группе запрещено чтение, а право на 
+			выполнение не назначается "автоматически".
 
 		<p>
 			Теперь попробуем назначать биты доступа самостоятельно: 
@@ -120,36 +112,36 @@ import java.io.IOException;
 public class CustomPermissions {
 	public static void main(String args[]) throws IOException {
 		Path target = Paths.get("test.txt");
-		Set<PosixFilePermission> desiredPermissions = PosixFilePermissions.fromString("rw-rw----");
-		FileAttribute<Set<PosixFilePermission>> attribute = PosixFilePermissions.asFileAttribute(desiredPermissions);
+		Set&lt;PosixFilePermission&gt; desiredPermissions = PosixFilePermissions.fromString("rw-rw----");
+		FileAttribute&lt;Set&lt;PosixFilePermission&gt;&gt; attribute = PosixFilePermissions.asFileAttribute(desiredPermissions);
 		Files.createFile(target, attribute); 
-		Set<PosixFilePermission> actualPermissions = Files.getFileAttributeView(target, PosixFileAttributeView.class).
+		Set&lt;PosixFilePermission&gt; actualPermissions = Files.getFileAttributeView(target, PosixFileAttributeView.class).
 			readAttributes().
 			permissions();
-		Set<PosixFilePermission> prettyPermissions = new TreeSet<PosixFilePermission>(actualPermissions);
+		Set&lt;PosixFilePermission&gt; prettyPermissions = new TreeSet&lt;PosixFilePermission&gt;(actualPermissions);
 		System.out.println(prettyPermissions);
 	}
 }
 </pre>
 
 		<p>
-			Установим экзотическое значение umask и проверим действительные права доступа.
+			Установим экзотическое значение <i>umask</i> и проверим действительные права доступа.
 
 <pre>
 $ umask 0741
 
-$ javac CustomPermissions.java && java CustomPermissions && ls -alh test.txt
+$ javac CustomPermissions.java &amp;&amp; java CustomPermissions &amp;&amp; ls -alh test.txt
 [GROUP_WRITE]
 -----w---- 1 yura yura 0 Apr 24 13:54 test.txt
 </pre>
 
 		<p>
-			После свистопляски с битами только право осталось только у группы и только на запись. В Java-коде мы задавали
-			права <tt>rw-rw----</tt>, т.е. <tt>660</tt>. umask равнялась <tt>741</tt> (о первой циферке забудем на время - это
-			отдельная тема), т.е. <tt>rwxr----x</tt>. Теперь считаем: 
+			После свистопляски с битами доступ остался только у группы и только на запись. В Java-коде мы задавали
+			права <tt>rw-rw----</tt>, т.е. <tt>660</tt>. umask равнялась <tt>741</tt> , т.е. <tt>rwxr----x</tt>. 
+			Теперь считаем (для удобства всевозможные представления сведены в таблицу):
 		
 			<table>
-			<caption>Представление битов доступа</caption>
+				<caption>Представление битов доступа</caption>
 				<tr>
 					<th>
 					
@@ -191,9 +183,9 @@ $ javac CustomPermissions.java && java CustomPermissions && ls -alh test.txt
 					<td>
 						<tt>--- -w- ---</tt>
 			</table>
-			
+		
 		<p>
-			Как видим, все сходится. Java уважает umask. Так что респект Java!
+			Как видим, все сходится. Java уважает <i>umask</i>. Так что респект Java!
 		
 		<hr>
 
