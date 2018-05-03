@@ -4,20 +4,20 @@ import java.util.List;
 
 public class Java8DataStreamsAndGenerics {
 	public static void main(String args[]) {
-		List<Banana> apples = Stream.of("Earth", "Mars", "Planet X").
-		map(origin -> new Fruit(origin)).
+		List<Fruit> apples = Stream.of(1, 2, 3).
+		map(dummy -> new Bucket()).
 		map(Bucket::apple).
 		collect(Collectors.toList());
+	}
+	
+	private static List<Apple> applesOf() {
+		return null;
 	}
 }
 
 interface Fruit {}
 
 interface Apple extends Fruit {}
-
-//interface Banana {}
-
-//interface Orange {}
 
 class Bucket implements Apple {
 	public Apple apple() {
