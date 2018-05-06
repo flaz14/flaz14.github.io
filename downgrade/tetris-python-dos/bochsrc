@@ -410,7 +410,7 @@ vgaromimage: file=/usr/share/vgabios/vgabios.bin
 #floppya: 1_44=a:, status=inserted
 #floppya: 1_44=a.img, status=inserted, write_protected=1
 #floppya: 1_44=/dev/rfd0a, status=inserted
-floppya: image=./disks/Dos6.22.img, status=inserted
+floppya: image="./disks/Dos6.22.img", status=inserted
 
 #=======================================================================
 # FLOPPYB:
@@ -496,8 +496,8 @@ ata3: enabled=0, ioaddr1=0x168, ioaddr2=0x360, irq=9
 #ata0-master: type=disk, mode=flat, path="c.img", cylinders=0 # autodetect
 #ata0-slave: type=disk, mode=vvfat, path=/bochs/images/vvfat, journal=vvfat.redolog
 #ata0-slave: type=cdrom, path=/dev/cdrom, status=inserted
-ata0-master: type=disk, mode=flat, path=./disks/hdimage.img, cylinders=0
-#ata0-slave: type=cdrom, path=./disks/doslivecd.iso, status=inserted
+ata0-master: type=disk, path="./disks/mymsdos.img", mode=flat, cylinders=203, heads=16, spt=63
+#ata0-slave: type=cdrom, path="./disks/doslivecd.iso", status=inserted
 
 #=======================================================================
 # BOOT:
