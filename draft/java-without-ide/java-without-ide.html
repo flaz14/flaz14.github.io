@@ -247,15 +247,108 @@ src/com/sun/org/apache/regexp/internal/CharacterArrayCharacterIterator.java:    
 src/com/sun/org/apache/regexp/internal/CharacterArrayCharacterIterator.java:    public String substring(int beginIndex)	
 </pre>
 		
+		<p>
+			Конечно, этот способо не всегда сработает. Сопоставление осуществляется только по именам. 
+			Никто не запрещает определить собственный класс с именем <em>String</em>. 
+			Да-да, приведенный ниже пример компилируется и работает:
+<pre>
+public class StringStringTest {
+	public static void main(String[] args) { 
+		new Runnable() {
+			class String {}
+
+			public String substring() { 
+				return null; 
+			}
 			
-			Пусть нам нужно получить JavaDoc по некоторому классу. Для это достаточно знать имя класса (или интерфейса), 
-			поскольку правила форматирования исходного кода у Oracle везде одинаковые. Так что воспользуемся такой командой 
-			для класса String:
+			@Override
+			public void run() {}
+		};
+	}
+}
+</pre>		
+		
+		<p>
+			Поиск в таком классе приведет нас к совершенно нерелевантному методу <code>substring()</code>:
+<pre>
+$ grep -R '[[:space:]]String substring(' StringStringTest.java 
+
+			public String substring() { 
+</pre>
+	
+		<p>
+			Теперь предположим, что нам нужно получить JavaDoc по некоторому классу с известным именем 
+			(часть JavaDoc'а опущена ради экономии места): 
+		
+<pre>
+$ grep -B 999 'class String' src/java/lang/String.java | grep -A 999 '/\*\*'
+
+/**
+ * The {@code String} class represents character strings. All
+ * string literals in Java programs, such as {@code "abc"}, are
+ * implemented as instances of this class.
+ * <p>
+ * Strings are constant; their values cannot be changed after they
+...
+ *
+ * @author  Lee Boynton
+ * @author  Arthur van Hoff
+ * @author  Martin Buchholz
+ * @author  Ulf Zibis
+ * @see     java.lang.Object#toString()
+ * @see     java.lang.StringBuffer
+ * @see     java.lang.StringBuilder
+ * @see     java.nio.charset.Charset
+ * @since   JDK1.0
+ */
+
+public final class String
+</pre>
+	
+		<p>
+			<i>999</i> - всего лишь ограничители на максимальное количество строк. Вряд ли JavaDoc содержит большее 999
+			строчек для одного класса.
+		
+		<h2>Парочка приколов напоследок</h2>
+		
+		<p>
+			Поимщем интересные (т.е. ругательные) слова в исходниках JDK (выведем по две строчки до и после совпадения, 
+			чтобы понимать контекст, в котором употребляется ругательство. 
+			А то <i>scraping</i>, вполне приличное слово, путается под ногами):
+<pre>
+$ grep -C 2 -i -R 'crap' src
+
+src/javax/xml/bind/DatatypeConverterImpl.java-            // uri can never be null according to javadoc,
+src/javax/xml/bind/DatatypeConverterImpl.java-            // but some users reported that there are implementations that return null.
+src/javax/xml/bind/DatatypeConverterImpl.java:            if (uri == null || uri.length() == 0) // crap. the NamespaceContext interface is broken.
+src/javax/xml/bind/DatatypeConverterImpl.java-            // error: unbound prefix
+src/javax/xml/bind/DatatypeConverterImpl.java-            {
+</pre>			
+
+		<p>
+			<cite>the NamespaceContext interface is broken.</cite> Ничего не поделаешь :)
+
+		<p></p>
 			
 <pre>
-</pre>			
-		
-			
+$ grep -C 2 -i -R 'fuck' src
+
+src/com/sun/org/apache/xalan/internal/xsltc/dom/BitArray.java-     * current position is cached in the following 4 variables and will
+src/com/sun/org/apache/xalan/internal/xsltc/dom/BitArray.java-     * help speed up a sequence of next() call in an index iterator. This
+src/com/sun/org/apache/xalan/internal/xsltc/dom/BitArray.java:     * method is a mess, but it is fast and it works, so don't fuck with it.
+src/com/sun/org/apache/xalan/internal/xsltc/dom/BitArray.java-     */
+src/com/sun/org/apache/xalan/internal/xsltc/dom/BitArray.java-    private int _pos = Integer.MAX_VALUE;
+</pre>		
+
+
+
+
+
+
+
+-----------------
+
+-----------------
 
 		<p>
 			В одной из своих предыдущих ламерских статей 
