@@ -181,9 +181,80 @@ $ find src -name 'ByteArrayOutputStream.java'
 			показвала содержимое каталога при нажатии <kbd>Tab</kbd>. Так можно путешествовать по дереву исходников, просматривать
 			содержимое пакетов, возвращаться назад при необходимости (достаточно лишь стереть символы до последнего слэша).
 				
-		<h2>И grep всемогущий!</h2>
+		<h2>grep</h2>
 		
 		<p>
+			Пусть мы знаем имя метода, но не знаем, в каком классе этот метод находится. Воспользуемся grep для получения
+			подробной информации на примере метода :
+<pre>
+$ grep -R 'String substring(' src
+
+src/java/lang/StringBuffer.java:    public synchronized String substring(int start) {
+src/java/lang/StringBuffer.java:    public synchronized String substring(int start, int end) {
+src/java/lang/String.java:    public String substring(int beginIndex) {
+src/java/lang/String.java:    public String substring(int beginIndex, int endIndex) {
+src/java/lang/AbstractStringBuilder.java:    public String substring(int start) {
+src/java/lang/AbstractStringBuilder.java:    public String substring(int start, int end) {
+src/java/net/URI.java:        private String substring(int start, int end) {
+src/com/sun/org/apache/xerces/internal/impl/xpath/regex/REUtil.java:    static final String substring(CharacterIterator iterator, int begin, int end) {
+src/com/sun/org/apache/regexp/internal/StringCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/StringCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/regexp/internal/StreamCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/StreamCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/regexp/internal/CharacterIterator.java:    String substring(int beginIndex, int endIndex);
+src/com/sun/org/apache/regexp/internal/CharacterIterator.java:    String substring(int beginIndex);
+src/com/sun/org/apache/regexp/internal/ReaderCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/ReaderCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/regexp/internal/CharacterArrayCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/CharacterArrayCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/xml/internal/utils/XMLString.java:  public abstract XMLString substring(int beginIndex);
+src/com/sun/org/apache/xml/internal/utils/XMLString.java:  public abstract XMLString substring(int beginIndex, int endIndex);
+src/com/sun/org/apache/xml/internal/utils/XMLStringDefault.java:  public XMLString substring(int beginIndex)
+src/com/sun/org/apache/xml/internal/utils/XMLStringDefault.java:  public XMLString substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/xpath/internal/objects/XString.java:  public XMLString substring(int beginIndex)
+src/com/sun/org/apache/xpath/internal/objects/XString.java:  public XMLString substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/xpath/internal/objects/XStringForFSB.java:  public XMLString substring(int beginIndex)
+src/com/sun/org/apache/xpath/internal/objects/XStringForFSB.java:  public XMLString substring(int beginIndex, int endIndex)
+</pre>
+
+		<p>
+			Что ж, работает. Но мы видим слишком много мусора. Надо искать точнее. Это легко сделать, поскольку все исходные коды отформатированы 
+			по одинаковым правилам. Так, мы знаем тип возвращаемого значения. После модификатора доступа 
+			(или другого модификатора, такого как final, следуем пробел). Но если модификатор доступа package-private, то пробела перед типом возвращаемого 
+			значения нет. На самом деле, он есть. Поскольку все методы, находящиеся в классе, начинаются с отступов. 
+			Так что точный поиск метода может выглядеть так:
+			
+<pre>
+yura@Desktop /usr/local/soft/jdk1.8.0_162 $ grep -R '[[:space:]]String substring(' src
+
+src/java/lang/StringBuffer.java:    public synchronized String substring(int start) {
+src/java/lang/StringBuffer.java:    public synchronized String substring(int start, int end) {
+src/java/lang/String.java:    public String substring(int beginIndex) {
+src/java/lang/String.java:    public String substring(int beginIndex, int endIndex) {
+src/java/lang/AbstractStringBuilder.java:    public String substring(int start) {
+src/java/lang/AbstractStringBuilder.java:    public String substring(int start, int end) {
+src/java/net/URI.java:        private String substring(int start, int end) {
+src/com/sun/org/apache/xerces/internal/impl/xpath/regex/REUtil.java:    static final String substring(CharacterIterator iterator, int begin, int end) {
+src/com/sun/org/apache/regexp/internal/StringCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/StringCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/regexp/internal/StreamCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/StreamCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/regexp/internal/CharacterIterator.java:    String substring(int beginIndex, int endIndex);
+src/com/sun/org/apache/regexp/internal/CharacterIterator.java:    String substring(int beginIndex);
+src/com/sun/org/apache/regexp/internal/ReaderCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/ReaderCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/regexp/internal/CharacterArrayCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/CharacterArrayCharacterIterator.java:    public String substring(int beginIndex)	
+</pre>
+		
+			
+			Пусть нам нужно получить JavaDoc по некоторому классу. Для это достаточно знать имя класса (или интерфейса), 
+			поскольку правила форматирования исходного кода у Oracle везде одинаковые. Так что воспользуемся такой командой 
+			для класса String:
+			
+<pre>
+</pre>			
+		
 			
 
 		<p>
