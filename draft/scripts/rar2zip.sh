@@ -33,30 +33,16 @@ function rar_name {
 	echo "${BASH_REMATCH[1]}"
 }
 
-
-
-#function rar2zip {
+function to_zip {
+	local rar_file="$1"
+	local name="$( rar_name "$rar_file" )"
+	local zip_file="./$name.zip"
+	local tmp_dir="$( mktemp --directory --tmpdir=/dev/shm/ )"
 	
-
-	
-
-		
-	#rar_basename = `basename "$rar"`
-
-	
-	
-
-	
-	#name="${BASH_REMATCH[1]}"
-	#echo "$name"
-	
-#	name=
-
-
-#	temp=""
-#	zip=""
-#}
+	7z x "$rar_file" -o"$tmp_dir"
+	7z a -tzip -mx=9 "$zip_file" "$tmp_dir/*"
+}
 
 input_file_exist "$1" && \
 is_rar_file "$1" && \
-rar_name "$1"
+to_zip "$1"
