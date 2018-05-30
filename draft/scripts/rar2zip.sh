@@ -33,10 +33,21 @@ function rar_name {
 	echo "${BASH_REMATCH[1]}"
 }
 
+function zip_name {
+	echo "./$( rar_name "$1" ).zip"
+}
+
+function output_file_does_not_exist {
+	file="$1"
+	if [[ -e "$file" ]]; then
+		echo "Output file [$file] already exists."
+		exit 5
+	fi
+}
+
 function to_zip {
 	local rar_file="$1"
-	local name="$( rar_name "$rar_file" )"
-	local zip_file="./$name.zip"
+	local zip_file="$2"
 	local tmp_dir="$( mktemp --directory --tmpdir=/dev/shm/ )"
 	
 	7z x "$rar_file" -o"$tmp_dir"
@@ -45,4 +56,5 @@ function to_zip {
 
 input_file_exist "$1" && \
 is_rar_file "$1" && \
-to_zip "$1"
+output_file_does_not_exist "$( zip_name "$1" )" && \
+to_zip "$1" "$( zip_name "$1" )"
