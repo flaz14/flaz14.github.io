@@ -45,13 +45,22 @@ function output_file_does_not_exist {
 	fi
 }
 
+function dos2linux {
+	local input_file="$1"
+	local temp_file="$( mktemp --tmpdir=/dev/shm/ )"
+	cp "$input_file" "$temp_file"
+	local output_file="$input_file"
+	cat "$temp_file" | iconv --from-code=cp866 --to-code=utf8 > "$output_file"
+}
+
 function to_zip {
 	local rar_file="$1"
 	local zip_file="$2"
-	local tmp_dir="$( mktemp --directory --tmpdir=/dev/shm/ )"
-	
-	7z x "$rar_file" -o"$tmp_dir"
-	7z a -tzip -mx=9 "$zip_file" "$tmp_dir/*"
+	local temp_dir="$( mktemp --directory --tmpdir=/dev/shm/ )"
+	7z x "$rar_file" -o"$temp_dir"
+	local temp_file="$( find "$temp_dir" -type f -print0 )"
+	dos2linux "$temp_file"
+	7z a -tzip -mx=9 "$zip_file" "$temp_file"
 }
 
 input_file_exist "$1" && \
