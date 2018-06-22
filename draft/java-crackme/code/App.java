@@ -20,7 +20,7 @@ public class App {
 				rawSerialNumber = keyboard.nextLine();
 		}
 		if (rawSerialNumber == null) 
-			throw new IllegalStateException("Internal error: serialNumber" +
+			throw new IllegalStateException("Internal error: serialNumber " +
 											"should not be null.");
 		String serialNumber = rawSerialNumber.trim();
 		if ( Objects.equals(serialNumber, VALID_SERIAL_NUMBER) )
