@@ -1,0 +1,571 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Java Crackme</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/#java-crackme" title="Перейти к оглавлению">&larr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a href="http://flaz14.github.io/java-crackme/java-crackme.html">
+				Java CrackMe
+			</a>
+		</h1>
+		
+		<h3>[2018, Июнь]</h3>
+		
+		<h3><a href="https://github.com/flaz14/flaz14.github.io/tree/master/java-crackme/code">Исходный код</a></h3>
+
+		<h2>Начало</h2>
+
+		<p>
+			Crackme - это маленькая программа, специально написанная для того, чтобы ее взломали. На таких небольших
+			примерах легко тренироваться, и постепенно усложняя задачу (обфускация и пр.) быстро приобретать практические
+			навыки взлома.
+			
+		<p>
+			В этом ламерской статье мы познакомимся с простейшим Crackme без привлечения продвинутых средств обратной 
+			разработкии. Ограничимся поставляемыми с JDK утилитами, hex-редактором и, быть может, самописными скриптами.
+			
+		<p>
+			Поскольку каждая версия компилятора и виртуальной машины Java имеет свои особенности при порождении и поедании 
+			байт-кода, сразу выясним их версии:
+			
+<pre>
+$ javac -version
+javac 1.8.0_162
+
+$ java -version
+java version "1.8.0_162"
+Java(TM) SE Runtime Environment (build 1.8.0_162-b12)
+Java HotSpot(TM) 64-Bit Server VM (build 25.162-b12, mixed mode)
+</pre>			
+		
+		<h2>SuperMega Application</h2>
+		
+		<p>
+			Ничего сложного здесь нет:
+			
+<h4 id="listing-1">Листинг 1 - Исходный код программы</h4>
+<pre>
+import java.util.Scanner;
+import java.util.Objects;
+
+public class App {
+	private static final String VALID_SERIAL_NUMBER = "qwerty";	
+	
+	public static void main(String ignoredArgs[]) {
+		System.out.println(	"****************************************\n" +
+							"* SuperMega Application by flaz14 Inc. *\n" + 
+							"****************************************\n" +
+							"\n" + 
+							"Hello, User!" + 
+							"\n" + 
+							"Please enter your Serial Number below\n" +
+							"and hit ENTER: " + 
+							"\n");
+		String rawSerialNumber = null;
+		try (Scanner keyboard = new Scanner(System.in, "UTF-8")) {
+			if (keyboard.hasNextLine())
+				rawSerialNumber = keyboard.nextLine();
+		}
+		if (rawSerialNumber == null) 
+			throw new IllegalStateException("Internal error: serialNumber " +
+											"should not be null.");
+		String serialNumber = rawSerialNumber.trim();
+		if ( Objects.equals(serialNumber, VALID_SERIAL_NUMBER) )
+			System.out.println(	"\nCongratulations! You've successfully\n" +
+								"activated your copy of the application.");
+		else 
+			System.out.println( "\nSorry, the serial you've entered is invalid.");
+	}
+}
+</pre>
+		<p>
+			Вот пример неудачного запуска:
+			
+<pre>
+$ javac App.java && java App
+****************************************
+* SuperMega Application by flaz14 Inc. *
+****************************************
+
+Hello, User!
+Please enter your Serial Number below
+and hit ENTER: 
+
+12345
+
+Sorry, the serial you've entered is invalid.
+</pre>
+
+		<p>
+			Мы просто считываем с клавиатуры введенный пользователем ключ как строку. Затем сравниваем ее с эталонной и 
+			выводим на экран соответствующие сообщения. 
+			
+		<p>
+			Первая утилита, которую стоит запустить перед анализом чего-либо - это <strong>strings</strong>. 
+			Она извлекает Применительно
+			к байт-коду нашей программы (полностью приведен в файле App.class.strings.txt !!!тут будет ссылка на файл!!!):
+
+<pre>
+$ strings --all --bytes=3 App.class
+
+VALID_SERIAL_NUMBER
+Ljava/lang/String;
+ConstantValue
+...
+</pre>			
+	
+		<p>
+			VALID_SERIAL_NUMBER сразу наводит на мысль, что ключ "зашит" непосредственно в программе. А поскольку количество
+			текстовых строк в .class-файле ограничено (не больше тысячи, к примеру) есть смысл не ковыряться долго в байт-коде, 
+			выуживания ключ. А просто перебрать извлеченные с помощью strings строчки. Скрипт, который делает это ...
+			
+			
+			
+			
+			
+			
+			
+			Если вглянуть на байт-код программы, наводит на мысль, что эталонный 
+			ключ "зашит" в самой программе. то станет ясно, что эталонный
+			ключ - не что иное, как строчка "qwerty":
+			
+<pre>
+Classfile /home/yura/Projects/flaz14.github.io/draft/java-crackme/code/App.class
+  Last modified Jun 27, 2018; size 1710 bytes
+  MD5 checksum df092f96fc80b2dc1aef03b6176acb55
+  Compiled from "App.java"
+public class App
+  minor version: 0
+  major version: 52
+  flags: ACC_PUBLIC, ACC_SUPER
+Constant pool:
+   #1 = Methodref          #23.#40        // java/lang/Object."<init>":()V
+   #2 = Fieldref           #41.#42        // java/lang/System.out:Ljava/io/PrintStream;
+   #3 = String             #43            // ****************************************\n* SuperMega Application by flaz14 Inc. *\n****************************************\n\nHello, User!\nPlease enter your Serial Number below\nand hit ENTER: \n
+   #4 = Methodref          #44.#45        // java/io/PrintStream.println:(Ljava/lang/String;)V
+   #5 = Class              #46            // java/util/Scanner
+   #6 = Fieldref           #41.#47        // java/lang/System.in:Ljava/io/InputStream;
+   #7 = String             #48            // UTF-8
+   #8 = Methodref          #5.#49         // java/util/Scanner."<init>":(Ljava/io/InputStream;Ljava/lang/String;)V
+   #9 = Methodref          #5.#50         // java/util/Scanner.hasNextLine:()Z
+  #10 = Methodref          #5.#51         // java/util/Scanner.nextLine:()Ljava/lang/String;
+  #11 = Methodref          #5.#52         // java/util/Scanner.close:()V
+  #12 = Class              #53            // java/lang/Throwable
+  #13 = Methodref          #12.#54        // java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+  #14 = Class              #55            // java/lang/IllegalStateException
+  #15 = String             #56            // Internal error: serialNumber should not be null.
+  #16 = Methodref          #14.#57        // java/lang/IllegalStateException."<init>":(Ljava/lang/String;)V
+  #17 = Methodref          #58.#59        // java/lang/String.trim:()Ljava/lang/String;
+  #18 = Class              #60            // App
+  #19 = String             #61            // qwerty
+  #20 = Methodref          #62.#63        // java/util/Objects.equals:(Ljava/lang/Object;Ljava/lang/Object;)Z
+  #21 = String             #64            // \nCongratulations! You've successfully\nactivated your copy of the application.
+  #22 = String             #65            // \nSorry, the serial you've entered is invalid.
+  #23 = Class              #66            // java/lang/Object
+  #24 = Utf8               VALID_SERIAL_NUMBER
+  #25 = Utf8               Ljava/lang/String;
+  #26 = Utf8               ConstantValue
+  #27 = Utf8               <init>
+  #28 = Utf8               ()V
+  #29 = Utf8               Code
+  #30 = Utf8               LineNumberTable
+  #31 = Utf8               main
+  #32 = Utf8               ([Ljava/lang/String;)V
+  #33 = Utf8               StackMapTable
+  #34 = Class              #67            // java/lang/String
+  #35 = Class              #46            // java/util/Scanner
+  #36 = Class              #53            // java/lang/Throwable
+  #37 = Class              #68            // "[Ljava/lang/String;"
+  #38 = Utf8               SourceFile
+  #39 = Utf8               App.java
+  #40 = NameAndType        #27:#28        // "<init>":()V
+  #41 = Class              #69            // java/lang/System
+  #42 = NameAndType        #70:#71        // out:Ljava/io/PrintStream;
+  #43 = Utf8               ****************************************\n* SuperMega Application by flaz14 Inc. *\n****************************************\n\nHello, User!\nPlease enter your Serial Number below\nand hit ENTER: \n
+  #44 = Class              #72            // java/io/PrintStream
+  #45 = NameAndType        #73:#74        // println:(Ljava/lang/String;)V
+  #46 = Utf8               java/util/Scanner
+  #47 = NameAndType        #75:#76        // in:Ljava/io/InputStream;
+  #48 = Utf8               UTF-8
+  #49 = NameAndType        #27:#77        // "<init>":(Ljava/io/InputStream;Ljava/lang/String;)V
+  #50 = NameAndType        #78:#79        // hasNextLine:()Z
+  #51 = NameAndType        #80:#81        // nextLine:()Ljava/lang/String;
+  #52 = NameAndType        #82:#28        // close:()V
+  #53 = Utf8               java/lang/Throwable
+  #54 = NameAndType        #83:#84        // addSuppressed:(Ljava/lang/Throwable;)V
+  #55 = Utf8               java/lang/IllegalStateException
+  #56 = Utf8               Internal error: serialNumber should not be null.
+  #57 = NameAndType        #27:#74        // "<init>":(Ljava/lang/String;)V
+  #58 = Class              #67            // java/lang/String
+  #59 = NameAndType        #85:#81        // trim:()Ljava/lang/String;
+  #60 = Utf8               App
+  #61 = Utf8               qwerty
+  #62 = Class              #86            // java/util/Objects
+  #63 = NameAndType        #87:#88        // equals:(Ljava/lang/Object;Ljava/lang/Object;)Z
+  #64 = Utf8               \nCongratulations! You've successfully\nactivated your copy of the application.
+  #65 = Utf8               \nSorry, the serial you've entered is invalid.
+  #66 = Utf8               java/lang/Object
+  #67 = Utf8               java/lang/String
+  #68 = Utf8               [Ljava/lang/String;
+  #69 = Utf8               java/lang/System
+  #70 = Utf8               out
+  #71 = Utf8               Ljava/io/PrintStream;
+  #72 = Utf8               java/io/PrintStream
+  #73 = Utf8               println
+  #74 = Utf8               (Ljava/lang/String;)V
+  #75 = Utf8               in
+  #76 = Utf8               Ljava/io/InputStream;
+  #77 = Utf8               (Ljava/io/InputStream;Ljava/lang/String;)V
+  #78 = Utf8               hasNextLine
+  #79 = Utf8               ()Z
+  #80 = Utf8               nextLine
+  #81 = Utf8               ()Ljava/lang/String;
+  #82 = Utf8               close
+  #83 = Utf8               addSuppressed
+  #84 = Utf8               (Ljava/lang/Throwable;)V
+  #85 = Utf8               trim
+  #86 = Utf8               java/util/Objects
+  #87 = Utf8               equals
+  #88 = Utf8               (Ljava/lang/Object;Ljava/lang/Object;)Z
+{
+  public App();
+    descriptor: ()V
+    flags: ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: return
+      LineNumberTable:
+        line 4: 0
+
+  public static void main(java.lang.String[]);
+    descriptor: ([Ljava/lang/String;)V
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=4, locals=7, args_size=1
+         0: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;
+         3: ldc           #3                  // String ****************************************\n* SuperMega Application by flaz14 Inc. *\n****************************************\n\nHello, User!\nPlease enter your Serial Number below\nand hit ENTER: \n
+         5: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+         8: aconst_null
+         9: astore_1
+        10: new           #5                  // class java/util/Scanner
+        13: dup
+        14: getstatic     #6                  // Field java/lang/System.in:Ljava/io/InputStream;
+        17: ldc           #7                  // String UTF-8
+        19: invokespecial #8                  // Method java/util/Scanner."<init>":(Ljava/io/InputStream;Ljava/lang/String;)V
+        22: astore_2
+        23: aconst_null
+        24: astore_3
+        25: aload_2
+        26: invokevirtual #9                  // Method java/util/Scanner.hasNextLine:()Z
+        29: ifeq          37
+        32: aload_2
+        33: invokevirtual #10                 // Method java/util/Scanner.nextLine:()Ljava/lang/String;
+        36: astore_1
+        37: aload_2
+        38: ifnull        113
+        41: aload_3
+        42: ifnull        63
+        45: aload_2
+        46: invokevirtual #11                 // Method java/util/Scanner.close:()V
+        49: goto          113
+        52: astore        4
+        54: aload_3
+        55: aload         4
+        57: invokevirtual #13                 // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+        60: goto          113
+        63: aload_2
+        64: invokevirtual #11                 // Method java/util/Scanner.close:()V
+        67: goto          113
+        70: astore        4
+        72: aload         4
+        74: astore_3
+        75: aload         4
+        77: athrow
+        78: astore        5
+        80: aload_2
+        81: ifnull        110
+        84: aload_3
+        85: ifnull        106
+        88: aload_2
+        89: invokevirtual #11                 // Method java/util/Scanner.close:()V
+        92: goto          110
+        95: astore        6
+        97: aload_3
+        98: aload         6
+       100: invokevirtual #13                 // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+       103: goto          110
+       106: aload_2
+       107: invokevirtual #11                 // Method java/util/Scanner.close:()V
+       110: aload         5
+       112: athrow
+       113: aload_1
+       114: ifnonnull     127
+       117: new           #14                 // class java/lang/IllegalStateException
+       120: dup
+       121: ldc           #15                 // String Internal error: serialNumber should not be null.
+       123: invokespecial #16                 // Method java/lang/IllegalStateException."<init>":(Ljava/lang/String;)V
+       126: athrow
+       127: aload_1
+       128: invokevirtual #17                 // Method java/lang/String.trim:()Ljava/lang/String;
+       131: astore_2
+       132: aload_2
+       133: ldc           #19                 // String qwerty
+       135: invokestatic  #20                 // Method java/util/Objects.equals:(Ljava/lang/Object;Ljava/lang/Object;)Z
+       138: ifeq          152
+       141: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;
+       144: ldc           #21                 // String \nCongratulations! You've successfully\nactivated your copy of the application.
+       146: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+       149: goto          160
+       152: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;
+       155: ldc           #22                 // String \nSorry, the serial you've entered is invalid.
+       157: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+       160: return
+      Exception table:
+         from    to  target type
+            45    49    52   Class java/lang/Throwable
+            25    37    70   Class java/lang/Throwable
+            25    37    78   any
+            88    92    95   Class java/lang/Throwable
+            70    80    78   any
+      LineNumberTable:
+        line 8: 0
+        line 17: 8
+        line 18: 10
+        line 19: 25
+        line 20: 32
+        line 21: 37
+        line 18: 70
+        line 21: 78
+        line 22: 113
+        line 23: 117
+        line 25: 127
+        line 26: 132
+        line 27: 141
+        line 30: 152
+        line 31: 160
+      StackMapTable: number_of_entries = 12
+        frame_type = 254 /* append */
+          offset_delta = 37
+          locals = [ class java/lang/String, class java/util/Scanner, class java/lang/Throwable ]
+        frame_type = 78 /* same_locals_1_stack_item */
+          stack = [ class java/lang/Throwable ]
+        frame_type = 10 /* same */
+        frame_type = 70 /* same_locals_1_stack_item */
+          stack = [ class java/lang/Throwable ]
+        frame_type = 71 /* same_locals_1_stack_item */
+          stack = [ class java/lang/Throwable ]
+        frame_type = 255 /* full_frame */
+          offset_delta = 16
+          locals = [ class "[Ljava/lang/String;", class java/lang/String, class java/util/Scanner, class java/lang/Throwable, top, class java/lang/Throwable ]
+          stack = [ class java/lang/Throwable ]
+        frame_type = 10 /* same */
+        frame_type = 3 /* same */
+        frame_type = 255 /* full_frame */
+          offset_delta = 2
+          locals = [ class "[Ljava/lang/String;", class java/lang/String ]
+          stack = []
+        frame_type = 13 /* same */
+        frame_type = 252 /* append */
+          offset_delta = 24
+          locals = [ class java/lang/String ]
+        frame_type = 7 /* same */
+}
+SourceFile: "App.java"
+
+</pre>
+
+
+<h4 id="listing-1">Листинг 1 - вычисление факториала рекурсивным способом</h4>
+<pre>
+public class FactorialRecursion {
+	public static void main(String ignored[]) {
+		System.out.println(
+			String.format("%3s: %15s\n", "n", "factorial(n)") + 
+			String.format("%3d: %15d\n", 1, factorial(1)) + 
+			String.format("%3d: %15d\n", 2, factorial(2)) +
+			String.format("%3d: %15d\n", 3, factorial(3)) + 
+			String.format("%3d: %15d\n", 4, factorial(4)) + 
+			String.format("%3d: %15d\n", 5, factorial(5)) + 
+			""
+		);
+	}
+	
+	private static int factorial(int n) {
+		if (n == 1) return 1;
+		return n * factorial(n - 1);
+	}
+}
+</pre>
+			
+		<p>
+			Запустим и получим:
+
+<pre>
+$ javac FactorialRecursion.java && java FactorialRecursion
+  n:    factorial(n)
+  1:               1
+  2:               2
+  3:               6
+  4:              24
+  5:             120
+</pre>
+
+		<h2>Цикл</h2>
+		
+		<p>
+			Цикл ненамного сложнее рекурсии. А может, даже легче для понимания.
+
+<h4 id="listing-2">Листинг 2 - вычисление факториала с помощью цикла</h4>
+<pre>
+public class FactorialLoop {
+	public static void main(String ignored[]) {
+		System.out.println(
+			String.format("%3s: %15s\n", "n", "factorial(n)") + 
+			String.format("%3d: %15d\n", 1, factorial(1)) + 
+			String.format("%3d: %15d\n", 2, factorial(2)) +
+			String.format("%3d: %15d\n", 3, factorial(3)) + 
+			String.format("%3d: %15d\n", 4, factorial(4)) + 
+			String.format("%3d: %15d\n", 5, factorial(5)) + 
+			""
+		);
+	}
+	
+	private static int factorial(int n) {
+		int result = 1;
+		for(int i = 1; i &lt;=n; i++) {
+			result *= i;
+		}
+		return result;
+	}
+}
+</pre>
+
+		<p>
+			Программа напечатает то же, что и предыдущая:
+<pre>
+$ javac FactorialLoop.java && java FactorialLoop 
+  n:    factorial(n)
+  1:               1
+  2:               2
+  3:               6
+  4:              24
+  5:             120
+</pre>
+
+		<h2>Рекурсия!</h2>
+		
+		<p>
+			Возможно, в JDK есть классы, которые позволяют "прятать" рекурсию. Т.е. предоставляют удобный интерфейс в
+			декларативном стиле. А для сокрытия циклов можно задействовать потоки Java 8. Но есть и более хардкорный 
+			способ.
+		
+		<p>
+			Конструкция <strong>try-with-resources</strong> (далее по тексту TWR) - именно то, что нужно. Ведь если в 
+			методе <code>close()</code> ресурса разместить блок <em>try</em>, в котором инициализируется ресурс того же 
+			класса, то при неявном вызове первого <code>close()</code> произойдет инициализация еще одного ресурса, 
+			который при закрытии создаст еще один и т.д. Т.о. рекурсия у нас в кармане.
+			
+		<p>
+			К сожалению, этого недостаточно. Суть рекурсии при вычислениях заключается в том, что из нее можно вернуть 
+			значение. Именно эта особенность и позволяет писать код вроде <code>return n * factorial(n - 1)</code>. Но 
+			из метода <code>close()</code> интерфейса <code>AutoCloseable</code> вернуть значение нельзя. Обратиться к 
+			переменной ресурса после его автоматического закрытия тоже не получится, т.е. нельзя в блоке 
+			<em>finally</em> ссылаться на переменную, определенную в TWR. Так что ничего не остается, как использовать 
+			массив из одного элемента, чтобы вернуть результат вычислений во внешний мир. 
+		
+		<p>
+			В итоге получась смесь рекурсии	и цикла: методы <code>close()</code> вызываются рекурсивно, но внутри этих 
+			методов происходит последовательное умножение на <i>n</i>, <i>n - 1</i>, <i>n - 2</i> и т.д., как в цикле, 
+			только от большего к меньшему.
+
+<h4 id="listing-3">Листинг 3 - вычисление факториала с помощью TWR</h4>
+<pre>
+public class FactorialTwr {
+	public static void main(String ignored[]) {
+		System.out.println(
+			String.format("%3s: %15s\n", "n", "factorial(n)") + 
+			String.format("%3d: %15d\n", 1, factorial(1)) + 
+			String.format("%3d: %15d\n", 2, factorial(2)) +
+			String.format("%3d: %15d\n", 3, factorial(3)) + 
+			String.format("%3d: %15d\n", 4, factorial(4)) + 
+			String.format("%3d: %15d\n", 5, factorial(5)) + 
+			""
+		);
+	}
+	
+	private static int factorial(int n) {
+		int[] resultPlaceholder = new int[] {1};
+		try (FactorialAutoCloseable calculator = new FactorialAutoCloseable(n, resultPlaceholder)) { }
+		return resultPlaceholder[0];
+	}
+	
+	private static class FactorialAutoCloseable implements AutoCloseable {
+		private int n;
+		private int[] resultPlaceholder;
+		
+		public FactorialAutoCloseable(int n, int[] resultPlaceholder) {
+			this.n = n;
+			this.resultPlaceholder = resultPlaceholder;
+		}
+		
+		@Override
+		public void close() {
+			if (n == 1) return;
+			resultPlaceholder[0] *= n; 
+			try(FactorialAutoCloseable calculator = new FactorialAutoCloseable(n - 1, resultPlaceholder)) { } 
+		}
+	}
+}
+</pre>
+
+		<p>
+			Запустим и убедимся, что факториал вычисляется правильно:
+
+<pre>
+$ javac FactorialTwr.java && java FactorialTwr 
+  n:    factorial(n)
+  1:               1
+  2:               2
+  3:               6
+  4:              24
+  5:             120
+</pre>
+
+		<h2>Good bye, World!</h2>
+		
+		<p>
+			Практического смысла в использовании TWR для рекурсивных вычислений нет, но все равно интересно. Java - не 
+			такой уж скучный язык программирования, каким кажется на первый взгляд.	
+		
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">&uarr;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">&#8962;</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>
