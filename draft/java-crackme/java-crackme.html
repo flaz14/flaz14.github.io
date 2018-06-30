@@ -131,8 +131,76 @@ ConstantValue
 	
 		<p>
 			VALID_SERIAL_NUMBER сразу наводит на мысль, что ключ "зашит" непосредственно в программе. А поскольку количество
-			текстовых строк в .class-файле ограничено (не больше тысячи, к примеру) есть смысл не ковыряться долго в байт-коде, 
-			выуживания ключ. А просто перебрать извлеченные с помощью strings строчки. Скрипт, который делает это ...
+			текстовых строк в нашем .class-файле ограничено (не больше тысячи) есть смысл не ковыряться долго в байт-коде, 
+			выуживания ключ. А просто перебрать извлеченные с помощью утилиты strings строчки. Написанный на скорую руку Python-скрипт
+			strings_bf.py !!!тут будет ссылка на исх. код!!! делает это:
+			
+<pre>
+$ ./strings_bf.py 
+
+String [qwerty] is valid serial number.
+</pre>
+			
+		<p>
+			Собственно, <b>qwerty</b> и есть наш серийный ключ (что ясно видно из <a href="#listing-1">листинга 1</a>).
+			
+		<h2>Патчим байт-код</h2>
+		
+		<p>
+			Посмотрим на вывод утилиты javap (полный текст App.class.javap.txt !!!тут будет ссылка!!!)
+			
+<pre>
+$ javap -v App.class
+
+...
+       133: ldc           #19                 // String qwerty
+       135: invokestatic  #20                 // Method java/util/Objects.equals:(Ljava/lang/Object;Ljava/lang/Object;)Z
+       138: ifeq          152
+       141: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;
+       144: ldc           #21                 // String \nCongratulations! You've successfully\nactivated your copy of the application.
+       146: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+       149: goto          160
+       152: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;
+       155: ldc           #22                 // String \nSorry, the serial you've entered is invalid.
+       157: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+       160: return
+...
+</pre>			
+
+		<p>
+			Строка №138 соответствует условному переходу к печати сообщения об ошибке. Чтобы направить программу в нужное русло, 
+			надо в строке №138 
+			<ol>
+				<li>
+					сменить код операции с <code>ifeq</code> на <code>ifne</code>
+					
+				<li>
+					либо изменить цель перехода, т.е. превратить <code>152</code> в <code>141</code>
+					
+				<li>
+					либо заменить инструкцию целиком на <code>nop</code>, т.е. не делать ничего, а сразу переходить 
+					к следующей инструкции. 
+					испортится
+			</ol>
+
+		<p>
+			Вообще, можно было бы убрать строчку №138 полностью. Но это в теории. На практике
+			из-за "пропажи" хоть одного байта "испортится" весь .class-файл. Для исправления ситуации придеться подгонять оставшийся байт-код (манипулировать 
+			с размерами фреймов что-ли, в общем, еще более темная магия). Так что более перспективным выглядит первый способ.
+			
+		<p>
+			ifeq opcode = 0x99 (153) 
+			
+			ifne opcode = 0x9a (154)
+			
+
+
+			
+			
+
+			
+			
+			
 			
 			
 			
