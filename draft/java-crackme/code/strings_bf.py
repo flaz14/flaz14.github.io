@@ -28,7 +28,7 @@ class JavaApplication:
 			stderr = sys.stdout
 		)
 	
-	def send_key(self, key):
+	def enter_key(self, key):
 		key_data = bytes(
 			key, 
 			default_encoding()
@@ -61,10 +61,10 @@ def fit_a_key(candidates):
 	for candidate in candidates:
 		app = JavaApplication()
 		app.start()
-		result = app.send_key(candidate)
+		result = app.enter_key(candidate)
 		if not failed(result):
-			key_fits_message = 'String [{}] is valid serial number.'.format(candidate)
-			print(key_fits_message)
+			key_found_message = 'String [{}] is valid serial number.'.format(candidate)
+			print(key_found_message)
 
 def main():
 	all_keys = strings()
