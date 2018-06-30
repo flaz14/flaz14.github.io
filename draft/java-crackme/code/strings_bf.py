@@ -14,6 +14,28 @@ def app_class_file():
 def message_after_entering_invalid_key():
 	return "Sorry, the serial you've entered is invalid."
 
+class JavaApplication:
+	def start(self):
+		class_name = app_class_file().split('.')[0]
+		application_command = [
+			'java',
+			class_name	
+		]
+		self.app_process = subprocess.Popen(
+			application_command, 
+			stdin = subprocess.PIPE,
+			stdout = subprocess.PIPE,
+			stderr = sys.stdout
+		)
+	
+	def send_key(self, key):
+		key_data = bytes(
+			key, 
+			default_encoding()
+		)
+		output, errorsIgnored = self.app_process.communicate(key_data)
+		return output.decode(default_encoding())
+
 def strings():
 	strings_command = [
 		'strings',
@@ -32,42 +54,21 @@ def strings():
 	)
 	return decoded_output.splitlines()
 
-class JavaApplication:
-	def start(self):
-		class_name = app_class_file().split('.')[0]
-		print(class_name)
-		application_command = [
-			'java',
-			class_name	
-		]
-		self.app_process = subprocess.Popen(
-			application_command, 
-			stdin = subprocess.PIPE,
-			stderr = sys.stdout
-		)
-	
-	def send_key(self, key):
-		key_data = bytes(
-			key, 
-			default_encoding()
-		)
-		self.app_process.communicate(key_data)
-	
-	def get_result(self):
-		with self.app_process.stdout as output:
-			print(output.readlines())
+def failed(result):
+	return message_after_entering_invalid_key() in result
 
-def fit_a_key(keys):
-	for key in keys:
-		invoke_application()
+def fit_a_key(candidates):
+	for candidate in candidates:
+		app = JavaApplication()
+		app.start()
+		result = app.send_key(candidate)
+		if not failed(result):
+			key_fits_message = 'String [{}] is valid serial number.'.format(candidate)
+			print(key_fits_message)
 
 def main():
-	#strings()
-	app = JavaApplication()
-	app.start()
-	app.send_key("qwerty")
-	app.get_result()
-	
+	all_keys = strings()
+	fit_a_key(all_keys)
 
 if __name__ == '__main__':
 	main()
