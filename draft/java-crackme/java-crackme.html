@@ -32,7 +32,7 @@
 		<p>
 			Байт-код Java, незамутненный обфускацией и прочими защитными мерами, несложен для понимания. В то же время 
 			взлом мало-мальски серьезной защиты, кроме аналитических способностей, требует навыков использования 
-			специальных инструментов: дизассемблеров, отладчиков и т.д. Об этом написано в блестящей серии из 4-х статей:
+			специальных инструментов: дизассемблеров, отладчиков и т.д. Об этом написано в блестящей серии из 4-х статей
 <a href="https://www.acloudtree.com/hacking-java-bytecode-for-programmers-part1-the-birds-and-the-bees-of-hex-editing/">
 Hacking Java Bytecode for Programmers</a>. В рамках же нашей заметки мы решим задачу полегче: вскроем простейший 
 			Crackme с использованием одних лишь подручных средств. А именно:
@@ -55,11 +55,11 @@ xxd V1.10 27oct98 by Juergen Weigert
 
 				<li>
 					утилит командной строки <strong>printf</strong> и <strong>dd</strong>;
-					
-				<li>
-					утилиты <strong>strings</strong> и самописного скрипта на Python (они послужат для иллюстрации метода подбора, 
-					а не для манипуляций с байт-кодом).
 			</ul>
+			
+		<p>
+			Утилита <strong>strings</strong> и самописный скрипт на Python послужат иллюстрации метода подбора, 
+					а не для манипуляций с байт-кодом.
 			
 		<p>
 			Версии компилятора и среды выполнения Java соответствуют версии <em>javap</em>.
@@ -77,33 +77,33 @@ import java.util.Scanner;
 import java.util.Objects;
 
 public class App {
-	private static final String VALID_SERIAL_NUMBER = "qwerty";	
+    private static final String VALID_SERIAL_NUMBER = "qwerty";	
 	
-	public static void main(String ignoredArgs[]) {
-		System.out.println(	"****************************************\n" +
-							"* SuperMega Application by flaz14 Inc. *\n" + 
-							"****************************************\n" +
-							"\n" + 
-							"Hello, User!" + 
-							"\n" + 
-							"Please enter your Serial Number below\n" +
-							"and hit ENTER: " + 
-							"\n");
-		String rawSerialNumber = null;
-		try (Scanner keyboard = new Scanner(System.in, "UTF-8")) {
-			if (keyboard.hasNextLine())
-				rawSerialNumber = keyboard.nextLine();
-		}
-		if (rawSerialNumber == null) 
-			throw new IllegalStateException("Internal error: serialNumber " +
-											"should not be null.");
-		String serialNumber = rawSerialNumber.trim();
-		if ( Objects.equals(serialNumber, VALID_SERIAL_NUMBER) )
-			System.out.println(	"\nCongratulations! You've successfully\n" +
-								"activated your copy of the application.");
-		else 
-			System.out.println( "\nSorry, the serial you've entered is invalid.");
-	}
+    public static void main(String ignoredArgs[]) {
+        System.out.println( "****************************************\n" +
+                            "* SuperMega Application by flaz14 Inc. *\n" + 
+                            "****************************************\n" +
+                            "\n" + 
+                            "Hello, User!" + 
+                            "\n" + 
+                            "Please enter your Serial Number below\n" +
+                            "and hit ENTER: " + 
+                            "\n");
+        String rawSerialNumber = null;
+        try (Scanner keyboard = new Scanner(System.in, "UTF-8")) {
+            if (keyboard.hasNextLine())
+                rawSerialNumber = keyboard.nextLine();
+        }
+        if (rawSerialNumber == null) 
+            throw new IllegalStateException("Internal error: serialNumber " +
+                                            "should not be null.");
+        String serialNumber = rawSerialNumber.trim();
+        if ( Objects.equals(serialNumber, VALID_SERIAL_NUMBER) )
+            System.out.println( "\nCongratulations! You've successfully\n" +
+                                "activated your copy of the application.");
+        else 
+            System.out.println( "\nSorry, the serial you've entered is invalid.");
+    }
 }
 </pre>
 
@@ -130,7 +130,7 @@ Sorry, the serial you've entered is invalid.
 		<h2>Brute Force</h2>
 		
 		<p>
-			Первая утилита, которую стоит запустить перед анализом какого-либо файла - это <strong>strings</strong> 
+			Первая утилита, которую стоит запустить перед анализом какого-либо файла - это <em>strings</em> 
 			(полный вывод приведен в файле 
 <a href="https://github.com/flaz14/flaz14.github.io/blob/master/draft/java-crackme/code/App.class.strings.txt">
 App.class.strings.txt</a>):
@@ -217,27 +217,24 @@ if ( !Objects.equals(serialNumber, VALID_SERIAL_NUMBER) )
 				<li>
 					Изменить цель перехода, т.е. превратить <code>152</code> в <code>141</code>. Это более экзотический
 					способ, нежели вышеприведенный, поскольку его нельзя выразить изменениями в исходном коде.
-					
-				<li>
-					Заменить инструкцию целиком , т.е. не делать ничего, а сразу переходить 
-					к следующей инструкции, т.е. сразу к строке №141.
 			</ol>
 
 		<p>
-			Вообще, можно было бы убрать строчку №138 полностью (или заменить на <code>nop</code>). Но это в теории. На 
+			Вообще, можно было бы убрать строчку №138 полностью, т.е. не делать ничего, а сразу переходить 
+					к следующей инструкции (строка №141). Но это в теории. На 
 			практике
 			из-за "пропажи" хоть одного байта "испортится" весь <i>.class</i>-файл. Для исправления ситуации придеться 
 			подгонять оставшийся байт-код (вставлять несколько <code>nop</code>-ов подряд что-ли?..). 
-			Так что наболее перспективным выглядит первый способ.
+			Так что наиболее перспективным выглядит первый способ.
 
 		<h2>Патчим байт-код</h2>
 			
 		<p>
-			Итак, мы решили изменить код операции. Каждому коду операции в <i>.class</i>-файле соответствует один байт (собственно, отсюда и происходит
+			Итак, мы решили подменить код операции. Каждому коду операции в <i>.class</i>-файле соответствует один байт (собственно, отсюда и происходит
 			термин "байт-код"). Т.е. требуется лишь заметить в файле один-единственный байт. Но какой именно? <em>javap</em> ничего не говорит от том, 
-			где в <i>.class</i>-файле находится строка №138. По-хорошему, на этом этапе пора взять в руки дизассемблер. Он 
-			сопоставит "ассемблерный" код в стиле <em>javap</em> с реальным байт-кодом и выдаст расположение заветной инструкции в <i>.class</i>-файле.
-			Но мы не хакеры, а ламеры. И мы не будем пользоваться дизассемблером и прочими штуками. А вернемся... к методу грубой силы!
+			где в <i>.class</i>-файле находится строка №138. На этом этапе пора взять в руки дизассемблер. Он 
+			сопоставит ассемблерный код в стиле <em>javap</em> с реальным байт-кодом и выдаст расположение заветной инструкции в <i>.class</i>-файле.
+			Но мы не хакеры, а ламеры. И мы не будем пользоваться дизассемблером и прочими штуками, а вернемся... к методу грубой силы!
 			
 		<p>
 			Как следует из 
@@ -373,7 +370,7 @@ Sorry, the serial you've entered is invalid.
 </pre>
 		
 		<p>
-			Так что идеального патча не получилось. Ну и ладно. Как бы то ни было, мы победили Crackme почти голыми руками. И хоть 
+			Ну и ладно. Как бы то ни было, мы победили Crackme почти голыми руками. Хоть 
 			процесс "взлома" выглядит смешным (и бесполезным с практической точки зрения), он лишний раз подтверждает, что 
 			возможности полного перебора не стоит недооценивать.
 		
