@@ -170,7 +170,6 @@ App.class.strings.txt</a>):
 <h4 id="listing-2">Листинг 2 - Байт-код программы</h4>		
 <pre>
 $ javap -v App.class
-
 ...
        133: ldc           #19                 // String qwerty
        135: invokestatic  #20                 // Method java/util/Objects.equals:(Ljava/lang/Object;Ljava/lang/Object;)Z
@@ -244,7 +243,10 @@ ifne opcode = 0x9a (154)
 
 <h4 id="illustration-1">Рисунок 1 - Байт 0x99 в .class-файле</h4>
 <p>
-	<img src="illustrations/bytecode.png">
+	<img 
+	alt="скриншот эмулятора терминала с результатом выполнения команды `$ xxd App.class | grep -C 5 99'"
+	width="480px"
+	src="illustrations/bytecode.png">
 			
 		<p>
 			Всего два вхождения! Стоит ли ради них запускать дизассемблер? Вряд ли. Проще пропатчить сначала первого 
