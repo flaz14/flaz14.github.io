@@ -29,6 +29,10 @@ class Settings:
 	@staticmethod
 	def default_encoding():
 		return 'utf-8'
+		
+	@staticmethod
+	def milestone_percents():
+		return 1
 
 
 def eprint(*args, **kwargs):
@@ -54,18 +58,14 @@ def logged(obj, message = None):
 
 
 class ProgressIndicator:
-	@staticmethod
-	def milestone_percents():
-		return 1
-	
 	def __init__(self, total):
 		self.total = total
-		self.last_milestone_percents = ProgressIndicator.milestone_percents()
+		self.last_milestone_percents = Settings.milestone_percents()
 	
 	def indicate(self, current, message = ''):
 		percents = int(current / self.total * 100)
 		if percents >= self.last_milestone_percents:
-			self.last_milestone_percents += ProgressIndicator.milestone_percents()
+			self.last_milestone_percents += Settings.milestone_percents()
 			indicator = '{} {:4}%'.format(message, percents)
 			eprint(indicator)
 
@@ -86,6 +86,35 @@ class AptCacheCommand:
 			'pkgnames'
 		]
 
+class AptGetCommand:
+	@staticmethod
+	def printUrisDownload(package_name, package_version):
+		return [
+			'apt-get',
+			'--print-uris',
+			'download',
+			'{}={}'.format(package_name, package_version)
+		]
+	
+	@staticmethod
+	def printUrisSource(package_name, package_version):
+		return [
+			'apt-get',
+			'--print-uris',
+			'source',
+			'{}={}'.format(package_name, package_version)
+		]
+
+
+def all_packages_names():
+	return str(
+		subprocess.check_output(
+			AptCacheCommand.search(),
+			stdin = subprocess.DEVNULL
+		),
+		Settings.default_encoding()
+	).splitlines()
+
 
 def all_packages_versions(package_names):
 	def versions(versions_strings):
@@ -93,12 +122,9 @@ def all_packages_versions(package_names):
 		Version is the first word in the string. It's separated from the following words by space. So it's pretty easy 
 		to extract version of a package without using regular expression.
 		"""
-		result = []
 		for string in versions_strings:
-			result.append(
-				string.split(' ')[0]
-			)
-		return result
+			version = string.split(' ')[0]
+			yield version
 
 	def versions_strings(versions_text):
 		def top_version_string(versions_sections):
@@ -114,12 +140,9 @@ def all_packages_versions(package_names):
 			In case of other sections (except the first one) version is located at the first line.
 			"""
 			remaining_sections = versions_sections[1:]
-			result = []
 			for section in remaining_sections:
-				result.append(
-					section.splitlines()[0]
-				)
-			return result
+				version_string = section.splitlines()[0]
+				yield version_string
 	
 		"""
 		Usually, there are several versions of the same package in repository. Each version is printed by `apt-cache' at
@@ -131,7 +154,7 @@ def all_packages_versions(package_names):
 		"""
 		versions_sections = versions_text.split('\n\n')
 		return	[top_version_string(versions_sections)] +\
-				remaining_versions_strings(versions_sections)
+				list(remaining_versions_strings(versions_sections))
 
 	def package_versions(package_name):
 		def versions_text(package_name):
@@ -166,8 +189,7 @@ def all_packages_versions(package_names):
 	
 	progress_indicator = ProgressIndicator(
 		len(package_names)
-	)
-	result = {}
+	)	
 	for package_name, package_counter in zip(
 		package_names, 
 		range(
@@ -181,46 +203,36 @@ def all_packages_versions(package_names):
 					'versions' : package_versions(package_name)
 				}
 			)
-		result[package_name] = package_versions(package_name)
 		progress_indicator.indicate(package_counter, 'Collecting packages...')
-		break # TODO it's for debuggin, please remove later
-	return result
+		yield {
+			'name' : package_name,
+			'versions' : package_versions(package_name)
+		}
 
 
-def all_packages_names():
-	return str(
-		subprocess.check_output(
-			AptCacheCommand.search(),
-			stdin = subprocess.DEVNULL
-		),
-		Settings.default_encoding()
-	).splitlines()
-
-
-def sorted_packages(packages):
-	result = []
-	for name in sorted(packages.keys()):
-		versions = sorted(packages[name])
-		result.append(
-			{
-				'name' : name,
-				'versions' : versions
-			}
-		)
-	return result
-
-
-def print_packages(packages):
+def packages_uris(packages):
 	for package in packages:
 		for version in package['versions']:
-			print(
-				'{} {}'.format(package['name'], version)
+			all_output = str(
+				subprocess.check_output(
+					AptGetCommand.printUrisDownload(package['name'], version),
+					stdin = subprocess.DEVNULL
+				),
+				Settings.default_encoding()
 			)
+			only_uri = all_output.split(' ')[0].replace("'", "")
+			yield logged(only_uri)
+
+
+def printed_uris(uris):
+	for uri in uris:
+		print(uri)
+	return uris
 
 
 def main():
-	print_packages(
-		sorted_packages(
+	printed_uris(
+		packages_uris(
 			all_packages_versions(
 				all_packages_names()
 			)
