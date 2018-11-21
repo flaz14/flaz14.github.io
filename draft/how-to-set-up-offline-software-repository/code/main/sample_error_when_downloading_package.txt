@@ -1,0 +1,14 @@
+Downloading source for package: [ajaxterm]
+Downloading .deb-file for package: [ajaxterm]
+Traceback (most recent call last):
+  File "../download-packages.py", line 111, in <module>
+    main()
+  File "../download-packages.py", line 107, in main
+    download_deb(package)
+  File "../download-packages.py", line 99, in download_deb
+    stderr = subprocess.DEVNULL
+  File "/usr/lib/python3.5/subprocess.py", line 626, in check_output
+    **kwargs).stdout
+  File "/usr/lib/python3.5/subprocess.py", line 708, in run
+    output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['apt-get', 'download', 'ajaxterm']' returned non-zero exit status 100

@@ -95,7 +95,8 @@ def download_deb(package_name):
 		AptGetCommand.download(
 			logged(package_name, 'Downloading .deb-file for package')
 		),
-		stdin = subprocess.DEVNULL
+		stdin = subprocess.DEVNULL,
+		stderr = subprocess.DEVNULL
 	)
 
 
