@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>R.I.P. payWave (three banks)</title>
+		<title>R.I.P. payWave</title>
 	</head>
 
 	<body>
@@ -19,366 +19,136 @@
 
 		<h1>
 			<a href="http://flaz14.github.io/rip-pay-wave/rip-pay-wave.html">
-				R.I.P. payWave (three banks)
+				R.I.P. payWave
 			</a>
 		</h1>
 		
-		<h3>[2019, December]</h3>
+		<h3>[2018, December]</h3>
 		
 		<h2>Intro</h2>
 		
 		<p>
-			We are living in the interconnected world. Credit cards had become so habitual. And new era of money wallets is coming: smartphones. 
+			This article was inspired by amazing 
+			<b>Karol Nowak</b>'s post: <a href="https://knowak.wordpress.com/2012/09/24/r-i-p-paypass-mbank/">R.I.P. PayPass (mBank)</a>. 
+			As for me (flaz14 or Flaz Fourteen)... I had written a lot of comments under the article. Now it's time to 
+			collect, summarize and sprinkle them with a bit of hands-on experience. 
 			
-		<p>
-			This article is was inspired by <a href="https://knowak.wordpress.com/2012/09/24/r-i-p-paypass-mbank/">R.I.P. PayPass (mBank)</a> post by 
-			<b>Karol Nowak</b>. As for me (flaz14 or Flaz Fourteen)... I had written a lot of comments under the article. Now it's time to 
-			collect and systematize them. And sprinkle them with a bit of hands-on experience. 
-			
-		<p>
-			Let's go!
-			
-		<p>
-			There are plenty of things to talk about how VISA payWave (or MasterCard PayPass) works. 
-
-		<p>
-			Байт-код Java, незамутненный обфускацией и прочими защитными мерами, несложен для понимания. Тем не менее,
-			взлом мало-мальски серьезной защиты, кроме аналитических способностей, требует навыков использования 
-			специальных инструментов: дизассемблеров, отладчиков и т.д. Об этом написано в блестящей серии из 4-х статей
-<a href="https://www.acloudtree.com/hacking-java-bytecode-for-programmers-part1-the-birds-and-the-bees-of-hex-editing/">
-Hacking Java Bytecode for Programmers</a>. В рамках же нашей заметки мы решим задачу полегче: вскроем простейший Crackme 
-			с использованием одних лишь подручных средств. А именно:
-			<ul>
-				<li>
-					утилиты <strong>javap</strong> из стандартного набора JDK:
-<pre>
-$ javap -version
-1.8.0_162
-</pre>
-					
-				<li>
-					шестнадцатеричного просмотрщика <strong>xxd</strong>:
-<pre>
-$ xxd -version
-xxd V1.10 27oct98 by Juergen Weigert
-</pre>
-
-				<li>
-					утилит командной строки <strong>printf</strong> и <strong>dd</strong>.
-			</ul>
-			
-		<p>
-			Утилита <strong>strings</strong> и самописный скрипт на Python послужат иллюстрации метода подбора, а не для 
-			манипуляций с байт-кодом.
+		<h2>Breaking the Wires</h2>
 		
 		<p>
-			Версии компилятора и среды выполнения Java соответствуют версии <em>javap</em>.
-		
-		<h2>SuperMega Application</h2>
-		
-		<p>
-			Ничего сложного в программе нет. Мы просто считываем с клавиатуры введенный пользователем серийный номер как 
-			строку. Затем сравниваем ее с эталонной и выводим на экран соответствующие сообщения.
-			
-<h4 id="listing-1">Листинг 1 - Исходный код программы</h4>
-<pre>
-import java.util.Scanner;
-import java.util.Objects;
-
-public class App {
-    private static final String VALID_SERIAL_NUMBER = "qwerty";	
-	
-    public static void main(String ignoredArgs[]) {
-        System.out.println( "****************************************\n" +
-                            "* SuperMega Application by flaz14 Inc. *\n" + 
-                            "****************************************\n" +
-                            "\n" + 
-                            "Hello, User!" + 
-                            "\n" + 
-                            "Please enter your Serial Number below\n" +
-                            "and hit ENTER: " + 
-                            "\n");
-        String rawSerialNumber = null;
-        try (Scanner keyboard = new Scanner(System.in, "UTF-8")) {
-            if (keyboard.hasNextLine())
-                rawSerialNumber = keyboard.nextLine();
-        }
-        if (rawSerialNumber == null) 
-            throw new IllegalStateException("Internal error: serialNumber " +
-                                            "should not be null.");
-        String serialNumber = rawSerialNumber.trim();
-        if ( Objects.equals(serialNumber, VALID_SERIAL_NUMBER) )
-            System.out.println( "\nCongratulations! You've successfully\n" +
-                                "activated your copy of the application.");
-        else 
-            System.out.println( "\nSorry, the serial you've entered is invalid.");
-    }
-}
-</pre>
-
-		<p>
-			Вот пример ввода неверного серийника:
-			
-<pre>
-$ javac App.java &amp;&amp; java App
-****************************************
-* SuperMega Application by flaz14 Inc. *
-****************************************
-
-Hello, User!
-Please enter your Serial Number below
-and hit ENTER: 
-
-12345
-
-Sorry, the serial you've entered is invalid.
-</pre>
-		
-		<h2>Brute Force</h2>
-		
-		<p>
-			Первая утилита, которую стоит запустить перед анализом какого-либо файла - это <em>strings</em> (полный 
-			вывод приведен в файле 
-<a href="https://github.com/flaz14/flaz14.github.io/blob/master/java-crackme/code/App.class.strings.txt">
-App.class.strings.txt</a>):
-			
-<pre>
-$ strings --all --bytes=3 App.class
-VALID_SERIAL_NUMBER
-Ljava/lang/String;
-ConstantValue
-&lt;init&gt;
-()V
-...
-</pre>			
-	
-		<p>
-			Строка <code>VALID_SERIAL_NUMBER</code> сразу наводит на мысль о том, что эталонный серийный номер "вшит" 
-			непосредственно в программу. А поскольку количество текстовых строк в нашем <i>.class</i>-файле ограничено 
-			(не больше сотни), есть смысл не ковыряться долго в байт-коде, выуживания ключ. А просто перебрать 
-			извлеченные с помощью утилиты <i>strings</i> строчки. Написанный на скорую руку Python-скрипт 
-<a href="https://github.com/flaz14/flaz14.github.io/blob/master/java-crackme/code/strings_bf.py">
-strings_bf.py</a> делает это:
-		
-<pre>
-$ ./strings_bf.py 
-String [qwerty] is valid serial number.
-</pre>
+			There is a plenty of details to talk about how VISA payWave (or MasterCard PayPass) works. Simply put, payWave is backed with antenna.
+			If you destroy antenna, you disable payWave. Karol Nowak discovered the wires with aid of x-rays.
+			That gives us clear image of antenna. As Karol said, an external flash light plus camera had did wonders too. Anyway, 
+			permanent "photo" of the internals of a card brings a lot of opportunities to study its structure.
+			But if you don't have x-rays tube or flash light and camera you can use domestic LED torch, it makes magic also
+			(especially when a torch is very bright). 
 			
 		<p>
-			<b>qwerty</b> и есть наш серийный номер (см. <a href="#listing-1">листинг 1</a>).
+			I directed the torch perpendicularly to the surface of the card. And saw solid lines inside the card 
+			(for better result it was done in dark room; torch was fitted closely to the surface as much as possible). 
+			Location of antenna was mostly the same as for <a href="https://knowak.files.wordpress.com/2012/09/mbank.jpg">mBank</a>. 
+			But connectors near the chip were more fat and long. 
+			Also, I noticed a thin line that had encircled the whole card, not only magnetic tape. 
+
+		<p>
+			I decided do not break thin line at the edge of the card because such a hole is mechanicaly unsafe.
+			And I didn't drill the card but pierced it with scorching needle (incidentally, I was afraid to overheat the chip by the needle).
 			
-		<p>
-			Конечно, это не настоящий взлом. Тем не менее, возможности полного перебора отметать полностью нельзя. В
-			конце-концов, перебор в режиме off-line - не такая уж безнадежная затея.
-			
-		<h2>Изучаем байт-код</h2>
-		
-		<p>
-			Посмотрим на байт-код глазами утилиты <em>javap</em> (полный вывод см. в файле 
-<a href="https://github.com/flaz14/flaz14.github.io/blob/master/java-crackme/code/App.class.strings.txt">
-App.class.strings.txt</a>):
+			As a result, I made four holes. In the illustration below you can see 
+			"patched" version of the card (holes are higlighted in red):
 
-<h4 id="listing-2">Листинг 2 - Байт-код программы</h4>		
-<pre>
-$ javap -v App.class
-...
-       133: ldc           #19                 // String qwerty
-       135: invokestatic  #20                 // Method java/util/Objects.equals:(Ljava/lang/Object;Ljava/lang/Object;)Z
-       138: ifeq          152
-       141: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;
-       144: ldc           #21                 // String \nCongratulations! You've successfully\nactivated your copy of the application.
-       146: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
-       149: goto          160
-       152: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;
-       155: ldc           #22                 // String \nSorry, the serial you've entered is invalid.
-       157: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
-       160: return
-...
-</pre>			
-
-		<p>
-			Строка №138 соответствует условному переходу к печати сообщения об ошибке. Чтобы направить программу в 
-			нужное русло, надо что-то сделать со строкой №138. Варианты:
-			<ol>
-				<li>
-					Cменить код операции с <code>ifeq</code> на антоним. Программа "проглотит" неверный серийный номер, 
-					поскольку перехода на строку №152 не произойдет. Т.е. проверка будет всегда проходить по "успешной" 
-					ветке выражения if-else, как будто бы мы написали в исходнике не:
-					
-<pre>
-if ( Objects.equals(serialNumber, VALID_SERIAL_NUMBER) )
-</pre>					
-
-		<p>
-			а:
-			
-<pre>
-if ( !Objects.equals(serialNumber, VALID_SERIAL_NUMBER) )
-</pre>
-					
-				<li>
-					Изменить цель перехода, т.е. превратить <code>152</code> в <code>141</code>. Это более экзотический
-					способ, нежели вышеприведенный, поскольку его нельзя выразить изменениями в исходном коде.
-			</ol>
-
-		<p>
-			Вообще, можно было бы убрать строчку №138 полностью, т.е. не делать ничего, а сразу выполнять следующую 
-			инструкцию (строка №141). Но это в теории. На практике из-за "пропажи" хоть одного байта "испортится" весь 
-			<i>.class</i>-файл. Для исправления ситуации придеться подгонять оставшийся байт-код (вставлять несколько 
-			<code>nop</code>'ов подряд что-ли?..). Так что наиболее перспективным выглядит первый способ.
-
-		<h2>Патчим байт-код</h2>
-			
-		<p>
-			Итак, мы решили подменить код операции. Каждому коду операции в <i>.class</i>-файле соответствует один байт 
-			(собственно, отсюда и происходит термин "байт-код"). Т.е. требуется лишь заметить в файле один-единственный 
-			байт. Но какой именно? <em>javap</em> ничего не говорит от том, где в <i>.class</i>-файле находится строка 
-			№138. На этом этапе пора взять в руки дизассемблер. Он сопоставит ассемблерный код в стиле <em>javap</em> с 
-			реальным байт-кодом и выдаст расположение заветной инструкции в <i>.class</i>-файле. Но мы не хакеры, а 
-			ламеры. И мы не будем пользоваться дизассемблером и прочими штуками, а вернемся к... методу грубой силы!
-		
-		<p>
-			Как следует из 
-			<a href=
-			"https://en.wikipedia.org/wiki/Java_bytecode_instruction_listings">Java bytecode instruction listings</a>,
-			атнипод <strong>ifeq</strong> - это <strong>ifne</strong>. А их байтовые значения отличаются всего лишь на 
-			единицу:
-
-<pre>
-ifeq opcode = 0x99 (153)
-ifne opcode = 0x9a (154)
-</pre>
-
-		<p>
-			Посмотрим, где же в <i>.class</i>-файле находится байт <b>0x99</b>:
-
-<h4 id="illustration-1">Рисунок 1 - Байт 0x99 в .class-файле</h4>
+<h4>Illustration no. 1 - NOVACARD E0793-05/15</h4>
 <p>
-	<img 
-	alt="скриншот эмулятора терминала с результатом выполнения команды `$ xxd App.class | grep -C 5 99'"
-	width="480px"
-	src="illustrations/bytecode.png">
+	<img src="illustrations/cards/belinvestbank_front.jpg"
+	width="480px">
+	
+	<img src="illustrations/cards/belinvestbank_back.jpg"
+	width="480px">
 			
 		<p>
-			Всего два вхождения! Стоит ли ради них запускать дизассемблер? Вряд ли. Проще пропатчить сначала первого 
-			кандидата. Затем запустить программу, ввести какой-нибудь серийник и посмотреть, появится ли надпись об 
-			успешной активации. Если не появится (либо возникнет внештатная ситуация), перекомпилировать исходник и 
-			пропатчить второго претендента.
+			After modification, payWave didn't work in POS terminals. But chip and magnetic tape worked well in a variety of ATMs 
+			(but I never checked contactful methods in POS terminals).
 			
 		<p>
-			Для пущей атмосферы хакерства мы будем патчить байт-код прямо из комадной строки, без hex-редактора. Как это
-			делается, подсмотрим в ответе 
-			<a href="https://stackoverflow.com/a/5586379/4672928">
-			CLI: Write byte at address (hexedit/modify binary from the command line)</a>. Надо лишь узнать значение 
-			<strong>seek</strong>.
+			Another card had slightly different layout of the wires comparing to the former. Again, I discovered antenna with aid of 
+			LED torch and interrupted them. The needle pierced the card very easily! 
+			But I noticed quite thin wires there. 
+			While in the old card it was a bit challenging to break the wires. So I made only two holes at that time :)
 			
-		<p>
-			По умолчанию <em>xxd</em> выводит содержимое файла в режиме шестнадцати октетов	(один октет - восемь 
-			двоичных разрядов, т.е. один байт, если	говорить по-русски). А утилита <em>dd</em> принимает аргумент 
-			<code>seek</code> в десятичной форме. Чтобы найти <code>seek</code>, нужно взять смещение (смещения выделены
-			на <a href="#illustration-1">рисунке 1</a> зелеными рамками) и прибавить к нему номер столбика, в котором 
-			находится желаемый байт (считать столбики нужно начиная с нуля, а не с единицы). Для первого кандидата: 
-
-<pre>
-seek = 0x00000550 + 14 = 1360 + 14 = 1374
-</pre>
-
-		<p>
-			Для второго:
-			
-<pre>
-seek = 0x000005c0 + 11 = 1472 + 11 = 1483
-</pre>
-
-		<p>
-			Тогда наши "патчи" будут выглядеть так:
-			
-<pre>
-# Кандидат 1
-printf '\x9a' | dd of=App.class bs=1 seek=1374 count=1 conv=notrunc
-
-# Кандидат 2
-printf '\x9a' | dd of=App.class bs=1 seek=1483 count=1 conv=notrunc
-</pre>
-			
-		<p>
-			Перекомпилируем исходник и попробуем:
-			
-<pre>
-$ javac App.java
-
-$ printf '\x9a' | dd of=App.class bs=1 seek=1374 count=1 conv=notrunc
-1+0 records in
-1+0 records out
-1 byte copied, 0,000152817 s, 6,5 kB/s
-
-$ java App
-****************************************
-* SuperMega Application by flaz14 Inc. *
-****************************************
-
-Hello, User!
-Please enter your Serial Number below
-and hit ENTER: 
-
-invalid_serial_number   
-Exception in thread "main" java.lang.IllegalStateException: Internal error: serialNumber should not be null.
-	at App.main(App.java:23)
-</pre>
-
-		<p>
-			Что-то пошло не так :) Значит, первый кандидат не подходит. Возьмемся за второго:
-			
-<pre>
-$ javac App.java
-
-$ printf '\x9a' | dd of=App.class bs=1 seek=1483 count=1 conv=notrunc
-1+0 records in
-1+0 records out
-1 byte copied, 0,000219027 s, 4,6 kB/s
-
-$ java App
-****************************************
-* SuperMega Application by flaz14 Inc. *
-****************************************
-
-Hello, User!
-Please enter your Serial Number below
-and hit ENTER: 
-
-invalid_serial_number
-
-Congratulations! You've successfully
-activated your copy of the application.
-</pre>
-
-		<p>
-			Ура! Заработало!
-			
-		<h2>Конец</h2>
-
-		<p>
-			После патча подойдет любая строка, кроме изначально правильного ключа, т.е <i>qwerty</i>:	
-<pre>
-$ java App
-****************************************
-* SuperMega Application by flaz14 Inc. *
-****************************************
-
-Hello, User!
-Please enter your Serial Number below
-and hit ENTER: 
-
-qwerty
-
-Sorry, the serial you've entered is invalid.
-</pre>
+<h4>Illustration no. 2: NOVACARD C2226-08/17</h4>
+<p>
+	<img src="illustrations/cards/mtbank_front.jpg"
+	width="480px">
+	
+	<img src="illustrations/cards/mtbank_back.jpg"
+	width="480px">
+		
+		<h2>R.I.P. payWave &amp; POS &amp; ATM</h2>
 		
 		<p>
-			Ну и ладно. Как бы то ни было, мы победили Crackme почти голыми руками. Хоть процесс "взлома" выглядит 
-			смешным (и бесполезным с практической точки зрения), он лишний раз подтверждает, что возможности полного 
-			перебора не стоит недооценивать.
+			Recently I've got yet another card with payWave. The card is black. So it's hard to discover the antenna with aid 
+			of LED torch. I just didn't see the wires. Only thick wires around the chip were visible. So I decided to make only one hole and interrupt 
+			one of those fat wires:
+			
+<h4>Illustration no. 3: NOVACARD C1441-06/18</h4>
+<p>
+	<img src="illustrations/cards/technobank_front.jpg"
+	width="480px">
+	<img src="illustrations/cards/technobank_back.jpg"
+	width="480px">
+			
+		<p>
+			payWave didn't work after my patch (as expected). But POS terminals didn't work also: they simply 
+			squeak and cannot detect the card! Neither by chip, neither by magnetic tape (but I checked only chip-enabled POS terminals; probably, plain old 
+			terminal could accept modified card).
+		<p>
+			Typically, an ATM takes the card, prompts for PIN and throws an error after I entered PIN, something like 
+			"unexpected error occured" and emits the card. Only one ATM in the city accepts the card. The ATM has quite innovational card slot. You have to put the card not lengthwise but 
+			accros direction of insertion, like it's depicted on the illustration below (the image has been taken from 
+			<a href="https://xakep.ru/2015/03/18/diebold-bokom/">Антискимерский метод от Diebold: карту вставляют боком</a> article):
+			
+<h4>Illustration no. 4: Card Reader that Accepts a Card Across Direction of Insertion</h4>
+<p>
+	<img src="illustrations/reader_turned.png"
+	width="480px">
+		
+		<p>
+			It is a mark TODO find out at least manufacturer of the ATM Below is the photo of that heroic ATM:
+			
+<h4>Illustration no. 5: Heroic ATM</h4>
+			
+		<p>
+			What did I wrong? Seems that I made a hole very near from the chip. And 
+			the sensors inside an ATM (or POS terminal) don't "see" the card. Those sensors are optical, I think. Otherwise
+			how an ATM can detect a hole that's small (not larger than two millimeters) and decide that card isn't presented in 
+			the slot?
+
+		<h2>Outro</h2>
+			
+		<p>
+			Debit cards are more than just a piece of plastic with some little things fused into. You can get even more fun
+			with your contactless debit card. For example, you can dissolve plastic, extract chip and connect it to antenna
+			in the form of ring. Please start from <a href="https://habr.com/post/220819/">Внутренности карты Яндекс.Денег — MasterCard PayPass</a> article 
+			written by <b>BarsMonster</b>. Anyway, ring is more convinient for everyday use than card: 
+			you don't need to get a ring from your pocket or wallet,
+			ring is more durable than card, etc. Obviously, it's possible to mount a kind of "Activate" that button 
+			that enables payWave only when it's pressed 
+			and keeps antenna disabled otherwise. 
+		
+		<p>
+			I plan to make an experimental card with a lot of closable holes in it. And make some tests with such a punchcard in 
+			ATMs of my city. Stay tuned :)
+		
+		<p>
+			<b>PS</b> I've also tried to examine with LED torch other plastic cards. For example, my office security card has 
+			small chip in the corner connected to large fat circle in the middle. Plain-old debit cards don’t contain any wires lines.
+		
+		<p>
+			<b>PS2</b> In the card where card number (cardholder name, etc) is not flat you have to paint them out from the photo of back side 
+			of the card as well as of front side. Because relief symbols are still visible from the back.
+		
+		<p>
+			<b>PS3</b> Sorry for pure quality of the photos.
 		
 		<hr>
 
