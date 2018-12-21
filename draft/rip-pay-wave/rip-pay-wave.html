@@ -30,17 +30,17 @@
 		<p>
 			This article was inspired by amazing 
 			<b>Karol Nowak</b>'s post: <a href="https://knowak.wordpress.com/2012/09/24/r-i-p-paypass-mbank/">R.I.P. PayPass (mBank)</a>. 
-			As for me (flaz14 or Flaz Fourteen)... I had written a lot of comments under the article. Now it's time to 
+			As for me (flaz14 or Flaz Fourteen), I had written a lot of comments under the article. Now it's time to 
 			collect, summarize and sprinkle them with a bit of hands-on experience. 
 			
 		<h2>Breaking the Wires</h2>
 		
 		<p>
-			There is a plenty of details to talk about how VISA payWave (or MasterCard PayPass) works. Simply put, payWave is backed with antenna.
-			If you destroy antenna, you disable payWave. Karol Nowak discovered the wires with aid of x-rays.
-			That gives us clear image of antenna. As Karol said, an external flash light plus camera had did wonders too. Anyway, 
+			There is a plenty of details to talk about how Visa payWave (or MasterCard PayPass) works. Simply put, payWave is backed with antenna.
+			If you destroy antenna, you disable payWave. Karol Nowak discovered wires with aid of x-rays.
+			That gave us clear image of antenna. As Karol said, an external flash light plus camera had did wonders too. Anyway, 
 			permanent "photo" of the internals of a card brings a lot of opportunities to study its structure.
-			But if you don't have x-rays tube or flash light and camera you can use domestic LED torch, it makes magic also
+			But if you haven't x-rays tube or flash light and camera you can use domestic LED torch, it makes magic also
 			(especially when a torch is very bright). 
 			
 		<p>
@@ -70,7 +70,7 @@
 			(but I never checked contactful methods in POS terminals).
 			
 		<p>
-			Another card had slightly different layout of the wires comparing to the former. Again, I discovered antenna with aid of 
+			Another card had slightly different layout of wires comparing to the former. Again, I discovered antenna with aid of 
 			LED torch and interrupted them. The needle pierced the card very easily! 
 			But I noticed quite thin wires there. 
 			While in the old card it was a bit challenging to break the wires. So I made only two holes at that time :)
@@ -86,9 +86,9 @@
 		<h2>R.I.P. payWave &amp; POS &amp; ATM</h2>
 		
 		<p>
-			Recently I've got yet another card with payWave. The card is black. So it's hard to discover the antenna with aid 
+			Recently I've got yet another card with payWave. The card was black mostly. So it was hard to discover the antenna with aid 
 			of LED torch. I just didn't see the wires. Only thick wires around the chip were visible. So I decided to make only one hole and interrupt 
-			one of those fat wires:
+			one of those fat connectors:
 			
 <h4>Illustration no. 3: NOVACARD C1441-06/18</h4>
 <p>
@@ -98,54 +98,55 @@
 	width="480px">
 			
 		<p>
-			payWave didn't work after my patch (as expected). But POS terminals didn't work also: they simply 
-			squeak and cannot detect the card! Neither by chip, neither by magnetic tape (but I checked only chip-enabled POS terminals; probably, plain old 
+			payWave didn't work after my patch (as expected). But POS terminals didn't work also (simply 
+			squeak and reject the card)! Neither by chip, neither by magnetic tape 
+			(but I checked only chip-enabled POS terminals; probably, plain old 
 			terminal could accept modified card).
 		<p>
-			Typically, an ATM takes the card, prompts for PIN and throws an error after I entered PIN, something like 
-			"unexpected error occured" and emits the card. Only one ATM in the city accepts the card. The ATM has quite innovational card slot. You have to put the card not lengthwise but 
+			Typically, an ATM took the card, prompted for PIN, displayed an error after entering PIN (something like 
+			"unexpected error occured") and thrown out the card. Only one ATM in the city accepts the card. 
+			That ATM has quite innovational card reader. You must put the card not lengthwise but 
 			accros direction of insertion, like it's depicted on the illustration below (the image has been taken from 
-			<a href="https://xakep.ru/2015/03/18/diebold-bokom/">Антискимерский метод от Diebold: карту вставляют боком</a> article):
+			<a href="https://xakep.ru/2015/03/18/diebold-bokom/">Антискимерский метод от Diebold: карту вставляют боком</a> post):
 			
 <h4>Illustration no. 4: Card Reader that Accepts a Card Across Direction of Insertion</h4>
 <p>
 	<img src="illustrations/reader_turned.png"
 	width="480px">
-		
-		<p>
-			It is a mark TODO find out at least manufacturer of the ATM Below is the photo of that heroic ATM:
-			
-<h4>Illustration no. 5: Heroic ATM</h4>
 			
 		<p>
 			What did I wrong? Seems that I made a hole very near from the chip. And 
 			the sensors inside an ATM (or POS terminal) don't "see" the card. Those sensors are optical, I think. Otherwise
-			how an ATM can detect a hole that's small (not larger than two millimeters) and decide that card isn't presented in 
-			the slot?
+			how an ATM can detect a hole (that's small, not larger than two millimeters) and decide that card isn't presented in 
+			the reader?
 
 		<h2>Outro</h2>
 			
 		<p>
-			Debit cards are more than just a piece of plastic with some little things fused into. You can get even more fun
-			with your contactless debit card. For example, you can dissolve plastic, extract chip and connect it to antenna
-			in the form of ring. Please start from <a href="https://habr.com/post/220819/">Внутренности карты Яндекс.Денег — MasterCard PayPass</a> article 
+			Debit card is more than just a piece of plastic with some little things fused into. You can get even more fun
+			with your contactless card. For example, you can dissolve plastic, extract chip and connect it to antenna
+			in the form of ring. Please start from nice <a href="https://habr.com/post/220819/">Внутренности карты Яндекс.Денег — MasterCard PayPass</a> article 
 			written by <b>BarsMonster</b>. Anyway, ring is more convinient for everyday use than card: 
 			you don't need to get a ring from your pocket or wallet,
-			ring is more durable than card, etc. Obviously, it's possible to mount a kind of "Activate" that button 
+			ring is more durable than card, etc. Obviously, it's possible to mount a kind of "Activate" button 
 			that enables payWave only when it's pressed 
 			and keeps antenna disabled otherwise. 
 		
 		<p>
-			I plan to make an experimental card with a lot of closable holes in it. And make some tests with such a punchcard in 
+			As for future, I plan to make an experimental card with a lot of closable holes in it. And perform some tests with such a punchcard in 
 			ATMs of my city. Stay tuned :)
 		
 		<p>
-			<b>PS</b> I've also tried to examine with LED torch other plastic cards. For example, my office security card has 
-			small chip in the corner connected to large fat circle in the middle. Plain-old debit cards don’t contain any wires lines.
+			__________
 		
 		<p>
-			<b>PS2</b> In the card where card number (cardholder name, etc) is not flat you have to paint them out from the photo of back side 
-			of the card as well as of front side. Because relief symbols are still visible from the back.
+			<b>PS</b> I've also tried to examine other plastic cards with aid of LED torch. For example, my office security card has 
+			small chip in the corner that's connected to large fat circle in the middle. Obviously, plain-old debit cards don't contain any 
+			wires.
+		
+		<p>
+			<b>PS2</b> In case of a card where card number (card holder name, etc) is not flat you have to paint them out from the photo of back side 
+			as well as from front side. Because relief symbols are still visible on the back.
 		
 		<p>
 			<b>PS3</b> Sorry for pure quality of the photos.
