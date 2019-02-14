@@ -145,7 +145,7 @@ ConstantValue
 			непосредственно в программу. А поскольку количество текстовых строк в нашем <i>.class</i>-файле ограничено 
 			(не больше сотни), есть смысл не ковыряться долго в байт-коде, выуживания ключ. А просто перебрать 
 			извлеченные с помощью утилиты <i>strings</i> строчки. Написанный на скорую руку Python-скрипт 
-<a href="https://github.com/flaz14/flaz14.github.io/blob/master/java-crackme/code/strings_bf.py">
+<a href="https://github.com/flaz14/flaz14.github.io/blob/master/java/java-crackme/code/strings_bf.py">
 strings_bf.py</a> делает это:
 		
 <pre>
@@ -164,7 +164,7 @@ String [qwerty] is valid serial number.
 		
 		<p>
 			Посмотрим на байт-код глазами утилиты <em>javap</em> (полный вывод см. в файле 
-<a href="https://github.com/flaz14/flaz14.github.io/blob/master/java-crackme/code/App.class.strings.txt">
+<a href="https://github.com/flaz14/flaz14.github.io/blob/master/java/java-crackme/code/App.class.strings.txt">
 App.class.strings.txt</a>):
 
 <h4 id="listing-2">Листинг 2 - Байт-код программы</h4>		
