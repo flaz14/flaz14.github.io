@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Java и umask</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/java/#java-and-umask" title="Перейти к оглавлению">[BACK]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;				
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a href="https://flaz14.github.io/java/java-and-umask/java-and-umask.html">
+				Java и umask
+			</a>
+		</h1>
+
+		<h3>[2018, Апрель]</h3>
+			
+		<p>
+			В предыдущих ламерских заметках (<a 
+			href="https://flaz14.github.io/linux/wonderful-zip/wonderful-zip.html">Чудесный ZIP</a> и
+			<a href="https://flaz14.github.io/linux/umask-in-linuxmint/umask-in-linuxmint.html">
+			Что не так с umask в LinuxMint?</a>) затрагивалась тема назначения "правильных" разрешений на доступ к 
+			файлам в Linux. И все равно она не дает мне покоя. В этот раз посмотрим, насколько хороша Java в области 
+			работы с атрибутами файлов.
+
+		<p>
+			Набросаем простую программу, которая создает файл с правами доступа по-умолчанию:
+
+<pre>
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Set;
+import java.util.TreeSet;
+import java.io.IOException;
+
+public class DefaultPermissions {
+	public static void main(String args[]) throws IOException {
+		Path target = Paths.get("test.txt");
+		Files.createFile(target);
+		Set&lt;PosixFilePermission&gt; permissions = Files.getFileAttributeView(target, PosixFileAttributeView.class).
+			readAttributes().
+			permissions();
+		Set&lt;PosixFilePermission&gt; prettyPermissions = new TreeSet&lt;PosixFilePermission&gt;(permissions);
+		System.out.println(prettyPermissions);
+	}
+}
+</pre>
+
+		<p>
+			Для начала посмотрим на значение <i>umask</i>:
+
+<pre>
+$ umask 
+0002
+</pre>
+
+		<p>
+			Запустим программу (заодно прочитаем биты доступа посредством комадной строки):
+<pre>
+$ javac DefaultPermissions.java &amp;&amp; java DefaultPermissions &amp;&amp; ls -alh test.txt 
+[OWNER_READ, OWNER_WRITE, GROUP_READ, GROUP_WRITE, OTHERS_READ]
+-rw-rw-r-- 1 yura yura 0 Apr 24 13:40 test.txt
+</pre>
+
+		<p>
+			Значение <i>umask</i> 002 (о первой циферке забудем на время - это отдельная тема) дает 
+			пользователю и группе все права, а остальным не дает право на запись в файл. Но по-умолчанию ни одна (по 
+			крайней мере, известная) программа не назначает право на выполнение при создании файла. Вот мы и видим, что 
+			пользователю и группе разрешено чтение и запись, а всем остальным - только чтение. Изменим <i>umask</i> и 
+			попробуем еще раз:
+
+<pre>
+$ umask 0741
+
+$ javac DefaultPermissions.java &amp;&amp; java DefaultPermissions &amp;&amp; ls -alh test.txt 
+[GROUP_WRITE, OTHERS_READ, OTHERS_WRITE]
+-----w-rw- 1 yura yura 0 Apr 24 13:39 test.txt
+</pre>
+
+		<p>
+			Этот случай посложнее. Пользователю здесь запрещено все, группе запрещено чтение (право на выполнение, как
+			было сказано выше, не назначается автоматически).
+
+		<p>
+			Теперь попробуем назначить биты доступа самостоятельно: 
+			
+<pre>
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.FileAttribute;
+import java.util.Set;
+import java.util.TreeSet;
+import java.io.IOException;
+
+public class CustomPermissions {
+	public static void main(String args[]) throws IOException {
+		Path target = Paths.get("test.txt");
+		Set&lt;PosixFilePermission&gt; desiredPermissions = PosixFilePermissions.fromString("rw-rw----");
+		FileAttribute&lt;Set&lt;PosixFilePermission&gt;&gt; attribute = PosixFilePermissions.asFileAttribute(desiredPermissions);
+		Files.createFile(target, attribute); 
+		Set&lt;PosixFilePermission&gt; actualPermissions = Files.getFileAttributeView(target, PosixFileAttributeView.class).
+			readAttributes().
+			permissions();
+		Set&lt;PosixFilePermission&gt; prettyPermissions = new TreeSet&lt;PosixFilePermission&gt;(actualPermissions);
+		System.out.println(prettyPermissions);
+	}
+}
+</pre>
+
+		<p>
+			Установим экзотическое значение <i>umask</i> и проверим действительные права доступа:
+
+<pre>
+$ umask 0741
+
+$ javac CustomPermissions.java &amp;&amp; java CustomPermissions &amp;&amp; ls -alh test.txt
+[GROUP_WRITE]
+-----w---- 1 yura yura 0 Apr 24 13:54 test.txt
+</pre>
+
+		<p>
+			В Java-коде мы задавали	права <tt>rw-rw----</tt>... Теперь посчитаем (для удобства восприятия всевозможные 
+			представления сведены в таблицу):
+		
+			<table>
+				<tr>
+					<th>
+					
+					<th>
+						Восьмеричное
+					<th>
+						Двоичное
+					<th>
+						Символьное
+					
+				<tr>
+					<td>
+						umask
+					
+					<td>
+						<tt>741</tt>
+					<td>
+						<tt>111 100 001</tt>
+					<td>
+						<tt>rwx r-- --x</tt>
+					
+				<tr>
+					<td>
+						Java
+					<td>
+						<tt>660</tt>
+					<td>
+						<tt>110 110 000</tt>
+					<td>
+						<tt>rw- rw- ---</tt>
+				
+				<tr>
+					<td>
+						Итог
+					<td>
+						<tt>020</tt>
+					<td>
+						<tt>000 010 000</tt>
+					<td>
+						<tt>--- -w- ---</tt>
+			</table>
+		
+		<p>
+			Как видим, все сходится. Java уважает <i>umask</i>. Так что респект Java!
+		
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">[UP]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>

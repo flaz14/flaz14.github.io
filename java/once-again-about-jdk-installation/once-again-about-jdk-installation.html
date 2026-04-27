@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Еще раз об установке JDK</title>
+	</head>
+	<body>
+		<h1>
+			<big>
+				<a href="/java/#once-again-about-jdk-installation" title="Перейти к оглавлению">[BACK]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+			</big>
+		</h1>
+		
+		<hr>
+		
+		<h1>
+			<a href=
+			"https://flaz14.github.io/java/once-again-about-jdk-installation/once-again-about-jdk-installation.html">
+				Еще раз об установке JDK
+			</a>
+		</h1>
+		
+		<h3>[2016, Ноябрь]</h3>
+			
+		<h2>Скачиваем</h2>
+		
+		<p>
+			Зайдем на официальный сайт <a href="http://www.oracle.com">Oracle</a>. Затем наведем курсор на 
+			<strong>Downloads</strong> и в выпадающем списке нажмем на <strong>Java for Developers</strong>. Далее
+			нажмем на большую кнопку с логотипом Java и подписью <strong>Java Platform (JDK) xxx / yyy</strong>. 
+			Откроется страничка с таблицей для разных ОС и архитектур. Например, для <i>Linux x86</i> предлагается 
+			скачать <i>rpm</i>-пакет или тарбол. Для Ubuntu <i>rpm</i>-пакет не подходит (да, преобразовать <i>rpm</i> 
+			в <i>deb</i> возможно, но лучше этого не делать). Так что скачаем тарбол 
+			(<i>jdk-8u111-linux-i586.tar.gz</i>). Все, у нас есть официальный дистрибутив: не из зеркала или 
+			репозитория, а от самой Oracle (правда, контрольную сумму для скачанного архива придется проверить вручную).
+			
+		<h2>Распаковываем</h2>
+		
+		<p>
+			Теперь надо распаковать тарбол и разобраться с переменными окружения. В большинстве случаев достаточно 
+			добавить подкаталог <i>bin</i> распакованного JDK в переменную окружения <strong>PATH</strong>. Не помешает и 
+			новая переменная окружения <strong>JAVA_HOME</strong>, которая указывает на распакованный JDK. Так что 
+			добавим в <i>~/.profile</i>:
+<pre>
+export JAVA_HOME=/path/to/unpacked/jdk
+export PATH=$JAVA_HOME/bin:$PATH
+</pre>
+
+		<p>
+			Тарбол же можно распаковать в <i>~/bin</i>. А можно и в <i>/usr/local/java</i>, к примеру. Достоинство 
+			последнего подхода - никто, кроме <strong>root</strong>, не сможет изменить файлы установленного JDK. Также 
+			есть смысл создать в каталоге с установленным JDK подкаталог <i>src</i> и в него распаковать содержимое 
+			файла <i>src.zip</i>. Эта возня с лихвой окупится, когда понадобится быстро взглянуть на исходный код 
+			стандартной библиотеки Java (например, с помощью <code>grep</code>) или даже открыть код в текстовом 
+			редакторе с графическим интерфейсом, не боясь при этом что-либо испортить.
+			
+		<p>
+			Пусть мы скачали JDK в <i>~/Downloads</i>. Теперь, чтобы поместить содержимое тарбола в 
+			<i>/usr/local/java</i>, достаточно выполнить (от имени <strong>root</strong>, естественно):
+<pre>
+david$ sudo tar \
+    --extract \
+    --directory /usr/local/java/ \
+    --file ~/Downloads/jdk-8u111-linux-i586.tar.gz
+</pre>
+
+		<p>
+			Вроде бы все готово. Посмотрим на результат:
+<pre>
+drwxr-xr-x  8 uucp  143 4,0K Sep 23 02:27 jdk1.8.0_111
+</pre>
+
+		<p>
+			Владелец почему-то <code>uucp</code>, а группа вообще без имени (<code>grep '143' /etc/group</code> ничего 
+			не находит). Ничего удивительного тут нет: поскольку <strong>tar</strong> был запущен с правами 
+			<strong>root</strong>, он распаковал тарбол таким, каким он был (у обычного пользователия так бы не 
+			получилось). Это, конечно же, никуда не годится. Не потому что странные права доступа угрожают безопасности 
+			компьютера, а потому что они просто некрасивые.
+
+		<h2>Перераспаковываем</h2>
+					
+		<p>
+			Что ж, попробуем исправиться:
+<pre>
+david$ tar \
+    --extract \
+    --directory /tmp \
+    --file ~/Downloads/jdk-8u111-linux-i586.tar.gz \
+&& \
+    sudo mv /tmp/jdk1.8.0_111 /usr/local/java
+</pre>
+
+		<p>
+			Посмотрим, что получилось:
+<pre>
+drwxr-xr-x  8 david david 4,0K Sep 23 02:27 jdk1.8.0_111
+</pre>
+		<p>
+			Опять не то, что надо. Хотя все предсказуемо: распаковали тарбол мы от имени обычного пользователя
+			(<strong>david</strong>), а переместили получившиеся файлы от имени <strong>root</strong> (который заботливо
+			сохранил оригинальные права доступа).
+			
+		<p>
+			Усложним команду, чтобы уж наверняка получилось:
+<pre>
+david$ tar \
+    --extract \
+    --directory /tmp \
+    --file ~/Downloads/jdk-8u111-linux-i586.tar.gz \
+&& \
+    sudo cp --recursive /tmp/jdk1.8.0_111 /usr/local/java \
+&& \
+    rm -rf -- /tmp/jdk1.8.0_111/
+</pre>
+
+		<p>
+			Действительно, результат - что надо:
+<pre>
+drwxr-xr-x  8 root root 4,0K Dec  3 15:25 jdk1.8.0_111
+</pre>
+		
+		<p>Но длинная команда расстраивает, особенно присутствие в ней <code>rm -rf</code>...
+			
+		<h2>Все намного проще</h2>
+		
+		<p>
+			У <strong>tar</strong> есть переключатели, которые значительно упрощают жизнь:
+			<blockquote>
+				<p>
+					<code>--no-same-owner</code><br>
+					extract files as yourself (default for ordinary users)
+	
+				<p>	
+					<code>--no-same-permissions</code><br>
+					apply the user's umask when extracting permissions from the archive (default for ordinary users)
+			</blockquote>
+
+		<p>
+			Применим их:
+
+<pre>
+david$ sudo tar \
+	--extract \
+	--directory /usr/local/java/ \
+	--no-same-owner \
+	--no-same-permissions \
+	--file ~/Downloads/jdk-8u111-linux-i586.tar.gz
+</pre>
+			
+		<p>
+			Получилось:
+<pre>
+drwxr-xr-x  8 root root 4,0K Sep 23 02:27 jdk1.8.0_111
+</pre>
+
+		<p>
+			И напоследок:
+<pre>
+david$ java -version
+java version "1.8.0_111"
+Java(TM) SE Runtime Environment (build 1.8.0_111-b14)
+Java HotSpot(TM) Server VM (build 25.111-b14, mixed mode)
+
+david$ javac -version
+javac 1.8.0_111
+</pre>
+			
+		<p>
+			Все OK!
+			
+		<hr>
+			
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">[UP]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>

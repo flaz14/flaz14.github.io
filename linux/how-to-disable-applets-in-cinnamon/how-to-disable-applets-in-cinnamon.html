@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Как "отключить" апплеты, десклеты и расширения Cinnamon</title>
+	</head>
+	
+	<body>
+		<h1>
+			<big>
+				<a href="/linux/#how-to-disable-applets-in-cinnamon" title="Перейти к оглавлению">[BACK]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+			</big>
+		</h1>
+
+		<hr>
+		
+		<h1>
+			<a href=
+		"https://flaz14.github.io/linux/how-to-disable-applets-in-cinnamon/how-to-disable-applets-in-cinnamon.html">
+				Как "отключить" апплеты, десклеты и расширения Cinnamon
+			</a>
+		</h1>
+		
+		<h3>[2016, Август]</h3>
+		
+		<p>
+			Апплеты, десклеты и расширения - это часть рабочего стола Cinnamon. Например, часы на панели задач и 
+			индикатор раскладки клавиатуры - это апплеты. В принципе, отключить их можно. Например, "неудаляемые" 
+			апплеты и десклеты находятся в каталогах <i>/usr/share/cinnamon/applets</i>	и 
+			<i>/usr/share/cinnamon/desklets</i> соответственно. Даже если после удаления содержимого этих каталогов 
+			Cinnamon заработает без сбоев, придеться искать замену апплетам (вряд ли сторонние программы подойдут, 
+			большинство из них рассчитаны на рабочую среду Gnome, а Cinnamon, хоть и наследник Gnome, все же отличается 
+			от своего предшественника)... Кроме того, они могут вернуться после обновления системы (потому что при 
+			обновлении файлы обычно перезаписываются).
+
+		<p>
+			А вот избавить отдельно взятого пользователя от новых апплетов, десклетов и расширений можно: 
+
+		<p>
+			<ol>
+				<li>
+					Добавляем в систему нового пользователя, под которым нельзя будет залогиниться 
+					<sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>. Например, создадим пользователя
+					<strong>mycinnamon</strong> (вместе с пользователем будет создана одноименная группа):
+
+<p>
+<pre>
+sudo adduser       \
+  --disabled-login \
+  --no-create-home \
+  --debug          \
+  mycinnamon
+</pre>
+
+				<li>
+					Удаляем все апплеты, десклеты и расширения с помощью GUI. Затем, для большей уверенности, очищаем 
+					каталоги  <i>~/.local/share/cinnamon/applets</i>, <i>~/.local/share/cinnamon/desklets</i> и 
+					<i>~/.local/share/cinnamon/extensions</i> (сами каталоги не трогаем).
+
+				<li>
+					Назначаем нового владельца для каталога <i>~/.local/share/cinnamon</i>:
+<p>
+<pre>
+sudo chown --recursive mycinnamon:mycinnamon ~/.local/share/cinnamon && \
+sudo chmod --recursive 555                   ~/.local/share/cinnamon
+</pre>
+			</ol>
+
+		<p>
+			Все, теперь только пользователь <strong>mycinnamon</strong> может манипулировать апплетами, десклетами и 
+			расширениями рабочего стола Сinnamon. 
+
+		<p>
+			__________
+			<ol>
+				<li id="footnote-1-bottom">
+					<p>
+						<a href="#footnote-1-top" title="Перейти к основному тексту">[UP]</a>
+						Можно было просто назначить <strong>root</strong> в качестве владельца 
+						<i>~/.local/share/cinnamon</i>. Но, по-моему, лучше назначить нового пользователя. Так будет 
+						понятно, что <strong>root</strong> здесь ни при чем (оставим ему системные настройки).
+			</ol>
+			
+		<hr>
+		
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">[UP]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>

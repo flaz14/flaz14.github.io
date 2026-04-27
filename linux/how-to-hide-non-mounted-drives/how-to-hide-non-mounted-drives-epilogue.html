@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Несмонтированные диски - с глаз долой. Эпилог</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/linux/#how-to-hide-non-mounted-drives" title="Перейти к оглавлению">[BACK]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a 
+href="https://flaz14.github.io/linux/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-epilogue.html">
+				Несмонтированные диски - с глаз долой. Эпилог
+			</a>
+		</h1>
+		
+		<h3>[2017, Февраль]</h3>
+		
+		<h3>
+			<a href="how-to-hide-non-mounted-drives-part-1.html">Часть 1</a>
+			|
+			<a href="how-to-hide-non-mounted-drives-part-2.html">Часть 2</a>
+			|
+			<a href="how-to-hide-non-mounted-drives-part-3.html">Часть 3</a>
+			|
+			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/linux/how-to-hide-non-mounted-drives/code">
+				Исходный код
+			</a>
+		</h3>
+
+		<h2>Планируем</h2>
+
+		<p>
+			Как уже было сказано в <a href="how-to-hide-non-mounted-drives-part-3.html#footnote-2-bottom">части 3</a>, 
+			не только файловый менеджер, но и любая другая программа может показывать пользователю несмонтированные 
+			тома. Так, Firefox отображает несмонтированные тома на левой панели диалога открытия/сохранения файла. Чтобы 
+			продемонстрировать это, возьмем все ту же флешку, подключим ее, размонтируем том с меткой <i>8_ext</i>, а 
+			том с меткой <i>8_ntfs</i> оставим смонтированным. Запустим Firefox, перейдем на какой-нибудь сайт и 
+			попробуем сохранить страничку. Увидим картину, приведенную на <a href="#illustration-1">рисунке 1</a>.
+		
+		<h4 id="illustration-1">
+			Рисунок 1 - Firefox отображает несмонтированный том на боковой панели диалога сохранения файла
+		</h4>
+		<p>
+			<img src="illustrations/firefox-Save-As-dialog-without-hook.png" width="640px"
+			alt="скриншот диалога сохранения файла Firefox">
+			
+		<p>
+			Нет ничего плохого в том, что Firefox показывает несмонтированный том. Но, поскольку я использую Firefox 
+			часто, меня это не сильно радует (и особенно расстраивает, когда отображется раздел, зарезервированный для 
+			PAM USB, но PAM USB - это отдельная тема).
+			
+		<p>
+			Что ж, поиграем в прятки. "Глобальный" hook сделать можно (например, на уровне модуля ядра). Да, придеться 
+			повозиться. Затраченные усилия не оправдают результат. Поэтому воспользуемся известным трюком с перехватом
+			функции, расположенной в разделяемой библиотеке. Я не стал смотреть исходный код Firefox, потому что значок 
+			извлечения напротив тома с меткой <i>8_ntfs</i> выглядит точно так же (ну почти), как в случае c
+			<a href="how-to-hide-non-mounted-drives-part-1.html#illustration-1-1">Nemo</a>. Кроме того, Firefox вроде бы
+			построен на библиотеке Gtk...
+			
+		<h2>Пробуем</h2>
+		
+		<p>
+			Hook оставим неизменным. Не будем переделывать Makefile. Сделаем лишь новый
+			<a 
+href="https://github.com/flaz14/flaz14.github.io/blob/master/linux/how-to-hide-non-mounted-drives/code/firefox">
+			скрипт-обертку</a>. Просто скопипастим обертку для Nemo и заменим <tt>nemo</tt> на <tt>firefox</tt>. 
+			Остается только поместить его <i>~/bin</i> и сделать исполняемым.
+
+		<p>
+			Запустим Firefox посредством обертки и получим картину, приведенную на 
+			<a href="#illustration-2">рисунке 2</a>.
+		
+		<h4 id="illustration-2">
+			Рисунок 2 - Firefox не отображает несмонтированные тома при использовании hook'а
+		</h4>
+		<p>
+			<img src="illustrations/firefox-Save-As-dialog-with-hook.png" width="640px"
+			alt="скриншот диалога сохранения файла Firefox">
+		
+		<p>
+			Том с меткой <i>8_ext</i> исчез! Результат, как говорится, превзошел все ожидания.
+			
+		<h2>Разочаровываемся</h2>
+		
+		<p>
+			Трюк с подменой функции помогает во многих ситуациях. Но этот прием ненадежный. Очевидно, что Firefox может быть запущен не посредством скрипта-обертки, а напрямую. Запустим Firefox c помощью обертки и проверим
+			значение <code>LD_PRELOAD</code>:
+<pre>
+$ ~/bin/firefox &amp;
+$ ps auxe | grep 'firefox' | grep 'LD_PRELOAD'
+</pre>
+		<p>
+			и получим (большая часть вывода опущена):		
+<pre>
+yura      8195 ... pts/5 ... /usr/lib/firefox/firefox ... LD_PRELOAD=/home/yura/bin/libnemohook.so ...
+</pre>
+
+		<p>
+			Если же запустить Firefox напрямую, т.е. <code>$ /usr/bin/firefox &amp;</code>, то в <code>LD_PRELOAD</code> 
+			будет пусто, и наш hook не будет принят во внимание.
+		
+		<p>
+			Я пытался проверить эту ситуацию в действии. А именно: пытался заставить Firefox запустить еще один Firefox 
+			(например, при открытии нового окна в режиме инкогнито), т.е. чтобы Firefox запустил <b>новый</b> процесс. 
+			И затем посмотреть, сохранилось ли значение <code>LD_PRELOAD</code> у нового процесса. У меня не получилось:
+			Firefox при открытии нового окна не создает новый процесс. То же наблюдается и для файлового менеджера Nemo.
+			Чисто теоретически можно утверждать, что программа может запускать другие программы как ей будет угодно. 
+			Например, как команду оболочки с сохранением переменных окружения, в том числе <code>PATH</code> (в этом 
+			случае, скорее всего, сначала запустится наш скрипт-обертка, а уже за ним - программа). Но переменные 
+			окружения могут быть очищены перед запуском дочернего процесса. Много нюансов есть и с системыми вызовами, 
+			такими как <code>execve()</code>. И конечно же, защита наподобие 
+			<a href="http://wiki.apparmor.net/index.php/Main_Page">AppArmor</a> может запрещать загружать библиотеки 
+			откуда попало, а только из системных каталогов, таких как <i>/usr/lib</i>. В последнем случае Firefox 
+			заработает, но hook загружен не будет, а в терминале появится сообщение вроде:
+<pre>
+ERROR: ld.so: object '/home/yura/bin/libnemohook.so' from LD_PRELOAD cannot be preloaded (cannot open shared object file): ignored.	
+</pre>			
+		
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">[UP]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>

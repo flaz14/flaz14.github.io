@@ -1,0 +1,31 @@
+Package: account-plugin-yahoojp
+Versions: 
+3.8.6-0ubuntu9.2 (/var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty-updates_universe_binary-amd64_Packages)
+ Description Language: 
+                 File: /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty-updates_universe_binary-amd64_Packages
+                  MD5: 5b9e183dfbe3fc188956eef1beaa6f59
+ Description Language: en
+                 File: /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty-updates_universe_i18n_Translation-en
+                  MD5: 5b9e183dfbe3fc188956eef1beaa6f59
+
+3.8.6-0ubuntu9 (/var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty_universe_binary-amd64_Packages)
+ Description Language: 
+                 File: /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty_universe_binary-amd64_Packages
+                  MD5: 1ecd1bf9e21c0366f391db33ef3fc1f3
+ Description Language: en
+                 File: /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_trusty_universe_i18n_Translation-en
+                  MD5: 1ecd1bf9e21c0366f391db33ef3fc1f3
+
+
+Reverse Depends: 
+  account-plugin-yahoojp:i386,account-plugin-yahoojp
+  mcp-account-manager-uoa,account-plugin-yahoojp
+  account-plugin-yahoojp:i386,account-plugin-yahoojp
+  mcp-account-manager-uoa,account-plugin-yahoojp
+Dependencies: 
+3.8.6-0ubuntu9.2 - empathy (5 3.8.6-0ubuntu9.2) telepathy-haze (0 (null)) mcp-account-manager-uoa (0 (null)) unity-asset-pool (4 0.8.24daily13.03.20.1) account-plugin-empathy (0 (null)) account-plugin-empathy:i386 (0 (null)) account-plugin-empathy (0 (null)) account-plugin-empathy:i386 (0 (null)) account-plugin-yahoojp:i386 (0 (null)) 
+3.8.6-0ubuntu9 - empathy (5 3.8.6-0ubuntu9) telepathy-haze (0 (null)) mcp-account-manager-uoa (0 (null)) unity-asset-pool (4 0.8.24daily13.03.20.1) account-plugin-empathy (0 (null)) account-plugin-empathy:i386 (0 (null)) account-plugin-empathy (0 (null)) account-plugin-empathy:i386 (0 (null)) account-plugin-yahoojp:i386 (0 (null)) 
+Provides: 
+3.8.6-0ubuntu9.2 - 
+3.8.6-0ubuntu9 - 
+Reverse Provides: 

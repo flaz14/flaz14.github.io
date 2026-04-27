@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# This is a simple wrapper for Nemo that helps to intercept Gnome library function, but looks exactly as original 
+# application.
+
+# We need to transfer all command-line arguments from this wrapper to original Nemo.
+LD_PRELOAD=~/bin/libnemohook.so /usr/bin/nemo "$@"

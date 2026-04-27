@@ -1,0 +1,57 @@
+Ign http://archive.canonical.com trusty InRelease
+Ign http://extra.linuxmint.com rebecca InRelease
+Ign http://packages.linuxmint.com rebecca InRelease
+Ign http://archive.ubuntu.com trusty InRelease
+Hit http://archive.canonical.com trusty Release.gpg
+Hit http://extra.linuxmint.com rebecca Release.gpg
+Hit http://packages.linuxmint.com rebecca Release.gpg
+Hit http://archive.ubuntu.com trusty-updates InRelease
+Hit http://archive.canonical.com trusty Release
+Hit http://security.ubuntu.com trusty-security InRelease
+Hit http://archive.ubuntu.com trusty Release.gpg
+Hit http://archive.canonical.com trusty/partner i386 Packages
+Hit http://security.ubuntu.com trusty-security/main i386 Packages
+Hit http://extra.linuxmint.com rebecca Release
+Hit http://packages.linuxmint.com rebecca Release
+Hit http://archive.ubuntu.com trusty-updates/main i386 Packages
+Hit http://archive.canonical.com trusty/partner Translation-en
+Hit http://security.ubuntu.com trusty-security/restricted i386 Packages
+Hit http://archive.ubuntu.com trusty-updates/restricted i386 Packages
+Hit http://security.ubuntu.com trusty-security/universe i386 Packages
+Hit http://archive.ubuntu.com trusty-updates/universe i386 Packages
+Hit http://packages.linuxmint.com rebecca/main i386 Packages
+Hit http://archive.ubuntu.com trusty-updates/multiverse i386 Packages
+Hit http://packages.linuxmint.com rebecca/upstream i386 Packages
+Hit http://extra.linuxmint.com rebecca/main i386 Packages
+Hit http://security.ubuntu.com trusty-security/multiverse i386 Packages
+Hit http://archive.ubuntu.com trusty-updates/main Translation-en
+Hit http://packages.linuxmint.com rebecca/import i386 Packages
+Hit http://archive.ubuntu.com trusty-updates/multiverse Translation-en
+Hit http://security.ubuntu.com trusty-security/main Translation-en
+Hit http://archive.ubuntu.com trusty-updates/restricted Translation-en
+Hit http://security.ubuntu.com trusty-security/multiverse Translation-en
+Hit http://archive.ubuntu.com trusty-updates/universe Translation-en
+Hit http://security.ubuntu.com trusty-security/restricted Translation-en
+Hit http://archive.ubuntu.com trusty Release
+Hit http://security.ubuntu.com trusty-security/universe Translation-en
+Hit http://archive.ubuntu.com trusty/main i386 Packages
+Hit http://archive.ubuntu.com trusty/restricted i386 Packages
+Hit http://archive.ubuntu.com trusty/universe i386 Packages
+Hit http://archive.ubuntu.com trusty/multiverse i386 Packages
+Hit http://archive.ubuntu.com trusty/main Translation-en
+Hit http://archive.ubuntu.com trusty/multiverse Translation-en
+Ign http://extra.linuxmint.com rebecca/main Translation-en_US
+Hit http://archive.ubuntu.com trusty/restricted Translation-en
+Hit http://archive.ubuntu.com trusty/universe Translation-en
+Ign http://extra.linuxmint.com rebecca/main Translation-en
+Ign http://archive.ubuntu.com trusty/main Translation-en_US
+Ign http://archive.ubuntu.com trusty/multiverse Translation-en_US
+Ign http://archive.ubuntu.com trusty/restricted Translation-en_US
+Ign http://archive.ubuntu.com trusty/universe Translation-en_US
+Ign http://packages.linuxmint.com rebecca/import Translation-en_US
+Ign http://packages.linuxmint.com rebecca/import Translation-en
+Ign http://packages.linuxmint.com rebecca/main Translation-en_US
+Ign http://packages.linuxmint.com rebecca/main Translation-en
+Ign http://packages.linuxmint.com rebecca/upstream Translation-en_US
+Ign http://packages.linuxmint.com rebecca/upstream Translation-en
+Reading package lists...

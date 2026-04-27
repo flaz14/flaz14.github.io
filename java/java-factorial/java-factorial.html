@@ -1,0 +1,224 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Три способа вычисления факториала на Java</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/java/#java-factorial" title="Перейти к оглавлению">[BACK]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a href="https://flaz14.github.io/java/java-factorial/java-factorial.html">
+				Три способа вычисления факториала на Java
+			</a>
+		</h1>
+		
+		<h3>[2018, Март]</h3>
+		
+		<h3>
+			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/java/java-factorial/code">Исходный код</a>
+		</h3>
+
+		<h2>Hello, World!</h2>
+
+		<p>
+			Задача вычисления факториала - это что-то вроде "Hello, World!", только в мире математики. Есть три способа
+			ее решения на Java: рекурсия, цикл и... снова рекурсия. 
+			
+		<p>
+			В примерах нет никаких проверок на отрицательные значения, нуль, выход за диапазон типа <code>int</code>. Но
+			это не так важно для этой ламерской заметки.
+		
+		<h2>Рекурсия</h2>	
+		
+		<p>
+			Этот способ все уже тыщу раз видели.
+
+<h4 id="listing-1">Листинг 1 - вычисление факториала рекурсивным способом</h4>
+<pre>
+public class FactorialRecursion {
+	public static void main(String ignored[]) {
+		System.out.println(
+			String.format("%3s: %15s\n", "n", "factorial(n)") + 
+			String.format("%3d: %15d\n", 1, factorial(1)) + 
+			String.format("%3d: %15d\n", 2, factorial(2)) +
+			String.format("%3d: %15d\n", 3, factorial(3)) + 
+			String.format("%3d: %15d\n", 4, factorial(4)) + 
+			String.format("%3d: %15d\n", 5, factorial(5)) + 
+			""
+		);
+	}
+	
+	private static int factorial(int n) {
+		if (n == 1) return 1;
+		return n * factorial(n - 1);
+	}
+}
+</pre>
+			
+		<p>
+			Запустим и получим:
+
+<pre>
+$ javac FactorialRecursion.java && java FactorialRecursion
+  n:    factorial(n)
+  1:               1
+  2:               2
+  3:               6
+  4:              24
+  5:             120
+</pre>
+
+		<h2>Цикл</h2>
+		
+		<p>
+			Цикл ненамного сложнее рекурсии. А может, даже легче для понимания.
+
+<h4 id="listing-2">Листинг 2 - вычисление факториала с помощью цикла</h4>
+<pre>
+public class FactorialLoop {
+	public static void main(String ignored[]) {
+		System.out.println(
+			String.format("%3s: %15s\n", "n", "factorial(n)") + 
+			String.format("%3d: %15d\n", 1, factorial(1)) + 
+			String.format("%3d: %15d\n", 2, factorial(2)) +
+			String.format("%3d: %15d\n", 3, factorial(3)) + 
+			String.format("%3d: %15d\n", 4, factorial(4)) + 
+			String.format("%3d: %15d\n", 5, factorial(5)) + 
+			""
+		);
+	}
+	
+	private static int factorial(int n) {
+		int result = 1;
+		for(int i = 1; i &lt;=n; i++) {
+			result *= i;
+		}
+		return result;
+	}
+}
+</pre>
+
+		<p>
+			Программа напечатает то же, что и предыдущая:
+<pre>
+$ javac FactorialLoop.java && java FactorialLoop 
+  n:    factorial(n)
+  1:               1
+  2:               2
+  3:               6
+  4:              24
+  5:             120
+</pre>
+
+		<h2>Рекурсия!</h2>
+		
+		<p>
+			Возможно, в JDK есть классы, которые позволяют "прятать" рекурсию. Т.е. предоставляют удобный интерфейс в
+			декларативном стиле. А для сокрытия циклов можно задействовать потоки Java 8. Но есть и более хардкорный 
+			способ.
+		
+		<p>
+			Конструкция <strong>try-with-resources</strong> (далее по тексту TWR) - именно то, что нужно. Ведь если в 
+			методе <code>close()</code> ресурса разместить блок <em>try</em>, в котором инициализируется ресурс того же 
+			класса, то при неявном вызове первого <code>close()</code> произойдет инициализация еще одного ресурса, 
+			который при закрытии создаст еще один и т.д. Т.о. рекурсия у нас в кармане.
+			
+		<p>
+			К сожалению, этого недостаточно. Суть рекурсии при вычислениях заключается в том, что из нее можно вернуть 
+			значение. Именно эта особенность и позволяет писать код вроде <code>return n * factorial(n - 1)</code>. Но 
+			из метода <code>close()</code> интерфейса <code>AutoCloseable</code> вернуть значение нельзя. Обратиться к 
+			переменной ресурса после его автоматического закрытия тоже не получится, т.е. нельзя в блоке 
+			<em>finally</em> ссылаться на переменную, определенную в TWR. Так что ничего не остается, как использовать 
+			массив из одного элемента, чтобы вернуть результат вычислений во внешний мир. 
+		
+		<p>
+			В итоге получась смесь рекурсии	и цикла: методы <code>close()</code> вызываются рекурсивно, но внутри этих 
+			методов происходит последовательное умножение на <i>n</i>, <i>n - 1</i>, <i>n - 2</i> и т.д., как в цикле, 
+			только от большего к меньшему.
+
+<h4 id="listing-3">Листинг 3 - вычисление факториала с помощью TWR</h4>
+<pre>
+public class FactorialTwr {
+	public static void main(String ignored[]) {
+		System.out.println(
+			String.format("%3s: %15s\n", "n", "factorial(n)") + 
+			String.format("%3d: %15d\n", 1, factorial(1)) + 
+			String.format("%3d: %15d\n", 2, factorial(2)) +
+			String.format("%3d: %15d\n", 3, factorial(3)) + 
+			String.format("%3d: %15d\n", 4, factorial(4)) + 
+			String.format("%3d: %15d\n", 5, factorial(5)) + 
+			""
+		);
+	}
+	
+	private static int factorial(int n) {
+		int[] resultPlaceholder = new int[] {1};
+		try (FactorialAutoCloseable calculator = new FactorialAutoCloseable(n, resultPlaceholder)) { }
+		return resultPlaceholder[0];
+	}
+	
+	private static class FactorialAutoCloseable implements AutoCloseable {
+		private int n;
+		private int[] resultPlaceholder;
+		
+		public FactorialAutoCloseable(int n, int[] resultPlaceholder) {
+			this.n = n;
+			this.resultPlaceholder = resultPlaceholder;
+		}
+		
+		@Override
+		public void close() {
+			if (n == 1) return;
+			resultPlaceholder[0] *= n; 
+			try(FactorialAutoCloseable calculator = new FactorialAutoCloseable(n - 1, resultPlaceholder)) { } 
+		}
+	}
+}
+</pre>
+
+		<p>
+			Запустим и убедимся, что факториал вычисляется правильно:
+
+<pre>
+$ javac FactorialTwr.java && java FactorialTwr 
+  n:    factorial(n)
+  1:               1
+  2:               2
+  3:               6
+  4:              24
+  5:             120
+</pre>
+
+		<h2>Good bye, World!</h2>
+		
+		<p>
+			Практического смысла в использовании TWR для рекурсивных вычислений нет, но все равно интересно. Java - не 
+			такой уж скучный язык программирования, каким кажется на первый взгляд.	
+		
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">[UP]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>

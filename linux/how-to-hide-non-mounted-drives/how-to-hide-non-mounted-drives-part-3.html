@@ -1,0 +1,254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Несмонтированные диски - с глаз долой. Часть 3</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/linux/#how-to-hide-non-mounted-drives" title="Перейти к оглавлению">[BACK]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a 
+href="https://flaz14.github.io/linux/how-to-hide-non-mounted-drives/how-to-hide-non-mounted-drives-part-3.html">
+				Несмонтированные диски - с глаз долой. Часть 3
+			</a>
+		</h1>
+		
+		<h3>[2016, Сентябрь]</h3>
+		
+		<h3>
+			<a href="how-to-hide-non-mounted-drives-part-1.html">Часть 1</a>
+			|
+			<a href="how-to-hide-non-mounted-drives-part-2.html">Часть 2</a>
+			|
+			<a href="how-to-hide-non-mounted-drives-epilogue.html">Эпилог</a>
+			|
+			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/linux/how-to-hide-non-mounted-drives/code">
+				Исходный код
+			</a>
+		</h3>
+
+		<h2>Проверяем ограничения</h2>
+
+		<p>
+			Кроме самого hook'а, я подготовил тестовую программу, которая ведет себя точно так же, как и Nemo. Исходные 
+			тексты находятся в
+			<a href="https://github.com/flaz14/flaz14.github.io/tree/master/linux/how-to-hide-non-mounted-drives/code">
+				подкаталоге code
+			</a>. 
+			Для начала разберемся с ограничениями, о которых говорилось в  
+			<a href="how-to-hide-non-mounted-drives-part-2.html">части 2</a>. 
+
+		<p>
+			Воспроизведем ситуацию, описанную в 
+			<a href="how-to-hide-non-mounted-drives-part-1.html#illustration-1-1">
+				части 1
+			</a>. 
+			Итак, подключим флешку, смонтируем раздел с меткой <i>8_ext</i> и оставим несмонтированным раздел с меткой 
+			<i>8_ntfs</i>. 
+
+		<p>
+			Запустим тестовую программу:
+<pre>
+david@athlonx2 ~/Projects/flaz14.github.io/how-to-hide-non-mounted-drives/code $ make test
+./application
+
+Hi! I'm sample application!
+
++ /dev/sdb2 [8_ext]
+- /dev/sdb1 [8_ntfs]
+
+Bye!
+</pre>
+
+		<p>
+			Как видно из вывода, Nemo "видит" смонтированный том с меткой <i>8_ext</i> и несмонтированный том с меткой 
+			<i>8_ntfs</i>.
+
+		<p>
+			Теперь запустим тестовую программу с hook'ом:
+<pre>
+david@athlonx2 ~/Projects/flaz14.github.io/how-to-hide-non-mounted-drives/code $ make test-hook
+gcc -Wall -g -shared -ldl -fPIC `pkg-config --cflags gtk+-3.0` libnemohook.c -o libnemohook.so `pkg-config --libs 
+gtk+-3.0`
+LD_PRELOAD=./libnemohook.so ./application
+
+Hi! I'm sample application!
+
+>
+    /dev/sda
+<
+>
+    /dev/sr0
+<
+>
+    /dev/sdb
+<
++ /dev/sdb2 [8_ext]
+
+Bye!
+</pre>
+
+		<p>
+			Строки вида 
+<pre>
+>
+    /dev/...
+<
+</pre>
+
+		<p>
+			означают, что hook перехватил обращение к функции <code>g_drive_get_volumes()</code>. Так, первым физическим
+			диском, тома на котором попытался бы получить Nemo, является <i>/dev/sda</i>. На этом диске не нашлось
+			томов, поскольку <code>g_drive_get_volumes()</code> показывает только те тома, которых нет в 
+			<i>/etc/fstab</i>. Далее, на физическом диска <i>/dev/sr0</i> тоже не нашлось томов (перед запуском тестовой
+			программы в приводе оптических дисков было пусто). А вот на физическом диске <i>/dev/sdb</i> (это и есть 
+			флешка) нашелся только один том. 
+
+		<p>
+			Сравним результаты:
+			<ul>
+				<li>
+					без hook'а:
+<pre>
++ /dev/sdb2 [8_ext]
+- /dev/sdb1 [8_ntfs]
+</pre>
+
+				<li>
+					с hook'ом:
+<pre>
++ /dev/sdb2 [8_ext]
+</pre>
+			</ul>
+
+		<p>
+			Т.е. при запуске тестовой программы с hook'ом несмонтированный раздел пропадает. Именно этого мы добивались.
+
+		<h2>Собираем костыль воедино</h2>
+
+		<p>
+			Теперь пришло время подменить оригинальный Nemo костылем. Чтобы костыльный Nemo запускался из командной 
+			строки, достаточно создать скрипт-обертку с именем <em>nemo</em> (скрипт будет устанавливать 
+			<strong>LD_PRELOAD</strong>) и добавить путь к нему в переменную окружения <strong>PATH</strong> (самый 
+			простой способ - поместить скрипт в <i>~/bin</i>). Но сработает ли скрипт-обертка, если запустить Nemo из
+			стартового меню Cinnamon? Или с помощью горячей клавиши (например, <kbd>Windows</kbd>+<kbd>E</kbd>)? Или с 
+			помощью клавиши на мультимедийной клавиатуре? Я попробовал все варианты: способ с переменной окружения 
+			<strong>PATH</strong> работает всегда. Так что установим костыль:
+<pre>
+david@athlonx2 ~/Projects/flaz14.github.io/how-to-hide-non-mounted-drives/code $ make install
+gcc -Wall -g -shared -ldl -fPIC `pkg-config --cflags gtk+-3.0` libnemohook.c -o libnemohook.so `pkg-config --libs 
+gtk+-3.0`
+cp ./libnemohook.so ~/bin/libnemohook.so
+chmod 500 ~/bin/libnemohook.so
+cp ./nemo ~/bin/nemo
+chmod 500 ~/bin/nemo
+</pre>
+
+		<p>
+			Как видим, скрипт-обертка и собственно hook размещаются в каталоге <i>~/bin/</i>. Чтобы убрать костыль, 
+			достаточно набрать <samp>make uninstall</samp> (или же удалить файлы вручную).
+
+		<h2>Тестируем костыль</h2>
+
+		<p>
+			Возьмем все ту же флешку с двумя разделами: <i>8_ext</i> и <i>8_ntfs</i>. Раздел <i>8_ext</i> оставим 
+			смонтированным, а <i>8_ntfs</i> - размонтируем. Запустим оригинальную версию Nemo (нужно напрямую вызвать 
+			<code>/usr/bin/nemo</code> из командной строки). Увидим картинку, как в 
+			<a href="how-to-hide-non-mounted-drives-part-1.html#illustration-1-1">
+				части 1
+			</a>:
+
+		<h4 id="illustration-3-1">
+				Рисунок 3.1 - оригинальный Nemo показывает и смонтированный том, и несмонтированный том
+        </h4>              
+		<p>
+			<img src="illustrations/nemo-sidebar-with-unmounted-drive-visible.png" width="240px"
+			alt="здесь изображен фрагмент скриншота программы Nemo">
+
+		<p>
+			Теперь запустим Nemo с костылем (как уже говорилось выше, для этого не нужно дополнительных усилий, 
+			достаточно нажать на <strong>Files</strong> в стартовом меню) и увидим все то же самое, только без 
+			<i>8_ntfs</i> на боковой панели, что проиллюстрировано на <a href="#illustration-3-2">рисунке 3.2</a>:
+
+		<h4 id="illustration-3-2">
+				Рисунок 3.2 - несмонтированный том не виден на боковой панели Nemo благодаря hook'у
+		</h4>
+		<p>
+			<img src="illustrations/nemo-sidebar-without-unmounted-drive-visible.png" width="240px"
+			alt="здесь изображен фрагмент скриншота программы Nemo" >
+
+        <p>
+			Костыль работает <sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>
+			<sup id="footnote-2-top"><a href="#footnote-2-bottom">[2]</a></sup>!
+
+		<p>
+			Достоинства:
+			<ul>
+				<li>
+					мы не меняли исходный код Nemo и не вмешивались в его настройки. Т.o. осталась возможность запустить
+					оригинальную версию программы (<code>/usr/bin/nemo</code>) в случае необходимости. Кроме того, все 
+					изменения касаются только одного пользователя. Чтобы вернуть все как было, достаточно удалить 
+					<i>nemo</i> и <i>libnemohook.so</i> из <i>~/bin/</i>;
+
+				<li>
+					несмотря на свою неэлегантность, костыль будет работать даже после обновления Nemo. Сломаться он 
+					может лишь после мажорного релиза Nemo или библиотеки Gnome.
+			</ul>
+			
+		<p>
+			Недостатки:
+			<ul>
+				<li>
+					hook может скрыть только тома, ассоциированные с физическим диском. Например, разделы на физическом 
+					диске (даже если файловая система занимает весь диск, как UDF). Но тома, которые не связаны с 
+					физическим диском (RAID, LVM, ...), hook не спрячет. Также hook не поможет в случае с дисками, 
+					которые не поддерживают функцию автоматического обнаружения (например, Floppy Disk Drive): такой 
+					диск будет всегда отображаться на боковой панели (за подробностями обращайтесь к строкам 
+<a 
+href="https://github.com/linuxmint/nemo/blob/751bacba6f9e4730241d1b69536e2934b1fa6c81/src/nemo-places-sidebar.c#L1019">
+№№1019-1027 файла <i>nemo-places-sidebar.c</i></a>).
+			</ul>
+
+		<p>
+			__________
+			<ol>
+				<li id="footnote-1-bottom">
+					<p>
+						<a href="#footnote-1-top" title="Перейти к основному тексту">[UP]</a>
+						Я проверил только в Linux Mint 17.1 Cinnamon i686.
+
+				<li id="footnote-2-bottom">
+					<p>
+						<a href="#footnote-2-top" title="Перейти к основному тексту">[UP]</a>
+						Другие программы могут отображать что им будет угодно. Например, в диалоговом окне открытия 
+						файла Firefox на боковой панели отображаются как смонтированные, так и несмонтированные тома. 
+						Видимо, чтобы привести все к единообразному виду, нужно использовать "глобальный" hook.
+			</ol>
+
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">[UP]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>

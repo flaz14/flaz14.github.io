@@ -1,0 +1,452 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Как начать изучать Java без помощи IDE</title>
+</head>
+
+<body>
+<h1>
+    <big>
+        <a href="/java/#java-without-ide" title="Перейти к оглавлению">[BACK]</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="/" title="Перейти на главную страницу">[HOME]</a>
+    </big>
+</h1>
+
+<hr>
+
+<h1>
+    <a href="https://flaz14.github.io/java/java-without-ide/java-without-ide.html">
+        Как начать изучать Java без помощи IDE
+    </a>
+</h1>
+
+<h3>[2021, Декабрь]</h3>
+
+<h2>Введение</h2>
+
+<p>
+    REST расшифровывается как REpresentational State Transfer. Видимо, сначала был придуман благозвучный акроним, и лишь
+    затем - более-менее подходящее значение. Как, к примеру, ELF - "Executable and Linkable Format" (или "Extensible
+    Linking Format"), STRIDE - "Spoofing identity, Tampering with data, Repudiation threats, Information disclosure,
+    Denial of service and Elevation of privileges".
+
+<p>
+    На русском "наглядная передача состояния".
+
+<p>
+    "Наглядная" потому что REST обходится без дополнительных сущностей, кроме изначально существовавших в протоколе
+    HTTP.
+
+<p>
+    "Передача" потому что без передачи между удаленными системами не обойтись.
+
+<p>
+    "Состояния" потому REST - это надстройка над HTTP. А в протоколе HTTP состояния нет, так было задумано с самого
+    начала. И вообще, любые взаимодействующие друг с другом программы по сути обмениваются своим состоянием. Только в
+    обычных приложениях (например, консольное приложение на Java) это сложно заметить. Например,
+    <code>System.out.println("Some text");</code> печатает текст в стандартный поток вывода. Происходит это практически
+    мгновенно, т.к. далеко ходить не надо - <code>System.out</code> находится совсем неподалеку (в адресном пространстве
+    одной и той же JVM). А если бы System.out работал на удаленном сервере, стали бы очевидны следующие вещи:
+
+<ul>
+    <li>удаленный System.out необязательно будет доступен в момент вызова println()
+    <li>удаленный System.out необязательно напечатает текст мгновенно
+    <li>удаленный System.out не может вернуть void, он должен сообщить о результате своей работы
+</ul>
+
+<p>
+    Если экстраполировать, удаленные приложения не вызывают методы друг друга, а лишь сообщают о своих намерениях.
+    Например,
+    приложение А вызывает метод println() приложения B не напрямую, а примерно таким образом:
+
+    А: Привет, B! У меня тут есть строка. Распечатай ее, пожалуйста. Принимай JSON.
+    B: Здарова, А! Нет проблем. Побудь на проводе, щас сделаю. Напечатал. Возвращаю код HTTP 200.
+
+<p>
+    У приложений, которые выполняются на разных компьютерах, нет ничего общего. Ни адресного пространства, ни
+    переменных, ни объектов, ничего. Они не делят память, не сражаются за процессорное время, и живут каждое своей
+    жизнью. Так что приложение А не может взять и приказать приложению Б что-то сделать. И наоборот. Можно сравнить их
+    взаимодействие с расшаркивющимися друг перед другом аристократами. Но в отличие от дворянского этикета, в REST нет
+    ничего лишнего.
+
+<p>
+    За действия отвечают HTTP-методы: GET, POST, PUT, DELETE. И еще много других. Теоретически, набор HTTP-методов не
+    ограничен. Т.к. метод - это всего лишь строка. Их можно придумать сколько угодно. Например, для CRUD можно внедрить
+    соответствующие
+    HTTP-методы: CREATE, READ, UPDATE, DELETE. Другое дело, что придется заставить других следовать такому же
+    соглашению. А это непросто. Впрочем, поговорим о CRUD позже.
+    А ведь когда-то было всего лишь два общепринятых метода: GET и POST. Тогда еще JavaScript не заполонил
+    веб-странички.
+
+    Когда нужно передать какие-то параметры, то в ход идет URL либо тело запроса. Зависит от конкретного API. В одних
+    случаях достаточно передать ID в основной части URL (до знака "?"). Например, удаление пользователя по ID может
+    осуществляться как запрос методом DELETE по адресу <code>/api/v1/user/ид_пользователя</code>. Для поиска
+    пользователя подойдет GET-запрос вида
+    <code>/api/v1/user/ид?name=Alex&surname=Ivanov</code>. Для сложных манипуляций передавать данные стоит в теле
+    запроса. Ну там JSON или XML. На самом деле неважно, какой формат данных. Хоть BLOB (предварительно закодированный в
+    base64). Так повелось, что JSON оказался наиболее удачным и созвучным JavaScript'у. Даже расшифровывается JSON как
+    JavaScript Object Notation.
+
+    Можно передавать и XML. Это не так важно. Важно, что в REST экономят на всем. Как стародавние времена конструкторы
+    космических кораблей экономили массу аппаратов. Например, кодировка тела JSON запроса передается в HTTP-заголовке
+    Content-type, а именно: <code>Content-type: application/json; charset=utf-8</code>
+
+    Методы REST не обязательно соответствуют методам CRUD. Кроме GET, POST, PUT, DELETE есть еще PATCH. Хотя их можно придумать сколько угодно, т.к. метод - это всего лишь текстовая строка. Сначала были только GET и POST. GET для запросов страничек, а POST для отправки форм. Раньше ведь не было REST API как таковых.
+
+
+
+
+    Хотя у того же XML есть перед JSON ряд преимуществ (равно как и недостатков).
+
+    Заголовки HTTP используются в основном в технических целях. Т.е. для указания кодировки тела запроса. Всякие
+    access-токены и всё такое прочее.
+
+<h2>Версия</h2>
+
+<p>
+    Возьмем Java 8 от компании Oracle:
+<pre>
+$ java -version
+
+java version "1.8.0_162"
+Java(TM) SE Runtime Environment (build 1.8.0_162-b12)
+Java HotSpot(TM) 64-Bit Server VM (build 25.162-b12, mixed mode)
+</pre>
+
+<p>
+    В Java 9 структура каталогов другая, лень с ней разбираться. Да и зачем все эти новые технологии? Еще
+    восьмую версию не полностью исследовали.
+
+<h2>Установка</h2>
+
+<p>
+    В одной из предыдущих заметок
+    (<a
+        href="https://flaz14.github.io/java/once-again-about-jdk-installation/once-again-about-jdk-installation.html">
+    Еще раз об установке JDK</a>) вскользь упоминалось о важности присутствия исходных текстов в каталоге с JDK.
+
+<p>
+    Программы, которые устанавливаются в обход системы управления пакетами, не стоит распаковывать в домашний
+    каталог. Конечно, для тех из них, которые обновляются автоматически, иного выбора нет (в противном случае
+    придеться давать программе права суперпользователя на время обновления). В случае же с JDK автоматическое
+    обновление не представляет затруднений, потому что его просто нет. Так же как и нет смысла перезатирать
+    предыдущую версию. Мало ли, понадобиться запустить что-нибудь на конкретной версии. Тем более, что даже в
+    распакованном виде JDK занимает сравнительно немного места. Так, версия JDK, упомянутая в предыдущем абзаце,
+    в распакованном виде занимает на диске всего лишь 472 мегабайта, что даже меньше, чем объем оперативной
+    памяти, потребляемый современными прикладными программами (привет, новый Skype for Linux).
+
+<p>
+    Так вот, установка программ куда-нибудь в <i>/opt</i>, в первую очередь, более безопасна: никто, кроме
+    <b>root</b>, не сможет подменить исполняемый файл программы. Хотя это и не нужно на самом деле: тот, кто
+    может выполнять команды от имени обычного пользователя, без труда получит права суперпользователя,
+    достаточно лишь подсунуть свою версию <code>sudo</code>. В общем, совсем не трудно замутить что-нибудь
+    эдакое...
+
+<p>
+    Чего действительно стоит опасаться, так это неумышленного повреждения файлов установленной программы
+    обычным пользователем (в том числе скриптами, которые пишет пользователь для резервного копирования,
+    например).
+
+<p>
+    Пусть мы распаковали дистрибутив JDK в каталог <i>/usr/local/soft</i>. В комплект поставки JDK входят
+    исходные тексты, они хранятся в файле <strong>src.zip</strong>. Создадим директорию с именем <i>src</i> и
+    распакуем в нее архив. После чего каталог с установленным JDK будет выглядеть следующим образом:
+<pre>
+$ ls -l
+
+total 25940
+drwxr-xr-x 2 root root     4096 Dec 20 08:24 bin
+-r--r--r-- 1 root root     3244 Dec 20 08:24 COPYRIGHT
+drwxr-xr-x 4 root root     4096 Dec 20 08:24 db
+drwxr-xr-x 3 root root     4096 Dec 20 08:24 include
+-rw-r--r-- 1 root root  5203041 Dec 20 01:57 javafx-src.zip
+drwxr-xr-x 5 root root     4096 Dec 20 08:24 jre
+drwxr-xr-x 5 root root     4096 Dec 20 08:24 lib
+-r--r--r-- 1 root root       40 Dec 20 08:24 LICENSE
+drwxr-xr-x 4 root root     4096 Dec 20 08:24 man
+-r--r--r-- 1 root root      159 Dec 20 08:24 README.html
+-rw-r--r-- 1 root root      424 Dec 20 08:24 release
+drwxr-xr-x 7 root root     4096 Apr 17 17:47 src
+-rw-r--r-- 1 root root 21096465 Dec 20 08:24 src.zip
+-rw-r--r-- 1 root root    63933 Dec 20 01:57 THIRDPARTYLICENSEREADME-JAVAFX.txt
+-r--r--r-- 1 root root   145180 Dec 20 08:24 THIRDPARTYLICENSEREADME.txt
+</pre>
+
+<p>
+    Теперь у нас есть исходные тексты в удобном для обозревания виде:
+<pre>
+$ tree src
+
+src
+├── com
+│   └── sun
+│       ├── corba
+...
+│       ├── image
+│       │   └── codec
+│       │       └── jpeg
+│       │           ├── ImageFormatException.java
+│       │           ├── JPEGCodec.java
+│       │           ├── JPEGDecodeParam.java
+│       │           ├── JPEGEncodeParam.java
+│       │           ├── JPEGHuffmanTable.java
+│       │           ├── JPEGImageDecoder.java
+│       │           ├── JPEGImageEncoder.java
+│       │           ├── JPEGQTable.java
+│       │           └── TruncatedFileException.java
+│       ├── imageio
+│       │   ├── plugins
+...
+│       ├── java
+│       │   └── swing
+...
+│   ├── io
+│   │   ├── Bits.java
+│   │   ├── BufferedInputStream.java
+│   │   ├── BufferedOutputStream.java
+│   │   ├── BufferedReader.java
+│   │   ├── BufferedWriter.java
+...
+│   ├── lang
+│   │   ├── AbstractMethodError.java
+│   │   ├── AbstractStringBuilder.java
+│   │   ├── annotation
+│   │   │   ├── AnnotationFormatError.java
+│   │   │   ├── Annotation.java
+│   │   │   ├── AnnotationTypeMismatchException.java
+│   │   │   ├── Documented.java
+│   │   │   ├── ElementType.java
+...
+
+487 directories, 7729 files
+</pre>
+
+<h2>И что же делать с исходниками?</h2>
+
+<p>
+    Ответ прост - читать :) Поскольку обычные пользователи имеют право только читать содержимое установленного
+    нами JDK (а именно этого мы и добивались в предыдущем абзаце), можно смело открывать исходники в любимом
+    текстовом редакторе, и, наслаждаясь подсветкой синтаксиса, неспешно созерцать их. Можно даже
+    "редактировать", делать пометки, стирать ненужное (естественно, изменения сохранены не будут) и т.д. А
+    поскольку файлы <i>.java</i> разложены в строгом соответствии со структурой пакетов, посмотреть исходный код
+    класса, например, <code>Integer</code> совсем несложно будет
+    <sup id="footnote-1-top"><a href="#footnote-1-bottom">[1]</a></sup>:
+<pre>
+$ less java/lang/Integer.java
+</pre>
+
+<h2>find</h2>
+
+<p>
+    Пусть мы знаем имя класса, например, <code>ByteArrayOutputStream</code>, но не знаем имени пакета, в котором
+    он находится. То ли <code>java.io</code>, то ли <code>java.nio</code>... Текстовый редактор нам не поможет
+    (мы же договорились не использовать IDE). Остается только искать. Это просто:
+<pre>
+$ find src -name 'ByteArrayOutputStream.java'
+</pre>
+
+<p>
+    Другой пример. Пусть нас интересует содержимое некоторого пакета, но мы сами толком не знаем, что ищем. В
+    этом случае для "обзора" пакетов можно вообще обойтись без утилит комадной строки! Лишь бы Bash (или другая
+    оболочка) показывала содержимое каталога при нажатии на клавишу <kbd>Tab</kbd>. Можно путешествовать по
+    дереву исходников, просматривать содержимое пакетов, возвращаться назад при необходимости (достаточно лишь
+    стереть символы до последнего слэша).
+
+<h2>grep</h2>
+
+<p>
+    Пусть мы знаем имя метода, но не знаем, в каком классе этот метод находится. Воспользуемся <code>grep</code>
+    для получения подробной информации на примере метода <code>substring()</code>:
+<pre>
+$ grep -R 'String substring(' src
+
+src/java/lang/StringBuffer.java:    public synchronized String substring(int start) {
+src/java/lang/StringBuffer.java:    public synchronized String substring(int start, int end) {
+src/java/lang/String.java:    public String substring(int beginIndex) {
+src/java/lang/String.java:    public String substring(int beginIndex, int endIndex) {
+src/java/lang/AbstractStringBuilder.java:    public String substring(int start) {
+src/java/lang/AbstractStringBuilder.java:    public String substring(int start, int end) {
+src/java/net/URI.java:        private String substring(int start, int end) {
+src/com/sun/org/apache/xerces/internal/impl/xpath/regex/REUtil.java:    static final String substring(CharacterIterator iterator, int begin, int end) {
+src/com/sun/org/apache/regexp/internal/StringCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/StringCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/regexp/internal/StreamCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/StreamCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/regexp/internal/CharacterIterator.java:    String substring(int beginIndex, int endIndex);
+src/com/sun/org/apache/regexp/internal/CharacterIterator.java:    String substring(int beginIndex);
+src/com/sun/org/apache/regexp/internal/ReaderCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/ReaderCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/regexp/internal/CharacterArrayCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/CharacterArrayCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/xml/internal/utils/XMLString.java:  public abstract XMLString substring(int beginIndex);
+src/com/sun/org/apache/xml/internal/utils/XMLString.java:  public abstract XMLString substring(int beginIndex, int endIndex);
+src/com/sun/org/apache/xml/internal/utils/XMLStringDefault.java:  public XMLString substring(int beginIndex)
+src/com/sun/org/apache/xml/internal/utils/XMLStringDefault.java:  public XMLString substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/xpath/internal/objects/XString.java:  public XMLString substring(int beginIndex)
+src/com/sun/org/apache/xpath/internal/objects/XString.java:  public XMLString substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/xpath/internal/objects/XStringForFSB.java:  public XMLString substring(int beginIndex)
+src/com/sun/org/apache/xpath/internal/objects/XStringForFSB.java:  public XMLString substring(int beginIndex, int endIndex)
+</pre>
+
+<p>
+    Что ж, работает. Но мы видим много лишнего. Надо искать точнее. Это легко сделать, поскольку все исходные
+    тексты отформатированы по одинаковым правилам. Так, мы знаем тип возвращаемого значения. После модификатора
+    доступа (или другого модификатора, такого как <code>final</code>) следует пробел. Но если модификатор
+    доступа <em>package-private</em>, то пробела перед типом возвращаемого значения вроде бы как нет... На самом
+    деле, он есть, потому что строчки, в которых находятся сигнатуры методов, начинаются с отступов. Так что
+    более точный фильтр может выглядеть так:
+
+<pre>
+$ grep -R '[[:space:]]String substring(' src
+
+src/java/lang/StringBuffer.java:    public synchronized String substring(int start) {
+src/java/lang/StringBuffer.java:    public synchronized String substring(int start, int end) {
+src/java/lang/String.java:    public String substring(int beginIndex) {
+src/java/lang/String.java:    public String substring(int beginIndex, int endIndex) {
+src/java/lang/AbstractStringBuilder.java:    public String substring(int start) {
+src/java/lang/AbstractStringBuilder.java:    public String substring(int start, int end) {
+src/java/net/URI.java:        private String substring(int start, int end) {
+src/com/sun/org/apache/xerces/internal/impl/xpath/regex/REUtil.java:    static final String substring(CharacterIterator iterator, int begin, int end) {
+src/com/sun/org/apache/regexp/internal/StringCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/StringCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/regexp/internal/StreamCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/StreamCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/regexp/internal/CharacterIterator.java:    String substring(int beginIndex, int endIndex);
+src/com/sun/org/apache/regexp/internal/CharacterIterator.java:    String substring(int beginIndex);
+src/com/sun/org/apache/regexp/internal/ReaderCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/ReaderCharacterIterator.java:    public String substring(int beginIndex)
+src/com/sun/org/apache/regexp/internal/CharacterArrayCharacterIterator.java:    public String substring(int beginIndex, int endIndex)
+src/com/sun/org/apache/regexp/internal/CharacterArrayCharacterIterator.java:    public String substring(int beginIndex)
+</pre>
+
+<p>
+    Конечно, этот способ не всегда работает. Ведь сопоставление осуществляется только по имени. Никто не
+    запрещает определить собственный класс с именем <em>String</em>. Да-да, приведенный ниже пример
+    компилируется и работает:
+<pre>
+public class StringStringTest {
+	public static void main(String[] args) {
+		new Runnable() {
+			class String {}
+
+			public String substring() {
+				return null;
+			}
+
+			@Override
+			public void run() {}
+		};
+	}
+}
+</pre>
+
+<p>
+    Но поиск в таком классе приведет нас к совершенно нерелевантному методу <code>substring()</code>:
+<pre>
+$ grep -R '[[:space:]]String substring(' StringStringTest.java
+
+			public String substring() {
+</pre>
+
+<p>
+    Теперь предположим, что нам нужно получить JavaDoc некоторого класса с известным именем
+    (часть JavaDoc'а опущена ради экономии места):
+
+<pre>
+$ grep -B 999 'class String' src/java/lang/String.java | grep -A 999 '/\*\*'
+
+/**
+ * The {@code String} class represents character strings. All
+ * string literals in Java programs, such as {@code "abc"}, are
+ * implemented as instances of this class.
+ * &lt;p&gt;
+ * Strings are constant; their values cannot be changed after they
+...
+ *
+ * @author  Lee Boynton
+ * @author  Arthur van Hoff
+ * @author  Martin Buchholz
+ * @author  Ulf Zibis
+ * @see     java.lang.Object#toString()
+ * @see     java.lang.StringBuffer
+ * @see     java.lang.StringBuilder
+ * @see     java.nio.charset.Charset
+ * @since   JDK1.0
+ */
+
+public final class String
+</pre>
+
+<p>
+    <i>999</i> - ограничитель на максимальное количество строк. Вряд ли JavaDoc содержит большее 999
+    строчек для одного класса.
+
+<h2>Парочка приколов напоследок</h2>
+
+<p>
+    Поищем веселые слова в исходниках JDK (выведем по две строчки до и после совпадения, чтобы понимать контекст
+    и не путать их с обычными словами):
+<pre>
+$ grep -C 2 -i -R 'crap' src
+
+src/javax/xml/bind/DatatypeConverterImpl.java-            // uri can never be null according to javadoc,
+src/javax/xml/bind/DatatypeConverterImpl.java-            // but some users reported that there are implementations that return null.
+src/javax/xml/bind/DatatypeConverterImpl.java:            if (uri == null || uri.length() == 0) // crap. the NamespaceContext interface is broken.
+src/javax/xml/bind/DatatypeConverterImpl.java-            // error: unbound prefix
+src/javax/xml/bind/DatatypeConverterImpl.java-            {
+</pre>
+
+<p>
+    <cite>crap. the NamespaceContext interface is broken.</cite> :)
+
+<pre>
+$ grep -C 2 -i -R 'fuck' src
+
+src/com/sun/org/apache/xalan/internal/xsltc/dom/BitArray.java-     * current position is cached in the following 4 variables and will
+src/com/sun/org/apache/xalan/internal/xsltc/dom/BitArray.java-     * help speed up a sequence of next() call in an index iterator. This
+src/com/sun/org/apache/xalan/internal/xsltc/dom/BitArray.java:     * method is a mess, but it is fast and it works, so don't fuck with it.
+src/com/sun/org/apache/xalan/internal/xsltc/dom/BitArray.java-     */
+src/com/sun/org/apache/xalan/internal/xsltc/dom/BitArray.java-    private int _pos = Integer.MAX_VALUE;
+</pre>
+
+<p>
+    <cite>it is fast and it works, so don't fuck with it</cite> :D
+
+<h2>Заключение</h2>
+
+<p>
+    Конечно, учиться программировать без IDE придеться очень долго. Но главное - это начать. Совсем по-другому
+    себя чувствуешь, когда знаешь, что ответы на основные вопросы всегда есть под рукой. Имена классов и пакетов
+    запоминаются сами собой, выстраиваются в целостную систему. Не то что обрывки листингов, которые
+    напрашиваются на copy-and-paste.
+
+<p>
+    __________
+<ol>
+    <li id="footnote-1-bottom">
+        <p>
+            <a href="#footnote-1-top" title="Перейти к основному тексту">[UP]</a>
+            Именно так, т.е. через <code>/</code> ссылается на классы JVM. Т.е. имена пакетов, разделенные
+            точкой - всего лишь условность. Во время выполнения есть некая Unix-подобная файловая система.
+            Но с этим вопросом я толком не разбирался. Написал эту сноску просто так, на всякий случай.
+</ol>
+
+<hr>
+
+<h1>
+    <big>
+        <a href="#" title="Перейти к началу страницы">[UP]</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="/" title="Перейти на главную страницу">[HOME]</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="http://validator.w3.org/check?uri=referer">
+            <img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict"
+                 height="31" width="88">
+        </a>
+    </big>
+</h1>
+</body>
+</html>

@@ -1,0 +1,50 @@
+VALID_SERIAL_NUMBER
+Ljava/lang/String;
+ConstantValue
+<init>
+()V
+Code
+LineNumberTable
+main
+([Ljava/lang/String;)V
+StackMapTable
+SourceFile
+App.java
+****************************************
+* SuperMega Application by flaz14 Inc. *
+****************************************
+Hello, User!
+Please enter your Serial Number below
+and hit ENTER: 
+java/util/Scanner
+UTF-8
+java/lang/Throwable
+java/lang/IllegalStateException
+0Internal error: serialNumber should not be null.
+App
+qwerty
+Congratulations! You've successfully
+activated your copy of the application.
+Sorry, the serial you've entered is invalid.
+java/lang/Object
+java/lang/String
+[Ljava/lang/String;
+java/lang/System
+out
+Ljava/io/PrintStream;
+java/io/PrintStream
+println
+(Ljava/lang/String;)V
+Ljava/io/InputStream;
+*(Ljava/io/InputStream;Ljava/lang/String;)V
+hasNextLine
+()Z
+nextLine
+()Ljava/lang/String;
+close
+addSuppressed
+(Ljava/lang/Throwable;)V
+trim
+java/util/Objects
+equals
+'(Ljava/lang/Object;Ljava/lang/Object;)Z

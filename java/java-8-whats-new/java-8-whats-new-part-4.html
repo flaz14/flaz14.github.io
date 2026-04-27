@@ -1,0 +1,269 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Новое, клёвое и хреновое в Java 8. Часть 4. Ввод-вывод и кодировки</title>
+	</head>
+
+	<body>
+		<h1>
+			<big>
+				<a href="/java/#java-8-whats-new" title="Перейти к оглавлению">[BACK]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+			</big>
+		</h1>
+
+		<hr>
+
+		<h1>
+			<a href="https://flaz14.github.io/java/java-8-whats-new/java-8-whats-new-part-4.html">
+				Новое, клёвое и хреновое в Java 8. Часть 4. Ввод-вывод и кодировки
+			</a>
+		</h1>
+		
+		<h3>[2017, Декабрь]</h3>
+
+		<h3>
+			<a href="java-8-whats-new-part-1.html">Часть 1. Потоки</a>
+			|
+			<a href="java-8-whats-new-part-2.html">Часть 2. Unit-тесты</a>
+			|
+			<a href="java-8-whats-new-part-3.html">Часть 3. Лямбда-выражения</a>
+			|
+			<a 
+href=
+"https://github.com/flaz14/flaz14.github.io/blob/master/java/java-8-whats-new/code/java-8-whats-new/src/test/java/io/ReadFileLineByLineAndPrintTest.java">
+				Исходный код
+			</a>
+		</h3>
+
+		<h2>Начало</h2>
+		
+		<p>
+			Как-то раз я прочитал статью 
+			<a href="https://habrahabr.ru/post/315374/">
+				Откуда в Java всплывают проблемы с кодировками и возможная причина падения марсианского зонда</a> и 
+			комментарии к ней. В принципе, добавить мне нечего. Но я все же решил написать эту ламерскую заметку.
+
+		<h2>java.nio.file.Files</h2>
+		
+		<p>
+			Класс <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html">java.nio.file.Files</a>
+			появился в Java 7. Уже тогда в нем были полезные методы, которые избавляют от проблем с кодировками. Вот 
+			они:
+			<ul>
+				<li>
+					<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#newBufferedReader-java.nio.file.Path-java.nio.charset.Charset-">
+						newBufferedReader(Path path, Charset cs)</a>
+				<li>
+					<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#newBufferedWriter-java.nio.file.Path-java.nio.charset.Charset-java.nio.file.OpenOption...-">
+						newBufferedWriter(Path path, Charset cs, OpenOption... options)</a>
+
+				<li>
+					<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#readAllLines-java.nio.file.Path-java.nio.charset.Charset-">
+						readAllLines(Path path, Charset cs)</a>
+			
+				<li>
+					<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#write-java.nio.file.Path-java.lang.Iterable-java.nio.charset.Charset-java.nio.file.OpenOption...-">
+						write(Path path, Iterable&lt;? extends CharSequence&gt; lines, Charset cs, OpenOption... options)</a>
+			</ul>
+			
+		<p>
+			Java 8 принесла сокращенные формы вышеперечисленных методов. В них просто опущен параметр 
+			<strong>cs</strong> (используется кодировка <em>UTF-8</em>). Кроме того, в Java 8 появилcя новый метод, 
+			учитывающий кодировку: 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#lines-java.nio.file.Path-java.nio.charset.Charset-">
+				lines(Path path, Charset cs)</a> (и его собрат, всегда использующий UTF-8). Так что теперь можно читать 
+			файлы построчно и лениво по-модному: с помощью Stream API.
+		
+		<h2>java.util.Scanner</h2>
+		
+		<p>
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html">java.util.Scanner</a> - это 
+			древний класс, существующий со времен Java 5. Писать с его помощью в файл не получиться, а вот читать - как 
+			нечего можно. На эту мысль меня натолкнула статья  
+			<a href="http://web.archive.org/web/20140531042945/https://weblogs.java.net/blog/pat/archive/2004/10/stupid_scanner_1.html">
+				Stupid Scanner tricks...</a> (сайт <i>java.net</i> закрыт, так что ссылка ведет на Web-архив). Автор 
+			ставил целью прочитать файл (т.е. 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html">InputStream</a>) целиком. Я же 
+			попробую читать файл построчно, чтобы затем сравнить старый подход 
+			(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html">java.util.Scanner</a>) и новый 
+			подход 
+			(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#lines-java.nio.file.Path-java.nio.charset.Charset-">Files.lines()</a>).
+			
+		<p>
+			Итак, создадим 
+<a href=
+"https://github.com/flaz14/flaz14.github.io/blob/master/java/java-8-whats-new/code/java-8-whats-new/src/test/resources/io/cp1251.txt">
+				текстовый файл</a>, 
+			наберем на русском языке пару строк (не забыв упомянуть о "невидимых" символах) и сохраним его в кодировке 
+			<strong>СP-1251</strong>.
+		
+		<p>
+			Теперь прочитаем текстовый файл и распечатаем его содержимое в стиле Java 8. Кодировку укажем явно 
+			(<code>private static final Charset ENCODING = Charset.forName("cp1251");</code>).
+
+<h4 id="listing-1">Листинг 1 - пример чтения текстового файла построчно в стиле Java 8</h4>
+<pre>
+    @Test
+    public void java8Stream() throws URISyntaxException {
+        final Path inputFile = Paths.get(ClassLoader.getSystemResource(FILE).toURI());
+        try (final Stream&lt;String&gt; lines = Files.lines(inputFile, ENCODING)) {
+            lines.forEach(line -> System.out.println("[" + line + "]"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+</pre>
+
+		<p>
+			В результате выполнения теста из <a href="#listing-1">листинга 1</a> получим следующие строки:
+			
+<h4 id="listing-2">Листинг 2 - результаты чтения файла в стиле Java 8</h4>
+<pre>
+[Это первая строка.]
+[Это вторая строка. На конце ее находятся несколько пробелов после точки.   ]
+[Это третья строка. После нее идет пустая строка. А после пустой - строка, состоящая только из пробелов.]
+[]
+[   ]
+[Это последняя строка.]
+</pre>
+
+		<p>
+			Для наглядности перед распечаткой я окружал каждую строку квадратными скобками. Как видим, "лишние" пробелы
+			никуда не делись. А вот символы переноса строки не сохранились (что вполне логично - у нас есть поток строк,
+			нет нужды хранить символ переноса, тем более, что переносы могут отличаться в разных ОС).
+		
+		<p>
+			Теперь попробуем проделать то же самое, только по-старинке (здесь "по-старинке" означает "в стиле Java 7"; 
+			Java 5 и Java 6 совсем уж древние) с использованием класса 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html">Scanner</a>.
+
+<h4 id="listing-3">Листинг 3 - пример чтения текстового файла построчно с использованием Scanner</h4>
+<pre>
+    @Test
+    public void java7Scanner() throws URISyntaxException {
+        final File inputFile = Paths.get(ClassLoader.getSystemResource(FILE).toURI()).toFile();
+        try (final Scanner scanner = new Scanner(inputFile, ENCODING.name())) {
+            while (scanner.hasNextLine()) {
+                final String line = scanner.nextLine();
+                System.out.println("[" + line + "]");
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+</pre>
+
+		<p>
+			Да, в Java 7 все получается не так красиво, как в восьмой версии языка. Тем не менее, конструкторы 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html">Scanner</a> (мы использовали 
+			конструктор на основе файла - так проще и понятнее) могут в качестве второго параметра принимать кодировку! 
+			Что совсем не характерно для основной части JDK, посвященной работе с файлами. И результаты радуют: они 
+			совпадают с приведенными в <a href="#listing-2">листинге 2</a>.
+		
+		<p>
+			Я уже было обрадовался: класс, который существует в JDK со времен <b>Java 5</b>, работает ничуть не хуже 
+			новомодного API (сделаем скидку на возраст, как-никак, до Java 8 приходилось писать больше рутинного кода), 
+			распознает кодировки, отбрасывает символы перевода строки и т.д. К тому же, 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html">Scanner</a> реализует интерфейс
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/AutoCloseable.html">AutoCloseable</a>, что 
+			избавляет от необходимости закрывать сканер явно. Вот теперь можно будет ответить любителям свеженького: 
+			"Знаете ли вы, что еще со времен Java 5 есть класс Scanner, с помощью которого можно без проблем читать 
+			файлы?". Но не тут-то было.
+		
+		<h2>Траблы</h2>	
+		
+		<p>
+			Представим себе ситуацию, когда на входе у нас оказался файл, сохраненный не в той кодировке, которую мы 
+			ожидаем. Чтобы смоделировать ее, нужно лишь опустить параметр кодировки. Так, в случае с Java 8 вместо 
+			вызова 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#lines-java.nio.file.Path-java.nio.charset.Charset-">
+				Files.lines(Path path, Charset cs)</a> будем использовать 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#lines-java.nio.file.Path-">
+				Files.lines(Path path)</a>. А в случае с Java 7 вместо конструктора 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html#Scanner-java.io.File-java.lang.String-">
+				Scanner(File source, String charsetName)</a> задействуем
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html#Scanner-java.io.File-">
+				Scanner(File source)</a>. И сравним результаты (см. листинги <a href="#listing-4">4</a> и 
+			<a href="#listing-5">5</a> соответственно).
+			
+<h4 id="listing-4">Листинг 4 - результаты чтения "неправильного" файла в Java 8</h4>
+<pre>
+java.io.UncheckedIOException: java.nio.charset.MalformedInputException: Input length = 1
+	at java.io.BufferedReader$1.hasNext(BufferedReader.java:574)
+	at java.util.Iterator.forEachRemaining(Iterator.java:115)
+	at java.util.Spliterators$IteratorSpliterator.forEachRemaining(Spliterators.java:1801)
+	at java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:580)
+	at io.ReadFileLineByLineAndPrintTest.java8StreamWithoutEncodingSpecified(ReadFileLineByLineAndPrintTest.java:35)
+	...
+Caused by: java.nio.charset.MalformedInputException: Input length = 1
+	at java.nio.charset.CoderResult.throwException(CoderResult.java:281)
+	at sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:339)
+	at sun.nio.cs.StreamDecoder.read(StreamDecoder.java:178)
+	at java.io.InputStreamReader.read(InputStreamReader.java:184)
+	at java.io.BufferedReader.fill(BufferedReader.java:161)
+	at java.io.BufferedReader.readLine(BufferedReader.java:324)
+	at java.io.BufferedReader.readLine(BufferedReader.java:389)
+	at java.io.BufferedReader$1.hasNext(BufferedReader.java:571)
+	...
+</pre>
+
+<h4 id="listing-5">Листинг 5 - результаты чтения "неправильного" файла в Java 7</h4>
+<pre>
+</pre>
+
+		<p>
+			В случае с Java 8 мы получаем сообщение об ошибке. По нему несложно догадаться, что проблема вызвана 
+			несовпадением кодировок (а так и есть, ведь метод
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html#lines-java.nio.file.Path-">
+				Files.lines(Path path)</a> использует <em>UTF-8</em>, в то время как текстовый файл был сохранен в 
+			<em>СP-1251</em>).
+			Как бы то ни было, мы получаем достаточно точный и подробный стэктрэйс.
+		
+		<p>
+			Как же ведет себя в аналогичной ситуации 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html">Scanner</a>? Он использует 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/charset/Charset.html#defaultCharset--">
+				кодировку по-умолчанию</a>. В моем случае это UTF-8 (потому что Linux). И не выбрасывает исключение, 
+			не возвращает в качестве строк кракозябры, и даже <code>null</code> (хотя бы для первой строки) не 
+			возвращает. В общем, не делает ничего! Да-да, именно поэтому в <a href="#listing-5">листинге 5</a> ничего 
+			нету. Попробуй тут догадаться, то ли файл "пришел" в неверной кодировке, то ли он был действительно пуст.
+			
+		<h2>Конец</h2>
+		
+		<p>
+			В заключение можно сказать, что в JDK есть много интересных мелочей, старомодные классы не такие уж 
+			бесполезные. Но и сюрпризов там хватает. 
+		
+		<p>
+			Старые методы, работа которых зависит от окружения, в котором запущена программа, так и остались не 
+			<code>@Deprecated</code> (в том числе конструкторы класса 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html">Scanner</a>).
+			И в документации к методу 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html#nextLine--">nextLine()</a> 
+			ничегошеньки не сказано о возможных глюках при несовпадении желаемой и актуально кодировок (в то время как в
+			документации к некоторым другим методам, например, 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html#toString--">
+				toString()</a>, 
+			о неопределенном поведении сказано явно). Так что ничего не остается, как писать Unit-тесты и надеяться на 
+			лучшее.
+		
+		<hr>
+
+		<h1>
+			<big>
+				<a href="#" title="Перейти к началу страницы">[UP]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="/" title="Перейти на главную страницу">[HOME]</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Strict" 
+					height="31" width="88">
+				</a>
+			</big>
+		</h1>
+	</body>
+</html>
